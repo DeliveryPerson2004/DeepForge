@@ -1,8 +1,10 @@
 import { z } from "zod"
 
-const ModelSchema = z.enum([
+export const ModelSchema = z.enum([
     "deepseek-v4-flash",
+    "deepseek-v4-pro"
 ]);
+export type ModelType = z.infer<typeof ModelSchema>;
 
 const TextInputSchema = z.string();
 
@@ -69,20 +71,24 @@ const InputItemSchema = z.union([
 
 const InputItemListSchema = z.array(InputItemSchema);
 
-const InputSchema = z.union([
+export const InputSchema = z.union([
     TextInputSchema,
     InputItemListSchema,
 ]).nullable();
+export type InputType = z.infer<typeof InputSchema>;
 
-const InstructionsSchema = z.string().nullable();
+export const InstructionsSchema = z.string().nullable();
+export type InstructionsType = z.infer<typeof InstructionsSchema>;
 
-export const ReasoningAPISchema = z.object({
+export const ReasoningSchema = z.object({
     effort: z.enum(["none", "low", "high", "max"]).nullable()
 }).nullable();
+export type ReasoningType = z.infer<typeof ReasoningSchema>;
 
 const MaxOutputTokensSchema = z.number().nullable();
 
-const StreamSchema = z.boolean().nullable();
+export const StreamSchema = z.boolean().nullable();
+export type StreamType = z.infer<typeof StreamSchema>;
 
 const FormatTextSchema = z.object({
     type: z.literal("text"),
@@ -94,9 +100,10 @@ const FormatJsonSchema = z.object({
     schema: z.json(),
 })
 
-const TextAPISchema = z.object({
+export const TextSchema = z.object({
     format: z.union([FormatTextSchema, FormatJsonSchema])
 }).nullable()
+export type TextType = z.infer<typeof TextSchema>;
 
 const ToolsFunctionItemSchema = z.object({
     type: z.literal("function"),
@@ -113,23 +120,20 @@ const ToolsItemSchema = z.union([
     ToolsFunctionItemSchema, ToolsWebSearchItemSchema
 ]);
 
-const ToolsAPISchema = z.array(ToolsItemSchema).nullable();
+export const ToolsSchema = z.array(ToolsItemSchema).nullable();
+export type ToolsType = z.infer<typeof ToolsSchema>;
 
-const UserSchema = z.string().nullable();
+export const UserSchema = z.string().nullable();
+export type UserType = z.infer<typeof UserSchema>;
 
 export const RequestBodySchema = z.object({
     model: ModelSchema,
     input: InputSchema,
     instructions: InstructionsSchema,
-    reasoning: ReasoningAPISchema,
+    reasoning: ReasoningSchema,
     max_output_tokens: MaxOutputTokensSchema.optional(),
     stream: StreamSchema,
-    text: TextAPISchema,
-    tools: ToolsAPISchema,
+    text: TextSchema,
+    tools: ToolsSchema,
     user: UserSchema.optional(),
-})
-
-export type ToolsAPI = z.infer<typeof ToolsAPISchema>;
-export type ReasoningAPI = z.infer<typeof ReasoningAPISchema>;
-export type TextAPI = z.infer<typeof TextAPISchema>;
-export type InputItem = z.infer<typeof InputItemSchema>;
+});
