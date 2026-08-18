@@ -12,7 +12,7 @@ import {
 import "dotenv/config";
 import {ResponsesSchema} from "./API/responses/ResponsesSchema.ts";
 
-export class DeepSeekModelClient {
+export class ModelClient {
     private baseURL: string = "https://api.deepseek.com";
     private API_KEY = process.env.DEEPSEEK_API_KEY;
 
