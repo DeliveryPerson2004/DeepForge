@@ -34,10 +34,18 @@ const OutputFunctionCallItemSchema = z.object({
     arguments: z.string(),
 })
 
+const OutputWebSearchCallItemSchema = z.object({
+    type: z.literal("web_search_call"),
+    id: z.string(),
+    status: z.enum(["in_progress", "completed", "incomplete"]),
+    action: z.object().loose(),
+})
+
 const OutputItemSchema = z.union([
     OutputMessageItemSchema,
     OutputReasoningItemSchema,
     OutputFunctionCallItemSchema,
+    OutputWebSearchCallItemSchema,
 ]);
 
 const UsageSchema = z.object({

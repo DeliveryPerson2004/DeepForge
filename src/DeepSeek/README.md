@@ -21,3 +21,7 @@
 ### 
 
 ## 该层级所使用的schema对上层（BaseAgent）而言应该是“透明”的
+
+# BaseAgent.ts
+
+该文件中的字段是与某一个model provider的API请求字段强绑的。

@@ -18,7 +18,7 @@ const OutputTextBlockSchema = z.object({
     text: z.string(),
 });
 
-const MessageItemSchema = z.object({
+export const MessageItemSchema = z.object({
     type: z.literal("message"),
     role: z.enum(["user", "assistant", "system", "developer"]),
     content: z.union([
@@ -69,12 +69,11 @@ const InputItemSchema = z.union([
         WebSearchCallItemSchema,
 ]);
 
-const InputItemListSchema = z.array(InputItemSchema);
+export const InputSchema = z.array(InputItemSchema);
 
-export const InputSchema = z.union([
-    TextInputSchema,
-    InputItemListSchema,
-]).nullable();
+// export const InputSchema = z.union([
+//     InputItemListSchema,
+// ]).nullable();
 export type InputType = z.infer<typeof InputSchema>;
 
 export const InstructionsSchema = z.string().nullable();

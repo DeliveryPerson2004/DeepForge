@@ -3,14 +3,11 @@ import type { InstructionsType, ModelType, ToolsType } from "../../DeepSeek/API/
 
 export class PlannerAgent extends BaseAgent {
     constructor(
-        funcTools: ToolsType = null,
-        model: ModelType = "deepseek-v4-flash",
-        instructions: InstructionsType = "You are a helpful planner agent."
+        funcTools: ToolsType,
+        model: ModelType,
+        instructions: InstructionsType
     ) {
-        super(funcTools, model, instructions);
-    }
-
-    async plan(taskDescription: string): Promise<void> {
-        await this.loop(taskDescription);
+        super("Planner", funcTools, model, instructions);
+        console.log(`PlannerAgent实例化成功`)
     }
 }

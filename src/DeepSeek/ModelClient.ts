@@ -1,12 +1,14 @@
 import {
     InputSchema,
-    type InputType, InstructionsSchema,
-    type InstructionsType, ModelSchema,
+    type InputType,
+    InstructionsSchema,
+    type InstructionsType, MessageItemSchema,
+    ModelSchema,
     type ModelType,
     type ReasoningType,
     type StreamType,
-    type TextType,
-    type ToolsType,
+    type TextType, ToolsSchema,
+    type ToolsType, UserSchema,
     type UserType
 } from "./API/responses/RequestSchema.ts";
 import "dotenv/config";
@@ -17,7 +19,9 @@ export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
 
     constructor() {
+        console.log(`ModelClient实例化成功`);
     }
+
     async requestResponsesAPI(
         model: ModelType,
         input: InputType,
@@ -34,6 +38,8 @@ export class ModelClient {
             model: ModelSchema.parse(model),
             input: InputSchema.parse(input),
             instructions: InstructionsSchema.parse(instructions),
+            tools: ToolsSchema.parse(tools),
+            user: UserSchema.parse(user),
         }
 
         const responses = await fetch(
