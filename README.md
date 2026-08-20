@@ -1,0 +1,86 @@
+# deep-forge
+
+基于 DeepSeek `/responses` API 的 AI Agent 框架示例，核心能力为多轮对话循环与工具调用（如 web_search）。整体采用 TypeScript 编写，代码从 API 文档直接翻译出 zod 数据契约，保证运行时可靠性。
+
+## 全库目录结构
+
+```
+deep-forge/
+├── package.json              # 依赖与脚本（dev:main / dev:test）
+├── pnpm-workspace.yaml       # pnpm 配置（esbuild 构建许可）
+├── tsconfig.json             # TypeScript 严格模式配置
+├── .env.example              # 环境变量模板（DEEPSEEK_API_KEY）
+├── .gitignore
+└── src/
+    ├── main.ts               # 程序入口：实例化 PlannerAgent 并启动对话循环
+    ├── test.ts               # ModelClient 独立测试脚本
+    ├── README.md             # src 目录说明（技术选型 / 架构 / 耦合原因）
+    ├── Agents/
+    │   └── Planner/
+    │       ├── PlannerAgent.ts       # 具体 Agent：注册 web_search 工具，加载指令
+    │       └── instructions.md       # Agent 系统指令（独立于代码维护）
+    └── DeepSeek/
+        ├── ModelClient.ts            # 模型客户端：封装 /responses API 调用
+        ├── BaseAgent.ts              # Agent 基类：多轮对话循环
+        ├── README.md                 # DeepSeek 目录说明（ModelClient / BaseAgent）
+        └── API/responses/
+            ├── RequestSchema.ts      # 请求体 zod schema
+            ├── ResponsesSchema.ts    # 响应体 zod schema
+            └── README.md             # responses 契约说明
+```
+
+## 技术选型
+
+| 类别 | 选型 | 说明 |
+| ---- | ---- | ---- |
+| 语言 | TypeScript 7 | `strict` 严格模式 + `noUncheckedIndexedAccess` 等强类型选项 |
+| 模块体系 | ESM（`module: nodenext`） | `type: "module"`，导入显式携带 `.ts` 扩展名 |
+| 运行方式 | tsx | 直接执行 TS 源码；`tsc --noEmit` 负责类型检查 |
+| 包管理器 | pnpm | `devEngines` 锁定 `pnpm ^11.22.0` |
+| 运行时校验 | zod 4 | 请求体 / 响应体双向 schema 校验 |
+| HTTP 客户端 | Node.js 原生 fetch | 无第三方 HTTP 依赖 |
+| 环境变量 | dotenv | 读取 `.env` 中的 `DEEPSEEK_API_KEY` |
+| 模型 API | DeepSeek `/responses` | 兼容 OpenAI Responses API 格式 |
+
+## 核心架构
+
+整体呈分层调用结构，依赖方向自上而下：
+
+```
+main.ts
+  └── PlannerAgent (Agents 层)
+        └── BaseAgent (Agent 基类)
+              └── ModelClient (网络层)
+                    └── RequestSchema / ResponsesSchema (数据契约层)
+                          └── DeepSeek API
+```
+
+- **Agent 继承体系**：`PlannerAgent` 继承 `BaseAgent`，构造函数注入 `user`、`funcTools`、`model`、`instructions`；指令从 `instructions.md` 文件读取，与代码解耦。
+- **多轮对话循环**：`BaseAgent.loop()` 累积历史消息并循环请求模型，逐条处理 message（回复）、reasoning（推理）、function_call（工具调用）、web_search_call（搜索）四类输出项，直到响应中不再包含 function_call 时终止。
+- **数据契约**：请求发送前经 `RequestBodySchema.parse()` 校验，响应经 `ResponsesSchema.parse()` 解析，全程强类型。
+- **设计取舍**：项目与 DeepSeek 单一 provider 强绑定——API 文档即最佳公开资料，直接翻译为 schema 使实现简单，但更换 provider 可能需要重构。详见 `src/DeepSeek/README.md`。
+
+## 快速开始
+
+```bash
+# 1. 安装依赖
+pnpm install
+
+# 2. 配置环境变量
+cp .env.example .env
+# 在 .env 中填入 DEEPSEEK_API_KEY
+
+# 3. 运行 Agent 对话（main.ts，含类型检查）
+pnpm dev:main
+
+# 4. 运行 ModelClient 测试脚本
+pnpm dev:test
+```
+
+## 文档导航
+
+| 文档 | 覆盖范围 |
+| ---- | ---- |
+| [src/README.md](src/README.md) | 技术选型、项目架构、与模型 provider 耦合的原因 |
+| [src/DeepSeek/README.md](src/DeepSeek/README.md) | ModelClient、BaseAgent 的实现与设计说明 |
+| [src/DeepSeek/API/responses/README.md](src/DeepSeek/API/responses/README.md) | 请求 / 响应 zod schema 契约说明 |
