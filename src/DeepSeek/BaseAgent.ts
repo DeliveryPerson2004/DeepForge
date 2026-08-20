@@ -12,7 +12,6 @@ export class BaseAgent{
     private readonly user: string;
     private readonly funcTools: ToolsType;
     private readonly model: ModelType;
-    //此处默认每一个agent在运行时，只使用一个模型，因此不使用模型“列表”。
     private modelClient = new ModelClient();
     private input: InputType = [];
     private readonly instructions: InstructionsType;
