@@ -5,7 +5,7 @@ import {
     type InstructionsType, MessageItemSchema,
     ModelSchema,
     type ModelType,
-    type ReasoningType,
+    type ReasoningType, RequestBodySchema,
     type StreamType,
     type TextType, ToolsSchema,
     type ToolsType, UserSchema,
@@ -26,21 +26,21 @@ export class ModelClient {
         model: ModelType,
         input: InputType,
         instructions: InstructionsType,
+        tools: ToolsType,
+        user: UserType,
         reasoning?: ReasoningType,
         stream?: StreamType,
         text?: TextType,
-        tools?: ToolsType,
-        user?: UserType,
-        ){
+    ){
         const endPoint = "/responses";
 
-        const playLoad = {
-            model: ModelSchema.parse(model),
-            input: InputSchema.parse(input),
-            instructions: InstructionsSchema.parse(instructions),
-            tools: ToolsSchema.parse(tools),
-            user: UserSchema.parse(user),
-        }
+        const playLoad = RequestBodySchema.parse({
+            model,
+            input,
+            instructions,
+            tools,
+            user,
+        })
 
         const responses = await fetch(
             `${this.baseURL}${endPoint}`,

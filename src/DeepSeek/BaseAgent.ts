@@ -49,9 +49,6 @@ export class BaseAgent{
                 this.model,
                 this.input,
                 this.instructions,
-                undefined,
-                undefined,
-                undefined,
                 this.funcTools,
                 this.user,
             )
