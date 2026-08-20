@@ -1,4 +1,4 @@
-import { PlannerAgent } from "./Agents/PlannerAgent.ts";
+import { PlannerAgent } from "./Agents/Planner/PlannerAgent.ts";
 
 async function main() {
     const planner = new PlannerAgent();
