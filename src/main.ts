@@ -6,6 +6,7 @@ async function main() {
         type: "web_search",
     }]
     const plannerFuncToolsParsed = ToolsSchema.parse(plannerFuncTools);
+
     const planner = new PlannerAgent(
         plannerFuncToolsParsed,
         "deepseek-v4-flash",
