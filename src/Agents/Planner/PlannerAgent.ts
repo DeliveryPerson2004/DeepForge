@@ -4,7 +4,6 @@ import {fileURLToPath} from "node:url";
 import {BaseAgent} from "../../DeepSeek/BaseAgent.ts";
 import {ModelType, type ToolsType} from "../../DeepSeek/API/responses.ts";
 
-// 获取当前文件所在目录路径（兼容 ESM 模块环境）
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class PlannerAgent extends BaseAgent {
