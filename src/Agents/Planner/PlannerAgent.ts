@@ -4,8 +4,7 @@ import {fileURLToPath} from "node:url";
 import {BaseAgent} from "../../DeepSeek/BaseAgent.ts";
 import {ModelType, type ToolsType} from "../../DeepSeek/API/responses.ts";
 
-// 获取当前文件所在目录路径（兼容 ESM 模块环境）
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class PlannerAgent extends BaseAgent {
     constructor() {
@@ -14,10 +13,9 @@ export class PlannerAgent extends BaseAgent {
         }];
 
         // 同步读取同级目录下的 instructions.md
-        const instructionsPath = path.join(__dirname, "instructions.md");
-        const instructions = fs.readFileSync(instructionsPath, "utf-8");
+        const instructionsFilePath = path.join(dirname, "instructions.md");
+        const instructions = fs.readFileSync(instructionsFilePath, "utf-8");
 
-        // 将读取到的 instructions 内容传入 super
         super("Planner", plannerFuncTools, ModelType.DeepSeekV4Flash, instructions);
         console.log(`PlannerAgent实例化成功`);
     }

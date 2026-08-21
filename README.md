@@ -1,6 +1,6 @@
 # deep-forge
 
-基于 DeepSeek `/responses` API 的 AI Agent 框架示例，核心能力为多轮对话循环与工具调用（如 web_search）。整体采用 TypeScript 编写，代码从 API 文档直接翻译出 zod 数据契约，保证运行时可靠性。
+基于 DeepSeek `/responses` API 的 AI Agent 框架示例，核心能力为多轮对话循环与工具调用（如 web_search）。整体采用 TypeScript 编写，代码从 API 文档直接翻译出 TypeScript 类型契约，保证编译期强类型。
 
 ## 全库目录结构
 
@@ -23,10 +23,8 @@ deep-forge/
         ├── ModelClient.ts            # 模型客户端：封装 /responses API 调用
         ├── BaseAgent.ts              # Agent 基类：多轮对话循环
         ├── README.md                 # DeepSeek 目录说明（ModelClient / BaseAgent）
-        └── API/responses/
-            ├── RequestSchema.ts      # 请求体 zod schema
-            ├── ResponsesSchema.ts    # 响应体 zod schema
-            └── README.md             # responses 契约说明
+        └── API/
+            └── responses.ts          # 请求体 / 响应体 TypeScript 类型契约（编译期强类型）
 ```
 
 ## 技术选型
@@ -37,7 +35,7 @@ deep-forge/
 | 模块体系 | ESM（`module: nodenext`） | `type: "module"`，导入显式携带 `.ts` 扩展名 |
 | 运行方式 | tsx | 直接执行 TS 源码；`tsc --noEmit` 负责类型检查 |
 | 包管理器 | pnpm | `devEngines` 锁定 `pnpm ^11.22.0` |
-| 运行时校验 | zod 4 | 请求体 / 响应体双向 schema 校验 |
+| 数据契约 | TypeScript 类型（编译期） | 请求体 / 响应体类型定义于 `responses.ts`，无运行时校验 |
 | HTTP 客户端 | Node.js 原生 fetch | 无第三方 HTTP 依赖 |
 | 环境变量 | dotenv | 读取 `.env` 中的 `DEEPSEEK_API_KEY` |
 | 模型 API | DeepSeek `/responses` | 兼容 OpenAI Responses API 格式 |
@@ -51,13 +49,13 @@ main.ts
   └── PlannerAgent (Agents 层)
         └── BaseAgent (Agent 基类)
               └── ModelClient (网络层)
-                    └── RequestSchema / ResponsesSchema (数据契约层)
+                    └── responses.ts (数据契约层)
                           └── DeepSeek API
 ```
 
 - **Agent 继承体系**：`PlannerAgent` 继承 `BaseAgent`，构造函数注入 `user`、`funcTools`、`model`、`instructions`；指令从 `instructions.md` 文件读取，与代码解耦。
 - **多轮对话循环**：`BaseAgent.loop()` 累积历史消息并循环请求模型，逐条处理 message（回复）、reasoning（推理）、function_call（工具调用）、web_search_call（搜索）四类输出项，直到响应中不再包含 function_call 时终止。
-- **数据契约**：请求发送前经 `RequestBodySchema.parse()` 校验，响应经 `ResponsesSchema.parse()` 解析，全程强类型。
+- **数据契约**：请求体与响应体由 `responses.ts` 中的类型契约定义，全程编译期强类型；运行时不做校验。
 - **设计取舍**：项目与 DeepSeek 单一 provider 强绑定——API 文档即最佳公开资料，直接翻译为 schema 使实现简单，但更换 provider 可能需要重构。详见 `src/DeepSeek/README.md`。
 
 ## 快速开始
@@ -83,4 +81,4 @@ pnpm dev:test
 | ---- | ---- |
 | [src/README.md](src/README.md) | 技术选型、项目架构、与模型 provider 耦合的原因 |
 | [src/DeepSeek/README.md](src/DeepSeek/README.md) | ModelClient、BaseAgent 的实现与设计说明 |
-| [src/DeepSeek/API/responses/README.md](src/DeepSeek/API/responses/README.md) | 请求 / 响应 zod schema 契约说明 |
+| [src/DeepSeek/API/responses.ts](src/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义 |

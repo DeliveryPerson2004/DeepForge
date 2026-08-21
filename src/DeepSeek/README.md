@@ -21,19 +21,16 @@ ModelClient 是"使用模型的一个入口"，是整个项目中唯一接触网
 组装 payload（model / input / instructions / tools / user）
         │
         ▼
-RequestBodySchema.parse()    ← 发送前校验请求体
+JSON.stringify 序列化    ← 类型契约保证字段形态（编译期）
         │
         ▼
 原生 fetch POST /responses   ← 携带 Bearer Token
         │
         ▼
-ResponsesSchema.parse()      ← 解析并强类型化响应体
-        │
-        ▼
-返回校验后的响应对象
+返回 JSON（上层强转为 ResponseSchema）
 ```
 
-请求与响应两侧均经过 zod 运行时校验，保证数据契约可靠。
+请求与响应两侧均受 `responses.ts` 类型契约约束，编译期强类型；运行时不做校验。
 
 ## BaseAgent.ts
 
@@ -47,7 +44,7 @@ BaseAgent 是通用 Agent 基类，为具体 Agent（如 `PlannerAgent`）提供
 
 ### 多轮循环机制
 
-1. `createInputMessageItem()` 将用户输入构造为 `message` 消息项，经 `MessageItemSchema` 校验后追加进上下文
+1. `createInputMessageItem()` 将用户输入构造为 `message` 消息项（`InputMessageItem` 类型），追加进上下文
 2. 调用 `requestResponsesAPI()` 获取模型响应
 3. 逐条处理输出项：
    - `message`：打印文本回复，追加进上下文
@@ -61,7 +58,7 @@ BaseAgent 是通用 Agent 基类，为具体 Agent（如 `PlannerAgent`）提供
 该文件中的字段是与某一 model provider 的 API 请求字段强绑的（`user`、`funcTools`、`model`、`instructions` 与请求字段一一对应）。
 
 - **为什么这样设计**：API 文档是最好的公开资料，所有人围绕这份资料进行开发就无需参考任何其他文件或代码。BaseAgent 的代码与 model provider 的 API 文档字段强绑，本质上是便于调用 model client 的相关方法，因此该开发实现方法相对简单。
-- **代价**：耦合了 model provider，因此如果需要更换模型，有可能需要重构代码（schema、client 与 agent 字段均受影响）。
+- **代价**：耦合了 model provider，因此如果需要更换模型，有可能需要重构代码（类型契约、client 与 agent 字段均受影响）。
 
 ## model 与 model-provider 强绑的原因
 
