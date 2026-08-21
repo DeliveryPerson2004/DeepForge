@@ -1,18 +1,5 @@
-import {
-    InputSchema,
-    type InputType,
-    InstructionsSchema,
-    type InstructionsType, MessageItemSchema,
-    ModelSchema,
-    type ModelType,
-    type ReasoningType, RequestBodySchema,
-    type StreamType,
-    type TextType, ToolsSchema,
-    type ToolsType, UserSchema,
-    type UserType
-} from "./API/responses/RequestSchema.ts";
 import "dotenv/config";
-import {ResponsesSchema} from "./API/responses/ResponsesSchema.ts";
+import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
 
 export class ModelClient {
     private baseURL: string = "https://api.deepseek.com";
@@ -25,22 +12,20 @@ export class ModelClient {
     async requestResponsesAPI(
         model: ModelType,
         input: InputType,
-        instructions: InstructionsType,
+        instructions: string,
         tools: ToolsType,
-        user: UserType,
-        reasoning?: ReasoningType,
-        stream?: StreamType,
-        text?: TextType,
+        user: string,
     ){
         const endPoint = "/responses";
 
-        const playLoad = RequestBodySchema.parse({
-            model,
-            input,
-            instructions,
-            tools,
-            user,
-        })
+        const requestBody: RequestBody = {
+            model: model,
+            input: input,
+            instructions: instructions,
+            tools: tools,
+            user: user,
+        }
+        const requestBodyString = JSON.stringify(requestBody);
 
         const responses = await fetch(
             `${this.baseURL}${endPoint}`,
@@ -51,12 +36,10 @@ export class ModelClient {
                     "Accept": "application/json",
                     "Authorization": `Bearer ${this.API_KEY}` // 此处传入实际的 API Token
                 },
-                body: JSON.stringify(playLoad),
+                body: requestBodyString,
             }
         );
 
-        const responsesJSONed = await responses.json();
-
-        return ResponsesSchema.parse(responsesJSONed);
+        return await responses.json();
     }
 }

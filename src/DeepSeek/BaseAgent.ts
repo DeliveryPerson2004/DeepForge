@@ -1,36 +1,36 @@
-import {ModelClient} from "./ModelClient.ts";
 import {
-    type InputType,
-    type InstructionsType,
-    MessageItemSchema,
-    type ModelType,
+    type InputItemType,
+    type InputMessageItem,
+    ModelType,
+    type ResponseSchema,
     type ToolsType
-} from "./API/responses/RequestSchema.ts";
-import {ResponsesSchema} from "./API/responses/ResponsesSchema.ts";
+} from "./API/responses.ts";
+import {ModelClient} from "./ModelClient.ts";
+
 
 export class BaseAgent{
     private readonly user: string;
-    private readonly funcTools: ToolsType;
+    private readonly functionTools: ToolsType;
     private readonly model: ModelType;
     private modelClient = new ModelClient();
-    private input: InputType = [];
-    private readonly instructions: InstructionsType;
+    private input: InputItemType[] = [];
+    private readonly instructions: string;
 
-    constructor(user: string, funcTools: ToolsType, model: ModelType, instructions: InstructionsType, ) {
+    constructor(user: string, functionTools: ToolsType, model: ModelType, instructions: string) {
         this.user = user;
-        this.funcTools = funcTools;
+        this.functionTools = functionTools;
         this.model = model;
         this.instructions = instructions;
     }
 
-    private createInputMessageItem(userInput: string){
-        const messageItem = {
+    private createInputMessageItemAndPush(userInput: string){
+        const inputMessageItem: InputMessageItem = {
             type: "message",
             role: "user",
             content: userInput,
         };
 
-        return MessageItemSchema.parse(messageItem);
+        this.input.push(inputMessageItem);
     }
 
     private printLog(log: string){
@@ -38,24 +38,19 @@ export class BaseAgent{
     }
 
     async loop(userInput: string){
-        if(this.input != null){
-            this.input.push(this.createInputMessageItem(userInput));
-            // console.log(this.input);
-        }
+        this.createInputMessageItemAndPush(userInput);
 
         while(true){
-            const response = await this.modelClient.requestResponsesAPI(
+            const response: ResponseSchema = await this.modelClient.requestResponsesAPI(
                 this.model,
                 this.input,
                 this.instructions,
-                this.funcTools,
+                this.functionTools,
                 this.user,
             )
-            const responseParsed = ResponsesSchema.parse(response);
-            const output = responseParsed.output;
 
             let hasFunctionCall = false;
-            for(const item of output){
+            for(const item of response.output){
                 if(item.type == "message"){
                     // console.log(item.content);
                     this.printLog("message:");
