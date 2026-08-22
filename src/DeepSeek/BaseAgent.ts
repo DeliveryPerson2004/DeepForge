@@ -10,7 +10,6 @@ import {
 import {ModelClient} from "./ModelClient.ts";
 import {logger} from "../logger.ts";
 
-
 export abstract class BaseAgent{
     private readonly user: string;
     private readonly functionTools: ToolsType;
