@@ -9,12 +9,16 @@ interface ExecError extends ExecException {
     stderr?: string;
 }
 
-export async function executeShellCommand(command: string): Promise<string> {
+export async function executeShellCommand(
+    command: string,
+    cwd: string
+): Promise<string> {
     try {
         const { stdout, stderr } = await execAsync(command, {
-            shell: '/bin/zsh', // 如需使用 bash，可替换为 '/bin/bash'
+            cwd, // 指定执行命令所在的文件夹路径
+            shell: '/bin/zsh',
             encoding: 'utf-8',
-            maxBuffer: 10 * 1024 * 1024, // 设置缓冲区为 10MB，防止输出过大报错
+            maxBuffer: 10 * 1024 * 1024,
         });
 
         if (stderr) {
@@ -22,8 +26,7 @@ export async function executeShellCommand(command: string): Promise<string> {
         }
 
         const result = stdout.trim();
-
-        logger.info(`Tool ExecuteCommand() Result:\n ${result}`)
+        logger.info(`Tool ExecuteCommand() Result:\n ${result}`);
         return result;
     } catch (err) {
         const error = err as ExecError;
@@ -31,10 +34,7 @@ export async function executeShellCommand(command: string): Promise<string> {
         const stdout = error.stdout?.trim();
         const message = error.message.trim();
 
-        // 记录错误日志
         logger.info(`Tool ExecuteCommand() Command execution failed: ${stderr || message}`);
-
-        // 优先返回 stderr 或 stdout，若无则返回错误信息本身
         return stderr || stdout || message;
     }
 }
