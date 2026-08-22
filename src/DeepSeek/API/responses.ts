@@ -9,14 +9,14 @@ export interface InputMessageItem{
     content: string,
 }
 
-interface InputFunctionCallItem{
+export interface InputFunctionCallItem{
     type: "function_call",
     call_id: string,
     name: string,
     arguments: string,
 }
 
-interface InputFunctionCallOutputItem{
+export interface InputFunctionCallOutputItem{
     type: "function_call_output",
     call_id: string,
     name: string,
@@ -90,7 +90,11 @@ interface ToolsFunctionItem{
     type: "function",
     name: string,
     description: string,
-    parameters: object,
+    parameters: {
+        "type": "object",
+        "properties": object,
+        "required": string[],
+    }
 }
 
 interface ToolsWebSearchItem{

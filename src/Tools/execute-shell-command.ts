@@ -9,6 +9,10 @@ interface ExecError extends ExecException {
     stderr?: string;
 }
 
+export interface executeShellCommandInput {
+    command: string,
+}
+
 export async function executeShellCommand(
     command: string,
     cwd: string
