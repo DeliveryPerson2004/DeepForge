@@ -6,6 +6,7 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
+import {logger} from "../logger.ts";
 
 
 export class BaseAgent{
@@ -21,6 +22,8 @@ export class BaseAgent{
         this.functionTools = functionTools;
         this.model = model;
         this.instructions = instructions;
+
+        logger.info("Instantiate class BaseAgent");
     }
 
     private createInputMessageItemAndPush(userInput: string){
@@ -33,11 +36,9 @@ export class BaseAgent{
         this.input.push(inputMessageItem);
     }
 
-    private printLog(log: string){
-        console.log(`\n\n\n\n\n${log}\n`);
-    }
-
     async loop(userInput: string){
+        logger.info("class BaseAgent public loop() start");
+
         this.createInputMessageItemAndPush(userInput);
 
         while(true){
@@ -52,31 +53,30 @@ export class BaseAgent{
             let hasFunctionCall = false;
             for(const item of response.output){
                 if(item.type == "message"){
-                    // console.log(item.content);
-                    this.printLog("message:");
+                    logger.info(item.type);
                     for(const contentItem of item.content){
-                        console.log(contentItem.text);
+                        logger.info(contentItem.text);
                     }
                     this.input.push(item);
                 }else if(item.type == "reasoning"){
-                    // console.log(item.type);
-                    this.printLog("reasoning:")
+                    logger.info(item.type);
                     for(const contentItem of item.content){
-                        console.log(contentItem.text);
+                        logger.info(contentItem.text);
                     }
                     this.input.push(item);
                 }else if(item.type == "function_call"){
                     hasFunctionCall = true;
-                    this.printLog(`${item.type}`)
+                    logger.info(item.type);
                     this.input.push(item);
                 }else if(item.type == "web_search_call"){
-                    this.printLog("web search")
+                    logger.info(item.type);
                 }
-                // console.log(`input.length: ${this.input.length}`);
             }
             if(!hasFunctionCall){
                 break;
             }
         }
+
+        logger.info("class BaseAgent public loop() end");
     }
 }
