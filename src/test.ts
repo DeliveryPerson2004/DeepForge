@@ -1,8 +1,8 @@
-import {executeCommand} from "./Tools/shell.ts";
+import {executeShellCommand} from "./Tools/execute-shell-command.ts";
 
 async function main() {
 
-    await executeCommand('ls');
+    await executeShellCommand('ls');
 }
 
 await main();

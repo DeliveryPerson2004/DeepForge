@@ -9,7 +9,7 @@ interface ExecError extends ExecException {
     stderr?: string;
 }
 
-export async function executeCommand(command: string): Promise<string> {
+export async function executeShellCommand(command: string): Promise<string> {
     try {
         const { stdout, stderr } = await execAsync(command, {
             shell: '/bin/zsh', // 如需使用 bash，可替换为 '/bin/bash'
