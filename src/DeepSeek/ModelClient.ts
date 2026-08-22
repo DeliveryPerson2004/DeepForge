@@ -1,12 +1,13 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
+import {logger} from "../logger.ts";
 
 export class ModelClient {
     private baseURL: string = "https://api.deepseek.com";
     private API_KEY = process.env.DEEPSEEK_API_KEY;
 
     constructor() {
-        console.log(`ModelClient实例化成功`);
+        logger.info("Instantiate class ModelClient");
     }
 
     async requestResponsesAPI(
