@@ -4,7 +4,7 @@
 
 当前包含一个工具：
 
-- `execute-shell-command.ts` — 在指定目录中执行 Shell 命令并返回结果
+- `shell-command/shell-execute.ts` — 在指定目录中执行 Shell 命令并返回结果
 
 ## 工具调用链路
 
@@ -20,7 +20,7 @@ BaseAgent.loop() 识别 item.type === "function_call"
 调用抽象方法 requestFunctionCall()（由具体 Agent 实现，如 PlannerAgent）
         │
         ▼
-按 name 分发到对应工具（如 execute_shell_command → executeShellCommand()）
+按 name 分发到对应工具（如 execute_shell_command → shellExecute()）
         │
         ▼
 工具执行完毕，通过 createFunctionCallOutputItemAndPush() 构造
@@ -30,7 +30,7 @@ function_call_output 输入项并追加进消息上下文
 下一轮请求时，模型可见工具执行结果，继续推理直至无 function_call
 ```
 
-## execute-shell-command.ts
+## shell-execute.ts
 
 ### 职责
 
@@ -39,7 +39,7 @@ function_call_output 输入项并追加进消息上下文
 ### 函数签名
 
 ```typescript
-export async function executeShellCommand(
+export async function shellExecute(
     command: string,
     cwd: string
 ): Promise<string>{
@@ -65,7 +65,7 @@ export async function executeShellCommand(
 
 ### 与响应契约的关联
 
-`executeShellCommandInput` 接口对应 `function_call` 输出的 `arguments` 字段（JSON 字符串），由具体 Agent 反序列化后传入工具：
+`shellExecuteInput` 接口对应 `function_call` 输出的 `arguments` 字段（JSON 字符串），由具体 Agent 反序列化后传入工具：
 
 ```typescript
 export interface executeShellCommandInput {

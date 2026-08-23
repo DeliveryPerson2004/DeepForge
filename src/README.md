@@ -20,7 +20,7 @@
 ```
 src/
 ├── main.ts                          # 程序入口：实例化 PlannerAgent 并启动对话循环
-├── test.ts                          # executeShellCommand 的独立测试脚本
+├── test.ts                          # shellExecute 的独立测试脚本
 ├── logger.ts                        # pino 日志封装（横切所有类与工具）
 ├── Agents/
 │   └── Planner/
@@ -32,7 +32,7 @@ src/
 │   └── API/
 │       └── responses.ts            # 请求体 / 响应体 TypeScript 类型契约（编译期强类型）
 └── Tools/
-    ├── execute-shell-command.ts     # Shell 命令执行工具（zsh 环境，cwd 指定工作目录）
+    ├── shell-execute.ts     # Shell 命令执行工具（zsh 环境，cwd 指定工作目录）
     └── README.md                    # 工具调用链路与实现说明
 ```
 
@@ -46,7 +46,7 @@ main.ts
   │     │           └── responses.ts (数据契约层)
   │     │                 └── DeepSeek API
   │     └── Tools 层
-  │           └── execute-shell-command.ts
+  │           └── shell-execute.ts
   └── logger.ts (日志，横切所有层)
 ```
 

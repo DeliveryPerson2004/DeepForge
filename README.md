@@ -14,7 +14,7 @@ deep-forge/
 ├── user-workspace/           # 工具执行的工作目录（shell 命令在此运行）
 └── src/
     ├── main.ts               # 程序入口：实例化 PlannerAgent 并启动对话循环
-    ├── test.ts               # executeShellCommand 独立测试脚本
+    ├── test.ts               # shellExecute 独立测试脚本
     ├── logger.ts             # pino 日志封装（所有类与工具统一使用）
     ├── README.md             # src 目录说明（技术选型 / 架构 / 耦合原因）
     ├── Agents/
@@ -28,7 +28,7 @@ deep-forge/
     │   └── API/
     │       └── responses.ts          # 请求体 / 响应体 TypeScript 类型契约（编译期强类型）
     └── Tools/
-        ├── execute-shell-command.ts  # Shell 命令执行工具（zsh 环境）
+        ├── shellExecute.ts  # Shell 命令执行工具（zsh 环境）
         └── README.md                 # Tools 目录说明（工具调用链路）
 ```
 
@@ -59,7 +59,7 @@ main.ts
   │     │           └── responses.ts (数据契约层)
   │     │                 └── DeepSeek API
   │     └── Tools 层
-  │           └── execute-shell-command.ts (Shell 命令执行)
+  │           └── shellExecute.ts (Shell 命令执行)
   └── logger.ts (日志，横切所有层)
 ```
 
@@ -92,5 +92,5 @@ pnpm dev:test
 | ---- | ---- |
 | [src/README.md](src/README.md) | 技术选型、项目架构、与模型 provider 耦合的原因 |
 | [src/DeepSeek/README.md](src/DeepSeek/README.md) | ModelClient、BaseAgent 的实现与设计说明 |
-| [src/Tools/README.md](src/Tools/README.md) | 工具调用链路与 execute-shell-command 实现说明 |
+| [src/Tools/README.md](src/Tools/README.md) | 工具调用链路与 shellExecute-shell-command 实现说明 |
 | [src/DeepSeek/API/responses.ts](src/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义 |
