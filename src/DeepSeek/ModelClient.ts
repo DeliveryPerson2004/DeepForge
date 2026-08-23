@@ -7,7 +7,7 @@ export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
 
     constructor() {
-        logger.info("Instantiate class ModelClient");
+        logger.info("new class ModelClient()");
     }
 
     async requestResponsesAPI(

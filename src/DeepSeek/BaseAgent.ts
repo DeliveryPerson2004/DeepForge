@@ -34,7 +34,7 @@ export abstract class BaseAgent{
         this.instructions = instructions;
         this.workspacePath = workspacePath;
 
-        logger.info("Instantiate class BaseAgent");
+        logger.info("new class BaseAgent()");
     }
 
     protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
@@ -80,13 +80,13 @@ export abstract class BaseAgent{
                 if(item.type == "message"){
                     logger.info(item.type);
                     for(const contentItem of item.content){
-                        logger.info(contentItem.text);
+                        logger.info("\n" + contentItem.text);
                     }
                     this.input.push(item);
                 }else if(item.type == "reasoning"){
                     logger.info(item.type);
                     for(const contentItem of item.content){
-                        logger.info(contentItem.text);
+                        logger.info("\n" + contentItem.text);
                     }
                     this.input.push(item);
                 }else if(item.type == "function_call"){

@@ -61,7 +61,7 @@ export class PlannerAgent extends BaseAgent {
             instructions,
             workspacePath);
 
-        logger.info("Instantiate class PlannerAgent");
+        logger.info("new class PlannerAgent()");
     }
 
     protected async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {
