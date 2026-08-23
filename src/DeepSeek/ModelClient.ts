@@ -3,8 +3,8 @@ import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses
 import {logger} from "../logger.ts";
 
 export class ModelClient {
-    private baseURL: string = "https://api.deepseek.com";
     private API_KEY = process.env.DEEPSEEK_API_KEY;
+    private baseURL: string = "https://api.deepseek.com";
 
     constructor() {
         logger.info("new class ModelClient()");
