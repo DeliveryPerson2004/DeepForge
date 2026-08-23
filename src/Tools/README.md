@@ -42,7 +42,9 @@ function_call_output 输入项并追加进消息上下文
 export async function executeShellCommand(
     command: string,
     cwd: string
-): Promise<string>
+): Promise<string>{
+    
+}
 ```
 
 - `command` — 要执行的 Shell 命令字符串
