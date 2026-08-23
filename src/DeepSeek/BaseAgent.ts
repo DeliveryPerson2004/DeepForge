@@ -1,4 +1,6 @@
 import {
+    type InputFunctionCallItem,
+    type InputFunctionCallOutputItem,
     type InputItemType,
     type InputMessageItem,
     ModelType,
@@ -8,16 +10,15 @@ import {
 import {ModelClient} from "./ModelClient.ts";
 import {logger} from "../logger.ts";
 
-
-export class BaseAgent{
+export abstract class BaseAgent{
     private readonly user: string;
     private readonly functionTools: ToolsType;
     private readonly model: ModelType;
     private modelClient = new ModelClient();
-    private input: InputItemType[] = [];
+    protected input: InputItemType[] = [];
     private readonly instructions: string;
 
-    constructor(user: string, functionTools: ToolsType, model: ModelType, instructions: string) {
+    protected constructor(user: string, functionTools: ToolsType, model: ModelType, instructions: string) {
         this.user = user;
         this.functionTools = functionTools;
         this.model = model;
@@ -25,6 +26,20 @@ export class BaseAgent{
 
         logger.info("Instantiate class BaseAgent");
     }
+
+    protected createFunctionCallOutputItemAndPush(inputFunctionCallItem: InputFunctionCallItem, output: string){
+        const functionCallOutputItem: InputFunctionCallOutputItem = {
+            type: "function_call_output",
+            call_id: inputFunctionCallItem.call_id,
+            name: inputFunctionCallItem.name,
+            arguments: inputFunctionCallItem.arguments,
+            output: output,
+        };
+
+        this.input.push(functionCallOutputItem);
+    }
+
+    abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
 
     private createInputMessageItemAndPush(userInput: string){
         const inputMessageItem: InputMessageItem = {
@@ -68,6 +83,7 @@ export class BaseAgent{
                     hasFunctionCall = true;
                     logger.info(item.type);
                     this.input.push(item);
+                    await this.requestFunctionCall(item);
                 }else if(item.type == "web_search_call"){
                     logger.info(item.type);
                 }
