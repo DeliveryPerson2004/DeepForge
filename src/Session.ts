@@ -12,7 +12,7 @@ export class Session{
         this.agent = new PlannerAgent(workspacePath);
         this.workspacePath = workspacePath;
 
-        logger.info("Instantiate class Session");
+        logger.info("new class Session()");
     }
 
     async input(userInput: string) {

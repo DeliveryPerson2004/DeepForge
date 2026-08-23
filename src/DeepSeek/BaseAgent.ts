@@ -34,8 +34,10 @@ export abstract class BaseAgent{
         this.instructions = instructions;
         this.workspacePath = workspacePath;
 
-        logger.info("Instantiate class BaseAgent");
+        logger.info("new class BaseAgent()");
     }
+
+    protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
 
     protected createFunctionCallOutputItemAndPush(inputFunctionCallItem: InputFunctionCallItem, output: string){
         const functionCallOutputItem: InputFunctionCallOutputItem = {
@@ -48,8 +50,6 @@ export abstract class BaseAgent{
 
         this.input.push(functionCallOutputItem);
     }
-
-    protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
 
     private createInputMessageItemAndPush(userInput: string){
         const inputMessageItem: InputMessageItem = {
@@ -80,13 +80,13 @@ export abstract class BaseAgent{
                 if(item.type == "message"){
                     logger.info(item.type);
                     for(const contentItem of item.content){
-                        logger.info(contentItem.text);
+                        logger.info("\n" + contentItem.text);
                     }
                     this.input.push(item);
                 }else if(item.type == "reasoning"){
                     logger.info(item.type);
                     for(const contentItem of item.content){
-                        logger.info(contentItem.text);
+                        logger.info("\n" + contentItem.text);
                     }
                     this.input.push(item);
                 }else if(item.type == "function_call"){

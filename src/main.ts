@@ -6,7 +6,7 @@ async function main() {
 
     const workspacePath = process.cwd();
     const session = new Session(workspacePath);
-    await session.input("使用shell工具查看一下上级目录中有哪些文件夹，并在上级目录中尝试创建一个新的.md文件");
+    await session.input("你是谁？你能帮我做什么？你有哪些工具可以调用？");
 
     logger.info("function main() end");
 }
