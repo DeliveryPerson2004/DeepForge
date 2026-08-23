@@ -37,6 +37,8 @@ export abstract class BaseAgent{
         logger.info("Instantiate class BaseAgent");
     }
 
+    protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
+
     protected createFunctionCallOutputItemAndPush(inputFunctionCallItem: InputFunctionCallItem, output: string){
         const functionCallOutputItem: InputFunctionCallOutputItem = {
             type: "function_call_output",
@@ -48,8 +50,6 @@ export abstract class BaseAgent{
 
         this.input.push(functionCallOutputItem);
     }
-
-    protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
 
     private createInputMessageItemAndPush(userInput: string){
         const inputMessageItem: InputMessageItem = {
