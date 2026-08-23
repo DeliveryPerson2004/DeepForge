@@ -1,6 +1,4 @@
 import {shellExecute} from "./Tools/shell-command/shell-execute.ts";
-import {executeShellCommandPWD} from "./Tools/shell-command/shell-pwd.ts";
-import {executeShellCommandLs} from "./Tools/shell-command/shell-ls.ts";
 
 
 

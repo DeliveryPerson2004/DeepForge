@@ -22,7 +22,7 @@
 export async function shellExecute(
     command: string,
     cwd: string
-): Promise<string>
+): Promise<string>{}
 ```
 
 - `command` — 要执行的 shell 命令字符串
@@ -76,7 +76,7 @@ export interface shellExecuteInput {
 ```typescript
 export async function executeShellCommandLs(
     cwd: string
-): Promise<string>
+): Promise<string>{}
 ```
 
 内部直接调用 `shellExecute("ls", cwd)`，入参仅需工作目录。调用前记录输入 `cwd` 日志。
@@ -88,7 +88,7 @@ export async function executeShellCommandLs(
 ```typescript
 export async function executeShellCommandPWD(
     cwd: string
-): Promise<string>
+): Promise<string>{}
 ```
 
 内部直接调用 `shellExecute("pwd", cwd)`，入参仅需工作目录。调用前记录输入 `cwd` 日志。
