@@ -2,9 +2,16 @@
 
 本目录存放 Agent 可调用的具体工具（tool）实现。工具是模型通过 `function_call` 触发、由 Agent 在本地执行并回填结果的函数单元。
 
-当前包含一个工具：
+当前包含：
 
-- `shell-command/shell-execute.ts` — 在指定目录中执行 Shell 命令并返回结果
+| 工具 | 文件 | 说明 |
+| ---- | ---- | ---- |
+| shell 命令执行 | `shell-command/shell-execute.ts` | 在指定工作目录中执行 shell 命令（bash，禁用 sudo） |
+| 目录查看 | `shell-command/shell-ls.ts` | 固定执行 `ls`，查看目录内容 |
+| 工作目录输出 | `shell-command/shell-pwd.ts` | 固定执行 `pwd`，输出当前工作目录路径 |
+| 询问开发者 | `ask-developer.ts` | 将 agent 的问题以 warn 日志形式转达给开发者 |
+
+各工具的技术细节见 [shell-command/README.md](shell-command/README.md)。
 
 ## 工具调用链路
 
@@ -30,47 +37,12 @@ function_call_output 输入项并追加进消息上下文
 下一轮请求时，模型可见工具执行结果，继续推理直至无 function_call
 ```
 
-## shell-execute.ts
+## 工具注册与分发
 
-### 职责
+- **注册**：具体 Agent（`PlannerAgent`）通过 `ToolsType` 声明工具列表，`function` 类工具在 `parameters` 中以 JSON Schema 声明参数形态，与 `responses.ts` 类型契约一一对应
+- **分发**：`requestFunctionCall()` 按 `inputFunctionCallItem.name` 分发到对应工具，`arguments`（JSON 字符串）反序列化为工具入参（如 `shellExecuteInput` / `askDeveloperInput`）
+- **回填**：工具执行完成后由 `createFunctionCallOutputItemAndPush()` 构造 `function_call_output` 输入项，使模型在下一轮推理中可见执行结果
 
-在指定的工作目录（`cwd`）中执行 Shell 命令字符串，返回标准输出（stdout）作为结果；执行失败时返回错误信息（stderr / message），不会向上抛异常。
+## 与沙箱运行环境的关系
 
-### 函数签名
-
-```typescript
-export async function shellExecute(
-    command: string,
-    cwd: string
-): Promise<string>{
-    
-}
-```
-
-- `command` — 要执行的 Shell 命令字符串
-- `cwd` — 命令执行所在的工作目录
-- 返回值 — 成功时为 `stdout`（已 `trim()`）；失败时为 `stderr || stdout || message`（已 `trim()`）
-
-### 执行细节
-
-- 基于 Node.js `child_process` 的 `exec` 并 `promisify` 为异步调用，无第三方依赖
-- 使用 `shell: '/bin/zsh'`，命令在 zsh 环境下执行（与项目运行环境一致）
-- `maxBuffer: 10MB`，防止大量输出撑爆内存
-- 输出编码为 `utf-8`
-- 结果通过 pino logger 打印（`src/logger.ts`），方便追踪工具调用与结果
-
-### 错误处理约定
-
-失败时函数**不抛异常**，而是将错误信息作为字符串返回，由模型在下一次推理中自行解读。这样保证了 `requestFunctionCall()` 永远可以继续回填上下文，不中断对话循环。
-
-### 与响应契约的关联
-
-`shellExecuteInput` 接口对应 `function_call` 输出的 `arguments` 字段（JSON 字符串），由具体 Agent 反序列化后传入工具：
-
-```typescript
-export interface executeShellCommandInput {
-    command: string,
-}
-```
-
-工具参数由 `responses.ts` 中 `ToolsFunctionItem.parameters` 的 JSON Schema 声明，工具实现与类型契约一一对应。
+shell 命令工具的目标运行环境是 Docker Sandbox（`sbx`）提供的隔离沙箱，由 `src/sandbox-init.sh` 初始化：宿主机只负责 agent 开发，`sbx cp` 将项目同步进沙箱机器（`shell-user-workspace`），shell 命令在沙箱内执行，防止注入影响宿主机。当前 `shellExecute()` 以本地 `exec` 实现，并先行通过 sudo 正则拦截（`\bsudo\b`，大小写不敏感）做第一道防护。
