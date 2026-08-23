@@ -1,12 +1,12 @@
-import { PlannerAgent } from "./Agents/Planner/PlannerAgent.ts";
 import {logger} from "./logger.ts";
+import {Session} from "./Session.ts";
 
 async function main() {
     logger.info("function main() start");
 
-    const planner = new PlannerAgent();
-
-    await planner.loop("调用shell工具查看当前目录的上一级目录中有哪些文件。");
+    const workspacePath = process.cwd();
+    const session = new Session(workspacePath);
+    await session.input("使用shell工具查看一下上级目录中有哪些文件夹，并在上级目录中尝试创建一个新的.md文件");
 
     logger.info("function main() end");
 }
