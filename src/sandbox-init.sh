@@ -1,0 +1,2 @@
+sbx exec -d shell-user-workspace sudo rm -rf /home/administrator/WebstormProjects/deep-forge
+sbx cp /home/administrator/WebstormProjects/deep-forge shell-user-workspace:/home/administrator/WebstormProjects/

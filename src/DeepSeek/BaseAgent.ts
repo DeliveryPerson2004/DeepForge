@@ -10,6 +10,8 @@ import {
 import {ModelClient} from "./ModelClient.ts";
 import {logger} from "../logger.ts";
 
+
+
 export abstract class BaseAgent{
     private readonly user: string;
     private readonly functionTools: ToolsType;
@@ -17,12 +19,20 @@ export abstract class BaseAgent{
     private modelClient = new ModelClient();
     protected input: InputItemType[] = [];
     private readonly instructions: string;
+    protected readonly workspacePath: string;
 
-    protected constructor(user: string, functionTools: ToolsType, model: ModelType, instructions: string) {
+    protected constructor(
+        user: string,
+        functionTools: ToolsType,
+        model: ModelType,
+        instructions: string,
+        workspacePath: string,
+    ) {
         this.user = user;
         this.functionTools = functionTools;
         this.model = model;
         this.instructions = instructions;
+        this.workspacePath = workspacePath;
 
         logger.info("Instantiate class BaseAgent");
     }
@@ -39,7 +49,7 @@ export abstract class BaseAgent{
         this.input.push(functionCallOutputItem);
     }
 
-    abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
+    protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
 
     private createInputMessageItemAndPush(userInput: string){
         const inputMessageItem: InputMessageItem = {
@@ -80,10 +90,15 @@ export abstract class BaseAgent{
                     }
                     this.input.push(item);
                 }else if(item.type == "function_call"){
-                    hasFunctionCall = true;
                     logger.info(item.type);
                     this.input.push(item);
                     await this.requestFunctionCall(item);
+
+                    if(item.name == "ask_developer"){
+                        break;
+                    }else{
+                        hasFunctionCall = true;
+                    }
                 }else if(item.type == "web_search_call"){
                     logger.info(item.type);
                 }
