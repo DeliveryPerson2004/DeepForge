@@ -49,9 +49,17 @@ BaseAgent 是通用 Agent 基类，为具体 Agent（如 `PlannerAgent`）提供
 3. 逐条处理输出项：
    - `message`：打印文本回复，追加进上下文
    - `reasoning`：打印推理过程，追加进上下文
-   - `function_call`：打印调用信息，追加进上下文，置 `hasFunctionCall = true`
+   - `function_call`：打印调用信息，追加进上下文，置 `hasFunctionCall = true`，并调用抽象方法 `requestFunctionCall()` 交由子类执行对应工具
    - `web_search_call`：打印 web 搜索日志
 4. 当一轮响应中不再包含 `function_call` 时循环终止
+
+### 工具调用的抽象契约
+
+`requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem)` 是抽象方法，工具的具体执行由子类实现：
+
+- 子类按 `inputFunctionCallItem.name` 分发到 `Tools/` 目录下的对应工具实现
+- 工具执行完成后，调用受保护的 `createFunctionCallOutputItemAndPush()` 方法，将结果构造为 `function_call_output` 输入项（`InputFunctionCallOutputItem`）追加进上下文
+- 下一轮请求时，模型即可看到工具执行结果，继续推理直至不再发出 `function_call`
 
 ### 与 model provider 的耦合
 

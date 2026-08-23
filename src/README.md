@@ -10,6 +10,8 @@
 | 包管理器 | pnpm | 通过 `devEngines` 锁定 `pnpm ^11.22.0` |
 | 数据契约 | TypeScript 类型（编译期） | 请求体 / 响应体类型定义于 `responses.ts`，仅编译期强类型，无运行时校验 |
 | HTTP 客户端 | Node.js 原生 fetch | 无第三方 HTTP 依赖 |
+| 日志 | pino + pino-pretty | `logger.ts` 统一封装，控制台彩色输出，贯穿所有层 |
+| Shell 执行 | node:child_process（exec） | 工具层执行命令，zsh 环境，无第三方依赖 |
 | 环境变量 | dotenv | 读取 `.env` 中的 `DEEPSEEK_API_KEY` |
 | 模型 API | DeepSeek `/responses` | 兼容 OpenAI Responses API 格式 |
 
@@ -18,26 +20,34 @@
 ```
 src/
 ├── main.ts                          # 程序入口：实例化 PlannerAgent 并启动对话循环
-├── test.ts                          # ModelClient 的独立测试脚本
+├── test.ts                          # executeShellCommand 的独立测试脚本
+├── logger.ts                        # pino 日志封装（横切所有类与工具）
 ├── Agents/
 │   └── Planner/
-│       ├── PlannerAgent.ts          # 具体 Agent：注册 web_search 工具，从文件加载指令
+│       ├── PlannerAgent.ts          # 具体 Agent：注册 web_search 与 execute_shell_command 工具
 │       └── instructions.md          # Agent 系统指令（独立于代码维护）
-└── DeepSeek/
-    ├── ModelClient.ts               # 模型客户端：封装 /responses API 的 HTTP 调用
-    ├── BaseAgent.ts                 # Agent 基类：实现多轮对话循环
-    └── API/
-        └── responses.ts            # 请求体 / 响应体 TypeScript 类型契约（编译期强类型）
+├── DeepSeek/
+│   ├── ModelClient.ts               # 模型客户端：封装 /responses API 的 HTTP 调用
+│   ├── BaseAgent.ts                 # Agent 基类：实现多轮对话循环
+│   └── API/
+│       └── responses.ts            # 请求体 / 响应体 TypeScript 类型契约（编译期强类型）
+└── Tools/
+    ├── execute-shell-command.ts     # Shell 命令执行工具（zsh 环境，cwd 指定工作目录）
+    └── README.md                    # 工具调用链路与实现说明
 ```
 
 整体呈分层调用结构，依赖方向自上而下：
 
 ```
 main.ts
-  └── PlannerAgent (Agents 层)
-        └── BaseAgent (Agent 基类)
-              └── ModelClient (网络层)
-                    └── responses.ts (数据契约层)
+  ├── PlannerAgent (Agents 层)
+  │     ├── BaseAgent (Agent 基类)
+  │     │     └── ModelClient (网络层)
+  │     │           └── responses.ts (数据契约层)
+  │     │                 └── DeepSeek API
+  │     └── Tools 层
+  │           └── execute-shell-command.ts
+  └── logger.ts (日志，横切所有层)
 ```
 
 ### 核心机制
@@ -48,10 +58,10 @@ main.ts
   - `reasoning`（推理过程，追加进上下文）
   - `function_call`（函数调用，追加进上下文，置 `hasFunctionCall = true`）
   - `web_search_call`（web 搜索调用）
-  
+
   当一轮响应中不再包含 `function_call` 时循环终止。
 - **数据契约**：请求体与响应体由 `responses.ts` 中的类型契约定义，全程编译期强类型；运行时不做校验。
-- **工具机制**：`PlannerAgent` 通过 `ToolsType` 声明 `web_search` 工具，工具列表由类型契约约束。
+- **工具机制**：`PlannerAgent` 通过 `ToolsType` 声明两个工具——`web_search`（内建搜索）与 `execute_shell_command`（本地执行 Shell 命令）。模型发出 `function_call` 后，`requestFunctionCall()` 按 `name` 分发到 `Tools/` 下的对应实现，执行结果通过 `createFunctionCallOutputItemAndPush()` 以 `function_call_output` 形式回填上下文，供模型下一轮推理使用。工具的完整调用链路见 `src/Tools/README.md`。
 
 ## 3. 与模型 provider 耦合的原因
 
