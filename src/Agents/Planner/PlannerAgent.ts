@@ -44,7 +44,6 @@ export class PlannerAgent extends BaseAgent {
         if (inputFunctionCallItem.name === "execute_shell_command") {
             const argumentsJSONed: executeShellCommandInput = JSON.parse(inputFunctionCallItem.arguments);
             const result = await executeShellCommand(argumentsJSONed.command, "/home/administrator/WebstormProjects/deep-forge/user-workspace");
-            console.log(result);
             this.createFunctionCallOutputItemAndPush(inputFunctionCallItem, result);
         }
     }
