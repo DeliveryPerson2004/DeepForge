@@ -3,5 +3,3 @@ node_modules
 .env
 user-workspace
 /generated/prisma
-
-/generated/prisma
