@@ -6,7 +6,7 @@ async function main() {
 
     const planner = new PlannerAgent();
 
-    await planner.loop("调用shell工具查看目录中有哪些文件。并新建一个.md文件");
+    await planner.loop("调用shell工具查看当前目录的上一级目录中有哪些文件。");
 
     logger.info("function main() end");
 }

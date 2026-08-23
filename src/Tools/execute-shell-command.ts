@@ -18,6 +18,7 @@ export async function executeShellCommand(
     cwd: string
 ): Promise<string> {
     try {
+        logger.info(`Tool ExecuteCommand() input command: ${command}`);
         const { stdout, stderr } = await execAsync(command, {
             cwd, // 指定执行命令所在的文件夹路径
             shell: '/bin/zsh',
