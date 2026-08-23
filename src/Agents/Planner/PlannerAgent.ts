@@ -4,12 +4,17 @@ import {BaseAgent} from "../../DeepSeek/BaseAgent.ts";
 import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../DeepSeek/API/responses.ts";
 import {logger} from "../../logger.ts";
 import * as fs from "node:fs";
-import {executeShellCommand, type executeShellCommandInput} from "../../Tools/execute-shell-command.ts";
+import {shellExecute, type shellExecuteInput} from "../../Tools/shell-command/shell-execute.ts";
+import {askDeveloper, type askDeveloperInput} from "../../Tools/ask-developer.ts";
+
+
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class PlannerAgent extends BaseAgent {
-    constructor() {
+    private agentName = "planner";
+
+    constructor(workspacePath: string) {
         const plannerFuncTools: ToolsType = [
             {
                 type: "web_search",
@@ -17,7 +22,7 @@ export class PlannerAgent extends BaseAgent {
             {
                 type: "function",
                 name: "execute_shell_command",
-                description: "在指定的目录中执行 Shell 命令，并返回标准输出或错误信息（使用 zsh 环境）。",
+                description: "在指定的目录中执行 Shell 命令但是禁用sudo权限，并返回标准输出或错误信息（使用 bash 环境）。",
                 parameters: {
                     "type": "object",
                     "properties": {
@@ -29,22 +34,44 @@ export class PlannerAgent extends BaseAgent {
                     "required": ["command"]
                 },
             },
+            {
+                type: "function",
+                name: "ask_developer",
+                description: "如果有任何疑问，可以通过该tool询问你的开发者，包括但不限于用户让你调用一个你并没有的tool等。注意这和询问user是不同的。",
+                parameters: {
+                    "type": "object",
+                    "properties": {
+                        "question": {
+                            "type": "string",
+                            "description": "要询问的问题。"
+                        },
+                    },
+                    "required": ["question"]
+                }
+            }
         ];
 
         // 同步读取同级目录下的 instructions.md
         const instructionsFilePath = path.join(dirname, "instructions.md");
         const instructions = fs.readFileSync(instructionsFilePath, "utf-8");
 
-        super("Planner", plannerFuncTools, ModelType.DeepSeekV4Flash, instructions);
+        super("Planner",
+            plannerFuncTools,
+            ModelType.DeepSeekV4Flash,
+            instructions,
+            workspacePath);
 
         logger.info("Instantiate class PlannerAgent");
     }
 
-    async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {
+    protected async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {
         if (inputFunctionCallItem.name === "execute_shell_command") {
-            const argumentsJSONed: executeShellCommandInput = JSON.parse(inputFunctionCallItem.arguments);
-            const result = await executeShellCommand(argumentsJSONed.command, "/home/administrator/WebstormProjects/deep-forge/user-workspace");
+            const argumentsJSONed: shellExecuteInput = JSON.parse(inputFunctionCallItem.arguments);
+            const result = await shellExecute(argumentsJSONed.command, this.workspacePath);
             this.createFunctionCallOutputItemAndPush(inputFunctionCallItem, result);
+        }else if(inputFunctionCallItem.name === "ask_developer"){
+            const argumentsJSONed: askDeveloperInput = JSON.parse(inputFunctionCallItem.arguments);
+            await askDeveloper(this.agentName, argumentsJSONed.question);
         }
     }
 }
