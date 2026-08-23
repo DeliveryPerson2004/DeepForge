@@ -13,12 +13,13 @@ import {logger} from "../logger.ts";
 
 
 export abstract class BaseAgent{
-    private readonly user: string;
     private readonly functionTools: ToolsType;
+    private readonly instructions: string;
     private readonly model: ModelType;
     private modelClient = new ModelClient();
+    private readonly user: string;
+
     protected input: InputItemType[] = [];
-    private readonly instructions: string;
     protected readonly workspacePath: string;
 
     protected constructor(
