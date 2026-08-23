@@ -19,6 +19,7 @@
   },
   "type": "module",
   "dependencies": {
+    "@prisma/adapter-better-sqlite3": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "dotenv": "^17.4.2",
     "pino": "^10.3.1",
@@ -28,6 +29,7 @@
     "typescript": "^7.0.2"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.2.0"
   }
 }
