@@ -86,6 +86,7 @@ export abstract class BaseAgent{
     public async loop(userInput: string){
         await printLogAndSaveDataToDB("class BaseAgent public loop() start", "info", this.sessionId, this.turn);
 
+        const turnInputStartIndex = this.input.length;
         this.createInputMessageItemAndPush(userInput);
 
         while(true){
@@ -128,7 +129,11 @@ export abstract class BaseAgent{
             }
         }
         await printLogAndSaveDataToDB("class BaseAgent public loop() end", "info", this.sessionId, this.turn);
-        await this.saveInputToDB(this.input);
+        await this.saveInputToDB(this.input.slice(turnInputStartIndex));
         this.turn += 1;
+        await prisma.session.update({
+            where: {id: this.sessionId},
+            data: {max_turn: this.turn},
+        });
     }
 }
