@@ -10,7 +10,6 @@ import {
 import {ModelClient} from "./ModelClient.ts";
 import {printLogAndSaveDataToDB, logger} from "../logger.ts";
 import {prisma} from "../database/prisma-client.ts";
-import type {Prisma} from "../../generated/prisma/client.ts";
 
 
 
@@ -23,7 +22,7 @@ export abstract class BaseAgent{
     protected turn: number;
 
     protected sessionId: number;
-    public input: InputItemType[] = [];
+    protected input: InputItemType[] = [];
     protected readonly workspacePath: string;
 
     protected constructor(
@@ -49,14 +48,16 @@ export abstract class BaseAgent{
         });
     }
 
-    private async saveInputToDB(input: InputItemType[]){
-        await prisma.agentInput.create({
-            data: {
-                input: input as unknown as Prisma.InputJsonValue,
-                session_id: this.sessionId,
-                turn: this.turn,
-            }
-        })
+    public getInput(){
+        return this.input;
+    }
+
+    public setInput(input: InputItemType[]){
+        this.input = input;
+    }
+
+    public getTurn(){
+        return this.turn;
     }
 
     protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
@@ -86,7 +87,6 @@ export abstract class BaseAgent{
     public async loop(userInput: string){
         await printLogAndSaveDataToDB("class BaseAgent public loop() start", "info", this.sessionId, this.turn);
 
-        const turnInputStartIndex = this.input.length;
         this.createInputMessageItemAndPush(userInput);
 
         while(true){
@@ -129,7 +129,7 @@ export abstract class BaseAgent{
             }
         }
         await printLogAndSaveDataToDB("class BaseAgent public loop() end", "info", this.sessionId, this.turn);
-        await this.saveInputToDB(this.input.slice(turnInputStartIndex));
+
         this.turn += 1;
         await prisma.session.update({
             where: {id: this.sessionId},

@@ -1,5 +1,5 @@
 import type {BaseAgent} from "./DeepSeek/BaseAgent.ts";
-import type {InputItemType} from "./DeepSeek/API/responses.ts";
+import type {InputFunctionCallItem, InputFunctionCallOutputItem, InputItemType} from "./DeepSeek/API/responses.ts";
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
 import {printLogAndSaveDataToDB, logger} from "./logger.ts";
 import {prisma} from "./database/prisma-client.ts";
@@ -25,8 +25,14 @@ export class Session{
 
     }
 
-    private saveAgentInputToDB(){
-
+    private async saveInputToDB(input: InputItemType[]){
+        await prisma.agentInput.create({
+            data: {
+                input: input,
+                session_id: this.sessionId,
+                turn: this.agent.getTurn(),
+            }
+        })
     }
 
     static async createNewSession(workspacePath: string) {
@@ -68,7 +74,7 @@ export class Session{
                 }
             })
             const plannerAgent = new PlannerAgent(workspacePath, oldSession.id, oldSession.max_turn);
-            plannerAgent.input = inputHistory.flatMap(row => row.input as unknown as InputItemType[]);
+            plannerAgent.setInput(inputHistory.flatMap(row => row.input as InputItemType[]));
 
             return new Session(plannerAgent, workspacePath, oldSession.id);
         }
@@ -83,8 +89,11 @@ export class Session{
             this.sessionId,
             1);
 
+        const agentInput = this.agent.getInput();
+        const turnStartInputLength = agentInput.length;
         await this.agent.loop(userInput);
-
+        const newAgentInput = this.agent.getInput();
+        await this.saveInputToDB(newAgentInput.slice(turnStartInputLength));
         await printLogAndSaveDataToDB(
             "class Session public input() end.",
             "info",
