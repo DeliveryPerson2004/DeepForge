@@ -1,6 +1,6 @@
 import type {BaseAgent} from "./DeepSeek/BaseAgent.ts";
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
-import {logger} from "./logger.ts";
+import {logAndInsertDataToDB, logger} from "./logger.ts";
 
 
 
@@ -14,7 +14,9 @@ export class Session{
         this.workspacePath = workspacePath;
         this.sessionId = sessionId;
 
-        logger.info("new class Session()");
+        logAndInsertDataToDB("new class Session()", "info", sessionId).catch((err) => {
+            logger.error(`ModelClient DB Log Error: ${err}`);
+        });
     }
 
     async input(userInput: string) {
