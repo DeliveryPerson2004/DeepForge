@@ -2,7 +2,7 @@ import path from "node:path";
 import {fileURLToPath} from "node:url";
 import {BaseAgent} from "../../BaseAgent.ts";
 import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../API/responses.ts";
-import {logger} from "../../../logger.ts";
+import {logAndInsertDataToDB, logger} from "../../../logger.ts";
 import * as fs from "node:fs";
 import {shellExecute, type shellExecuteInput} from "../../../Tools/shell-command/shell-execute.ts";
 import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer.ts";
@@ -57,7 +57,9 @@ export class PlannerAgent extends BaseAgent {
 
         super(ModelType.DeepSeekV4Flash, instructions, "Planner", plannerFuncTools, sessionId, workspacePath);
 
-        logger.info("new class PlannerAgent()");
+        logAndInsertDataToDB("new class PlannerAgent()", "info", sessionId).catch((err) => {
+            logger.error(`ModelClient DB Log Error: ${err}`);
+        });
     }
 
     protected async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {
