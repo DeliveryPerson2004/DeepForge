@@ -14,7 +14,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 export class PlannerAgent extends BaseAgent {
     private agentName = "planner";
 
-    constructor(workspacePath: string) {
+    constructor(workspacePath: string, sessionId: number) {
         const plannerFuncTools: ToolsType = [
             {
                 type: "web_search",
@@ -55,11 +55,7 @@ export class PlannerAgent extends BaseAgent {
         const instructionsFilePath = path.join(dirname, "instructions.md");
         const instructions = fs.readFileSync(instructionsFilePath, "utf-8");
 
-        super("Planner",
-            plannerFuncTools,
-            ModelType.DeepSeekV4Flash,
-            instructions,
-            workspacePath);
+        super(ModelType.DeepSeekV4Flash, instructions, "Planner", plannerFuncTools, sessionId, workspacePath);
 
         logger.info("new class PlannerAgent()");
     }

@@ -16,23 +16,27 @@ export abstract class BaseAgent{
     private readonly functionTools: ToolsType;
     private readonly instructions: string;
     private readonly model: ModelType;
-    private modelClient = new ModelClient();
+    private modelClient: ModelClient;
     private readonly user: string;
 
+    protected sessionId: number;
     protected input: InputItemType[] = [];
     protected readonly workspacePath: string;
 
     protected constructor(
-        functionTools: ToolsType,
-        instructions: string,
         model: ModelType,
+        instructions: string,
         user: string,
+        functionTools: ToolsType,
+        sessionId: number,
         workspacePath: string,
     ) {
         this.functionTools = functionTools;
         this.instructions = instructions;
         this.model = model;
+        this.modelClient = new ModelClient(sessionId);
         this.user = user;
+        this.sessionId = sessionId;
         this.workspacePath = workspacePath;
 
         logger.info("new class BaseAgent()");

@@ -5,8 +5,11 @@ import {logger} from "../logger.ts";
 export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
     private baseURL: string = "https://api.deepseek.com";
+    private sessionId: number;
 
-    constructor() {
+    constructor(sessionId: number) {
+        this.sessionId = sessionId;
+
         logger.info("new class ModelClient()");
     }
 
