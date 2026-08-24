@@ -5,17 +5,21 @@ import {logger} from "./logger.ts";
 
 
 export class Session{
-    private agent: BaseAgent;
+    private agentList: BaseAgent[] = [];
     private workspacePath: string;
 
     constructor(workspacePath: string) {
-        this.agent = new PlannerAgent(workspacePath);
+        this.agentList.push(new PlannerAgent(workspacePath));
         this.workspacePath = workspacePath;
 
         logger.info("new class Session()");
     }
 
     async input(userInput: string) {
-        await this.agent.loop(userInput);
+        for(const agent of this.agentList){
+            if(agent instanceof PlannerAgent){
+                await agent.loop(userInput);
+            }
+        }
     }
 }
