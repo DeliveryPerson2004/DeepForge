@@ -1,5 +1,5 @@
 import type {BaseAgent} from "./DeepSeek/BaseAgent.ts";
-import type {InputFunctionCallItem, InputFunctionCallOutputItem, InputItemType} from "./DeepSeek/API/responses.ts";
+import type {InputItemType} from "./DeepSeek/API/responses.ts";
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
 import {printLogAndSaveDataToDB, logger} from "./logger.ts";
 import {prisma} from "./database/prisma-client.ts";
@@ -11,12 +11,12 @@ export class Session{
     private workspacePath: string;
     private readonly sessionId: number;
 
-    private constructor(baseAgent: BaseAgent, workspacePath: string, sessionId: number) {
+    private constructor(baseAgent: BaseAgent, workspacePath: string, sessionId: number, turn = 1) {
         this.agent = baseAgent;
         this.workspacePath = workspacePath;
         this.sessionId = sessionId;
 
-        printLogAndSaveDataToDB("new class Session()", "info", sessionId, 1).catch((err) => {
+        printLogAndSaveDataToDB("new class Session()", "info", sessionId, turn).catch((err) => {
             logger.error(`ModelClient DB Log Error: ${err}`);
         });
     }
@@ -76,7 +76,7 @@ export class Session{
             const plannerAgent = new PlannerAgent(workspacePath, oldSession.id, oldSession.max_turn);
             plannerAgent.setInput(inputHistory.flatMap(row => row.input as InputItemType[]));
 
-            return new Session(plannerAgent, workspacePath, oldSession.id);
+            return new Session(plannerAgent, workspacePath, oldSession.id, oldSession.max_turn);
         }
 
         return null;
@@ -87,7 +87,7 @@ export class Session{
             "class Session public input() start.",
             "info",
             this.sessionId,
-            1);
+            this.agent.getTurn());
 
         const agentInput = this.agent.getInput();
         const turnStartInputLength = agentInput.length;
@@ -98,6 +98,6 @@ export class Session{
             "class Session public input() end.",
             "info",
             this.sessionId,
-            1);
+            this.agent.getTurn());
     }
 }
