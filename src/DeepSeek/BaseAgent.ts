@@ -9,9 +9,6 @@ import {
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
 import {logAndInsertDataToDB, logger} from "../logger.ts";
-import type {Level} from "pino";
-import {ContentLevel} from "../../generated/prisma/enums.ts";
-import {prisma} from "../database/prisma-client.ts";
 
 
 
