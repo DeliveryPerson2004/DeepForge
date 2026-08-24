@@ -12,6 +12,11 @@ datasource db {
   provider = "sqlite"
 }
 
+enum ContentLevel {
+  warn
+  info
+}
+
 model Session{
   id Int @id@default(autoincrement())
   logs Log[]
@@ -20,7 +25,8 @@ model Session{
 
 model Log{
   id Int @id@default(autoincrement())
-  message String
+  content String
+  content_level ContentLevel
   session Session @relation(fields: [session_id], references: [id])
   session_id Int
   created_at DateTime @default(now())
