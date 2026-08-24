@@ -8,7 +8,7 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {printLogAndSaveDataToDB, logger} from "../logger.ts";
+import {printLogAndSaveToDB, logger} from "../logger.ts";
 import {prisma} from "../database/prisma-client.ts";
 
 
@@ -43,7 +43,7 @@ export abstract class BaseAgent{
         this.workspacePath = workspacePath;
         this.turn = turn;
 
-        printLogAndSaveDataToDB("new class BaseAgent()", "info", sessionId, turn).catch((err) => {
+        printLogAndSaveToDB("new class BaseAgent()", "info", sessionId, turn).catch((err) => {
             logger.error(`ModelClient DB Log Error: ${err}`);
         });
     }
@@ -85,7 +85,7 @@ export abstract class BaseAgent{
     }
 
     public async loop(userInput: string){
-        await printLogAndSaveDataToDB("class BaseAgent public loop() start", "info", this.sessionId, this.turn);
+        await printLogAndSaveToDB("class BaseAgent public loop() start", "info", this.sessionId, this.turn);
 
         this.createInputMessageItemAndPush(userInput);
 
@@ -102,17 +102,17 @@ export abstract class BaseAgent{
             for(const item of response.output){
                 this.input.push(item);
                 if(item.type == "message"){
-                    await printLogAndSaveDataToDB(item.type, "info", this.sessionId, this.turn);
+                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
                     for(const contentItem of item.content){
-                        await printLogAndSaveDataToDB("\n" + contentItem.text, "info", this.sessionId, this.turn);
+                        await printLogAndSaveToDB("\n" + contentItem.text, "info", this.sessionId, this.turn);
                     }
                 }else if(item.type == "reasoning"){
-                    await printLogAndSaveDataToDB(item.type, "info", this.sessionId, this.turn);
+                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
                     for(const contentItem of item.content){
-                        await printLogAndSaveDataToDB("\n" + contentItem.text, "info", this.sessionId, this.turn);
+                        await printLogAndSaveToDB("\n" + contentItem.text, "info", this.sessionId, this.turn);
                     }
                 }else if(item.type == "function_call"){
-                    await printLogAndSaveDataToDB(item.type, "info", this.sessionId, this.turn);
+                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
@@ -121,14 +121,14 @@ export abstract class BaseAgent{
                         hasFunctionCall = true;
                     }
                 }else if(item.type == "web_search_call"){
-                    await printLogAndSaveDataToDB(item.type, "info", this.sessionId, this.turn);
+                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
                 }
             }
             if(!hasFunctionCall){
                 break;
             }
         }
-        await printLogAndSaveDataToDB("class BaseAgent public loop() end", "info", this.sessionId, this.turn);
+        await printLogAndSaveToDB("class BaseAgent public loop() end", "info", this.sessionId, this.turn);
 
         this.turn += 1;
         await prisma.session.update({

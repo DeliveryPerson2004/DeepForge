@@ -1,7 +1,7 @@
 import type {BaseAgent} from "./DeepSeek/BaseAgent.ts";
 import type {InputItemType} from "./DeepSeek/API/responses.ts";
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
-import {printLogAndSaveDataToDB, logger} from "./logger.ts";
+import {printLogAndSaveToDB, logger} from "./logger.ts";
 import {prisma} from "./database/prisma-client.ts";
 
 
@@ -16,7 +16,7 @@ export class Session{
         this.workspacePath = workspacePath;
         this.sessionId = sessionId;
 
-        printLogAndSaveDataToDB("new class Session()", "info", sessionId, turn).catch((err) => {
+        printLogAndSaveToDB("new class Session()", "info", sessionId, turn).catch((err) => {
             logger.error(`ModelClient DB Log Error: ${err}`);
         });
     }
@@ -42,7 +42,7 @@ export class Session{
                 max_turn: 1,
             },
         });
-        await printLogAndSaveDataToDB(
+        await printLogAndSaveToDB(
             "class Session public createNewSession() start",
             "info",
             newSession.id,
@@ -50,7 +50,7 @@ export class Session{
 
         const plannerAgent = new PlannerAgent(workspacePath, newSession.id, 1);
 
-        await printLogAndSaveDataToDB(
+        await printLogAndSaveToDB(
             "class Session public createNewSession() end",
             "info",
             newSession.id,
@@ -83,7 +83,7 @@ export class Session{
     }
 
     public async input(userInput: string) {
-        await printLogAndSaveDataToDB(
+        await printLogAndSaveToDB(
             "class Session public input() start.",
             "info",
             this.sessionId,
@@ -94,7 +94,7 @@ export class Session{
         await this.agent.loop(userInput);
         const newAgentInput = this.agent.getInput();
         await this.saveInputToDB(newAgentInput.slice(turnStartInputLength));
-        await printLogAndSaveDataToDB(
+        await printLogAndSaveToDB(
             "class Session public input() end.",
             "info",
             this.sessionId,

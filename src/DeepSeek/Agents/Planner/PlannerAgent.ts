@@ -2,7 +2,7 @@ import path from "node:path";
 import {fileURLToPath} from "node:url";
 import {BaseAgent} from "../../BaseAgent.ts";
 import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../API/responses.ts";
-import {printLogAndSaveDataToDB, logger} from "../../../logger.ts";
+import {printLogAndSaveToDB, logger} from "../../../logger.ts";
 import * as fs from "node:fs";
 import {shellExecute, type shellExecuteInput} from "../../../Tools/shell-command/shell-execute.ts";
 import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer.ts";
@@ -63,7 +63,7 @@ export class PlannerAgent extends BaseAgent {
             turn
         );
 
-        printLogAndSaveDataToDB("new class PlannerAgent()", "info", sessionId, this.turn).catch((err) => {
+        printLogAndSaveToDB("new class PlannerAgent()", "info", sessionId, this.turn).catch((err) => {
             logger.error(`ModelClient DB Log Error: ${err}`);
         });
     }

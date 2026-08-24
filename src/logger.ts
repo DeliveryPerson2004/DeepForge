@@ -2,7 +2,7 @@ import pino, {type Level} from 'pino';
 import {ContentLevel} from "../generated/prisma/enums.ts";
 import {prisma} from "./database/prisma-client.ts";
 
-export async function printLogAndSaveDataToDB(
+export async function printLogAndSaveToDB(
     content: string,
     logLevel: Level,
     sessionId: number,
