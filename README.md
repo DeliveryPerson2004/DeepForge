@@ -47,7 +47,7 @@ sbx cp /home/administrator/WebstormProjects/deep-forge shell-user-workspace:/hom
 
 ### 4. 指令与代码解耦
 
-Agent 的系统指令存放在 `src/Agents/Planner/instructions.md`，通过文件读取加载，调整提示词无需改动代码。
+Agent 的系统指令存放在 `src/DeepSeek/Agents/Planner/instructions.md`，通过文件读取加载，调整提示词无需改动代码。
 
 ### 5. 日志贯穿全流程
 

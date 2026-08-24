@@ -1,11 +1,11 @@
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {BaseAgent} from "../../DeepSeek/BaseAgent.ts";
-import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../DeepSeek/API/responses.ts";
-import {logger} from "../../logger.ts";
+import {BaseAgent} from "../../BaseAgent.ts";
+import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../API/responses.ts";
+import {logger} from "../../../logger.ts";
 import * as fs from "node:fs";
-import {shellExecute, type shellExecuteInput} from "../../Tools/shell-command/shell-execute.ts";
-import {askDeveloper, type askDeveloperInput} from "../../Tools/ask-developer.ts";
+import {shellExecute, type shellExecuteInput} from "../../../Tools/shell-command/shell-execute.ts";
+import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer.ts";
 
 
 

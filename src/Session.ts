@@ -1,5 +1,5 @@
 import type {BaseAgent} from "./DeepSeek/BaseAgent.ts";
-import {PlannerAgent} from "./Agents/Planner/PlannerAgent.ts";
+import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
 import {logger} from "./logger.ts";
 
 
