@@ -24,7 +24,11 @@ export class Session{
         const newSession = await prisma.session.create({
             data: {},
         });
+        await logAndInsertDataToDB("class Session public createNewSession() start", "info", newSession.id);
+
         const plannerAgent = new PlannerAgent(workspacePath, newSession.id);
+
+        await logAndInsertDataToDB("class Session public createNewSession() end", "info", newSession.id);
         return new Session(plannerAgent, workspacePath, newSession.id);
     }
 
