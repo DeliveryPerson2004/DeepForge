@@ -8,7 +8,7 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {logAndInsertDataToDB, logger} from "../logger.ts";
+import {logAndSaveDataToDB, logger} from "../logger.ts";
 
 
 
@@ -20,7 +20,7 @@ export abstract class BaseAgent{
     private readonly user: string;
 
     protected sessionId: number;
-    protected input: InputItemType[] = [];
+    public input: InputItemType[] = [];
     protected readonly workspacePath: string;
 
     protected constructor(
@@ -39,7 +39,7 @@ export abstract class BaseAgent{
         this.sessionId = sessionId;
         this.workspacePath = workspacePath;
 
-        logAndInsertDataToDB("new class BaseAgent()", "info", sessionId).catch((err) => {
+        logAndSaveDataToDB("new class BaseAgent()", "info", sessionId).catch((err) => {
             logger.error(`ModelClient DB Log Error: ${err}`);
         });
     }
@@ -69,7 +69,7 @@ export abstract class BaseAgent{
     }
 
     public async loop(userInput: string){
-        await logAndInsertDataToDB("class BaseAgent public loop() start", "info", this.sessionId);
+        await logAndSaveDataToDB("class BaseAgent public loop() start", "info", this.sessionId);
 
         this.createInputMessageItemAndPush(userInput);
 
@@ -86,17 +86,17 @@ export abstract class BaseAgent{
             for(const item of response.output){
                 this.input.push(item);
                 if(item.type == "message"){
-                    await logAndInsertDataToDB(item.type, "info", this.sessionId);
+                    await logAndSaveDataToDB(item.type, "info", this.sessionId);
                     for(const contentItem of item.content){
-                        await logAndInsertDataToDB("\n" + contentItem.text, "info", this.sessionId);
+                        await logAndSaveDataToDB("\n" + contentItem.text, "info", this.sessionId);
                     }
                 }else if(item.type == "reasoning"){
-                    await logAndInsertDataToDB(item.type, "info", this.sessionId);
+                    await logAndSaveDataToDB(item.type, "info", this.sessionId);
                     for(const contentItem of item.content){
-                        await logAndInsertDataToDB("\n" + contentItem.text, "info", this.sessionId);
+                        await logAndSaveDataToDB("\n" + contentItem.text, "info", this.sessionId);
                     }
                 }else if(item.type == "function_call"){
-                    await logAndInsertDataToDB(item.type, "info", this.sessionId);
+                    await logAndSaveDataToDB(item.type, "info", this.sessionId);
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
@@ -105,7 +105,7 @@ export abstract class BaseAgent{
                         hasFunctionCall = true;
                     }
                 }else if(item.type == "web_search_call"){
-                    await logAndInsertDataToDB(item.type, "info", this.sessionId);
+                    await logAndSaveDataToDB(item.type, "info", this.sessionId);
                 }
             }
             if(!hasFunctionCall){
@@ -113,6 +113,6 @@ export abstract class BaseAgent{
             }
         }
 
-        await logAndInsertDataToDB("class BaseAgent public loop() end", "info", this.sessionId);
+        await logAndSaveDataToDB("class BaseAgent public loop() end", "info", this.sessionId);
     }
 }

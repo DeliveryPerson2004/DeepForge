@@ -1,6 +1,6 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
-import {logAndInsertDataToDB, logger} from "../logger.ts";
+import {logAndSaveDataToDB, logger} from "../logger.ts";
 
 
 
@@ -11,7 +11,7 @@ export class ModelClient {
 
     constructor(sessionId: number) {
         this.sessionId = sessionId;
-        logAndInsertDataToDB("new class ModelClient()", "info", this.sessionId).catch((err) => {
+        logAndSaveDataToDB("new class ModelClient()", "info", this.sessionId).catch((err) => {
             logger.error(`ModelClient DB Log Error: ${err}`);
         });
     }
