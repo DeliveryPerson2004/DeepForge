@@ -5,7 +5,9 @@
   "main": "src/main.ts",
   "scripts": {
     "dev:main": "tsc --noEmit && tsx src/main.ts",
-    "dev:test": "tsx src/test.ts"
+    "dev:test": "tsx src/test.ts",
+    "dev:db": "tsx src/database/query-db.ts",
+    "dev:delete-db": "tsx src/database/delete-db.ts"
   },
   "keywords": [],
   "author": "",

@@ -23,16 +23,16 @@ export abstract class BaseAgent{
     protected readonly workspacePath: string;
 
     protected constructor(
-        user: string,
         functionTools: ToolsType,
-        model: ModelType,
         instructions: string,
+        model: ModelType,
+        user: string,
         workspacePath: string,
     ) {
-        this.user = user;
         this.functionTools = functionTools;
-        this.model = model;
         this.instructions = instructions;
+        this.model = model;
+        this.user = user;
         this.workspacePath = workspacePath;
 
         logger.info("new class BaseAgent()");
