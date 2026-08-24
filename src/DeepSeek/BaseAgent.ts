@@ -82,21 +82,19 @@ export abstract class BaseAgent{
 
             let hasFunctionCall = false;
             for(const item of response.output){
+                this.input.push(item);
                 if(item.type == "message"){
                     logger.info(item.type);
                     for(const contentItem of item.content){
                         logger.info("\n" + contentItem.text);
                     }
-                    this.input.push(item);
                 }else if(item.type == "reasoning"){
                     logger.info(item.type);
                     for(const contentItem of item.content){
                         logger.info("\n" + contentItem.text);
                     }
-                    this.input.push(item);
                 }else if(item.type == "function_call"){
                     logger.info(item.type);
-                    this.input.push(item);
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
