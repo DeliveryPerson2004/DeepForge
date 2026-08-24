@@ -8,7 +8,10 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {logger} from "../logger.ts";
+import {logAndInsertDataToDB, logger} from "../logger.ts";
+import type {Level} from "pino";
+import {ContentLevel} from "../../generated/prisma/enums.ts";
+import {prisma} from "../database/prisma-client.ts";
 
 
 
@@ -39,7 +42,9 @@ export abstract class BaseAgent{
         this.sessionId = sessionId;
         this.workspacePath = workspacePath;
 
-        logger.info("new class BaseAgent()");
+        logAndInsertDataToDB("new class BaseAgent()", "info", sessionId).catch((err) => {
+            logger.error(`ModelClient DB Log Error: ${err}`);
+        });
     }
 
     protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
@@ -67,7 +72,7 @@ export abstract class BaseAgent{
     }
 
     async loop(userInput: string){
-        logger.info("class BaseAgent public loop() start");
+        await logAndInsertDataToDB("class BaseAgent public loop() start", "info", this.sessionId);
 
         this.createInputMessageItemAndPush(userInput);
 
@@ -84,17 +89,17 @@ export abstract class BaseAgent{
             for(const item of response.output){
                 this.input.push(item);
                 if(item.type == "message"){
-                    logger.info(item.type);
+                    await logAndInsertDataToDB(item.type, "info", this.sessionId);
                     for(const contentItem of item.content){
-                        logger.info("\n" + contentItem.text);
+                        await logAndInsertDataToDB("\n" + contentItem.text, "info", this.sessionId);
                     }
                 }else if(item.type == "reasoning"){
-                    logger.info(item.type);
+                    await logAndInsertDataToDB(item.type, "info", this.sessionId);
                     for(const contentItem of item.content){
-                        logger.info("\n" + contentItem.text);
+                        await logAndInsertDataToDB("\n" + contentItem.text, "info", this.sessionId);
                     }
                 }else if(item.type == "function_call"){
-                    logger.info(item.type);
+                    await logAndInsertDataToDB(item.type, "info", this.sessionId);
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
@@ -103,7 +108,7 @@ export abstract class BaseAgent{
                         hasFunctionCall = true;
                     }
                 }else if(item.type == "web_search_call"){
-                    logger.info(item.type);
+                    await logAndInsertDataToDB(item.type, "info", this.sessionId);
                 }
             }
             if(!hasFunctionCall){
@@ -111,6 +116,6 @@ export abstract class BaseAgent{
             }
         }
 
-        logger.info("class BaseAgent public loop() end");
+        await logAndInsertDataToDB("class BaseAgent public loop() end", "info", this.sessionId);
     }
 }
