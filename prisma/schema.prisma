@@ -20,14 +20,27 @@ enum ContentLevel {
 model Session{
   id Int @id@default(autoincrement())
   logs Log[]
+  agent_inputs AgentInput[]
+  max_turn Int
+  workspace_path String
   created_at DateTime @default(now())
 }
 
 model Log{
   id Int @id@default(autoincrement())
+  turn Int
   content String
   content_level ContentLevel
   session Session @relation(fields: [session_id], references: [id])
   session_id Int
+  created_at DateTime @default(now())
+}
+
+model AgentInput{
+  id Int @id@default(autoincrement())
+  input Json
+  session Session @relation(fields: [session_id], references: [id])
+  session_id Int
+  turn Int
   created_at DateTime @default(now())
 }

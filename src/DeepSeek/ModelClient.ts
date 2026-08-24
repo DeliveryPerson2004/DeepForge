@@ -1,6 +1,6 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
-import {logAndSaveDataToDB, logger} from "../logger.ts";
+import {printLogAndSaveDataToDB, logger} from "../logger.ts";
 
 
 
@@ -8,10 +8,12 @@ export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
     private baseURL: string = "https://api.deepseek.com";
     private readonly sessionId: number;
+    private readonly turn: number;
 
-    constructor(sessionId: number) {
+    constructor(sessionId: number, turn: number) {
         this.sessionId = sessionId;
-        logAndSaveDataToDB("new class ModelClient()", "info", this.sessionId).catch((err) => {
+        this.turn = turn;
+        printLogAndSaveDataToDB("new class ModelClient()", "info", this.sessionId, this.turn).catch((err) => {
             logger.error(`ModelClient DB Log Error: ${err}`);
         });
     }

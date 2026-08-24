@@ -1,6 +1,6 @@
 import type {BaseAgent} from "./DeepSeek/BaseAgent.ts";
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
-import {logAndSaveDataToDB, logger} from "./logger.ts";
+import {printLogAndSaveDataToDB, logger} from "./logger.ts";
 import {prisma} from "./database/prisma-client.ts";
 
 
@@ -15,9 +15,13 @@ export class Session{
         this.workspacePath = workspacePath;
         this.sessionId = sessionId;
 
-        logAndSaveDataToDB("new class Session()", "info", sessionId).catch((err) => {
+        printLogAndSaveDataToDB("new class Session()", "info", sessionId, 1).catch((err) => {
             logger.error(`ModelClient DB Log Error: ${err}`);
         });
+    }
+
+    private logHistory(){
+
     }
 
     private saveAgentInputToDB(){
@@ -26,21 +30,55 @@ export class Session{
 
     static async createNewSession(workspacePath: string) {
         const newSession = await prisma.session.create({
-            data: {},
+            data: {
+                workspace_path: workspacePath,
+                max_turn: 1,
+            },
         });
-        await logAndSaveDataToDB("class Session public createNewSession() start", "info", newSession.id);
+        await printLogAndSaveDataToDB(
+            "class Session public createNewSession() start",
+            "info",
+            newSession.id,
+            1);
 
-        const plannerAgent = new PlannerAgent(workspacePath, newSession.id);
+        const plannerAgent = new PlannerAgent(workspacePath, newSession.id, 1);
 
-        await logAndSaveDataToDB("class Session public createNewSession() end", "info", newSession.id);
+        await printLogAndSaveDataToDB(
+            "class Session public createNewSession() end",
+            "info",
+            newSession.id,
+            1);
         return new Session(plannerAgent, workspacePath, newSession.id);
     }
 
+    static async resumeSession(workspacePath: string, sessionId: number){
+        const oldSession = await prisma.session.findUnique({
+            where: {
+                id: sessionId,
+            }
+        })
+        if(oldSession != null){
+            const plannerAgent = new PlannerAgent(workspacePath, oldSession.id, oldSession.max_turn);
+
+            // return new Session()
+        }
+
+        return null;
+    }
+
     public async input(userInput: string) {
-        await logAndSaveDataToDB("class Session public input() start.", "info", this.sessionId);
+        await printLogAndSaveDataToDB(
+            "class Session public input() start.",
+            "info",
+            this.sessionId,
+            1);
 
         await this.agent.loop(userInput);
 
-        await logAndSaveDataToDB("class Session public input() end.", "info", this.sessionId);
+        await printLogAndSaveDataToDB(
+            "class Session public input() end.",
+            "info",
+            this.sessionId,
+            1);
     }
 }
