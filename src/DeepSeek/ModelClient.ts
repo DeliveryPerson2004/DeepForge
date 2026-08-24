@@ -16,7 +16,7 @@ export class ModelClient {
         });
     }
 
-    async requestResponsesAPI(
+    public async requestResponsesAPI(
         model: ModelType,
         input: InputType,
         instructions: string,

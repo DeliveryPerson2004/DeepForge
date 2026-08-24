@@ -68,7 +68,7 @@ export abstract class BaseAgent{
         this.input.push(inputMessageItem);
     }
 
-    async loop(userInput: string){
+    public async loop(userInput: string){
         await logAndInsertDataToDB("class BaseAgent public loop() start", "info", this.sessionId);
 
         this.createInputMessageItemAndPush(userInput);
