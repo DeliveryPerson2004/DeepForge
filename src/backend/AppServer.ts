@@ -8,6 +8,12 @@ export class AppServer {
     private session: Session | null = null;
     private modelProvider: string | null = null;
 
+    public setModelProvider(modelProvider: string){
+        this.modelProvider = modelProvider;
+
+        return true;
+    }
+
     private async checkModelConnect(){
         if(this.modelProvider === null){
             logger.error("model provider is null");
@@ -50,12 +56,6 @@ export class AppServer {
             logger.error(`${modelProvider} client is wrong`);
             return false;
         }
-    }
-
-    public setModelProvider(modelProvider: string){
-        this.modelProvider = modelProvider;
-
-        return true;
     }
 
     public async checkEnvironment(){
