@@ -1,8 +1,8 @@
 import express, { type Express, type Request, type Response } from 'express';
-import {UserServer} from "./UserServer.ts";
+import {AppServer} from "./AppServer.ts";
 
 const app: Express = express();
-const userClient = new UserServer();
+const userClient = new AppServer();
 const port = 30000;
 
 app.use(express.json());
