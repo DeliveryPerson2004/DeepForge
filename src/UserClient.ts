@@ -52,7 +52,6 @@ export class UserClient {
         let isSucceed: boolean;
         isSucceed = await this.checkModelConnect();
 
-        logger.info("environment is ready");
         return isSucceed;
     }
 
