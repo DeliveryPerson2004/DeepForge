@@ -26,9 +26,9 @@ app.get('/environment-is-ready', async (req: Request, res: Response) => {
 app.post('/model-provider', async (req: Request, res: Response) => {
     const modelProvider: string = req.body.modelProvider;
 
-    userClient.setModelProvider(modelProvider);
+    const isSuccess = userClient.setModelProvider(modelProvider);
 
-    res.send(true);
+    res.send(isSuccess);
 });
 
 app.listen(port, () => {

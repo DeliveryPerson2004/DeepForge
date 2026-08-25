@@ -10,6 +10,8 @@ export class UserClient {
 
     public setModelProvider(modelProvider: string){
         this.modelProvider = modelProvider;
+
+        return true;
     }
 
     private async checkModelConnect(){
