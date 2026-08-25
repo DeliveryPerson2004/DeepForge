@@ -17,7 +17,7 @@ app.get('/session-list', async (req: Request, res: Response) => {
     res.send(sessionList);
 });
 
-app.post('/environment', async (req: Request, res: Response) => {
+app.post('/environment-is-ready', async (req: Request, res: Response) => {
     const modelProvider: string = req.body.modelProvider;
 
     const isReady = await userClient.checkEnvironment(modelProvider);
