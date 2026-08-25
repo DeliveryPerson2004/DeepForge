@@ -70,7 +70,7 @@ export class UserServer {
     }
 
     public async createNewSession(workspacePath: string){
-        this.session = await Session.createNewSession(workspacePath);
+        this.session = await Session.createSession(workspacePath);
     }
 
     public async resumeSession(workspacePath: string, sessionId: number){

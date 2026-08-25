@@ -57,7 +57,7 @@ export class Session{
         })
     }
 
-    static async createNewSession(workspacePath: string) {
+    static async createSession(workspacePath: string) {
         const newSession = await prisma.session.create({
             data: {
                 workspace_path: workspacePath,
