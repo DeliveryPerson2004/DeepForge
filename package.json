@@ -2,10 +2,10 @@
   "name": "deep-forge",
   "version": "1.0.0",
   "description": "",
-  "main": "src/main.ts",
+  "main": "src/frontend/main.tsx",
   "scripts": {
-    "start": "tsx src/main.ts",
-    "dev:main": "sh src/init-prisma.sh && tsc --noEmit && tsx src/main.ts",
+    "start": "tsx src/frontend/main.tsx",
+    "dev:main": "sh src/init-prisma.sh && tsc --noEmit && tsx src/frontend/main.tsx",
     "dev:test": "tsx test/*.ts"
   },
   "keywords": [],
@@ -23,15 +23,18 @@
     "@prisma/adapter-better-sqlite3": "^7.9.1",
     "@prisma/client": "^7.9.1",
     "dotenv": "^17.4.2",
+    "ink": "^7.1.1",
     "pino": "^10.3.1",
     "pino-pretty": "^13.1.3",
     "prisma": "^7.9.1",
+    "react": "^19.2.8",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
-    "@types/node": "^26.2.0"
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18"
   },
   "homepage": "https://github.com/DeliveryPerson2004/DeepForge"
 }
