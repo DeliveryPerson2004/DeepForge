@@ -5,14 +5,8 @@ import {logger} from "./logger.ts";
 
 
 export class UserClient {
-    private readonly modelProvider: string;
-
-    constructor(modelProvider: string) {
-        this.modelProvider = modelProvider.toUpperCase();
-    }
-
-    private async checkModelConnect(){
-        const modelProvider = this.modelProvider;
+    private async checkModelConnect(provider: string){
+        const modelProvider = provider.toUpperCase();
         if(modelProvider === "DEEPSEEK"){
             const API_KEY = process.env.DEEPSEEK_API_KEY;
             if(API_KEY === undefined){
@@ -43,14 +37,14 @@ export class UserClient {
 
             return false;
         }else{
-            logger.error(`${this.modelProvider} client is wrong`);
+            logger.error(`${modelProvider} client is wrong`);
             return false;
         }
     }
 
-    public async checkEnvironment(){
+    public async checkEnvironment(modelProvider: string){
         let isSucceed: boolean;
-        isSucceed = await this.checkModelConnect();
+        isSucceed = await this.checkModelConnect(modelProvider);
 
         return isSucceed;
     }
