@@ -1,4 +1,3 @@
-import {Session} from "./Session.ts";
 import {UserClient} from "./UserClient.ts";
 import {logger} from "./logger.ts";
 
