@@ -44,6 +44,7 @@ export class UserServer {
                 }
             }
 
+            logger.error("model provider is wrong");
             return false;
         }else{
             logger.error(`${modelProvider} client is wrong`);
