@@ -48,16 +48,15 @@ export abstract class BaseAgent{
         });
     }
 
-    public getInput(){
-        return this.input;
-    }
-
-    public setInput(input: InputItemType[]){
-        this.input = input;
-    }
-
-    public getTurn(){
-        return this.turn;
+    private async createInputMessageItemAndPush(userInput: string) {
+        const inputMessageItem: InputMessageItem = {
+            type: "message",
+            role: "user",
+            content: userInput,
+        };
+        await printLogAndSaveToDB(inputMessageItem.type, "info", this.sessionId, this.turn);
+        await printLogAndSaveToDB(inputMessageItem.content, "info", this.sessionId, this.turn);
+        this.input.push(inputMessageItem);
     }
 
     protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
@@ -74,15 +73,16 @@ export abstract class BaseAgent{
         this.input.push(functionCallOutputItem);
     }
 
-    private async createInputMessageItemAndPush(userInput: string) {
-        const inputMessageItem: InputMessageItem = {
-            type: "message",
-            role: "user",
-            content: userInput,
-        };
-        await printLogAndSaveToDB(inputMessageItem.type, "info", this.sessionId, this.turn);
-        await printLogAndSaveToDB(inputMessageItem.content, "info", this.sessionId, this.turn);
-        this.input.push(inputMessageItem);
+    public getInput(){
+        return this.input;
+    }
+
+    public setInput(input: InputItemType[]){
+        this.input = input;
+    }
+
+    public getTurn(){
+        return this.turn;
     }
 
     public async loop(userInput: string){
