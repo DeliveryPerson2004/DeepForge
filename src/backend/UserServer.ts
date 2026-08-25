@@ -13,6 +13,7 @@ export class UserServer {
             logger.error("model provider is null");
             return false;
         }
+
         const modelProvider = this.modelProvider.toUpperCase();
         if(modelProvider === "DEEPSEEK"){
             const API_KEY = process.env.DEEPSEEK_API_KEY;
@@ -38,6 +39,7 @@ export class UserServer {
             for(const dataItem of responseJSONed.data){
                 const modelProvider: string = dataItem.owned_by.toUpperCase();
                 if(modelProvider === "DEEPSEEK"){
+                    logger.info("model provider is DeepSeek");
                     return true;
                 }
             }
