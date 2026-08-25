@@ -1,11 +1,11 @@
 import path from "node:path";
 import {fileURLToPath} from "node:url";
-import {BaseAgent} from "../../DeepSeek/BaseAgent.ts";
-import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../DeepSeek/API/responses.ts";
-import {logger} from "../../logger.ts";
+import {BaseAgent} from "../../BaseAgent.ts";
+import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../API/responses.ts";
+import {printLogAndSaveToDB, logger} from "../../../logger.ts";
 import * as fs from "node:fs";
-import {shellExecute, type shellExecuteInput} from "../../Tools/shell-command/shell-execute.ts";
-import {askDeveloper, type askDeveloperInput} from "../../Tools/ask-developer.ts";
+import {shellExecute, type shellExecuteInput} from "../../../Tools/shell-command/shell-execute.ts";
+import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer.ts";
 
 
 
@@ -14,7 +14,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 export class PlannerAgent extends BaseAgent {
     private agentName = "planner";
 
-    constructor(workspacePath: string) {
+    constructor(workspacePath: string, sessionId: number, turn: number) {
         const plannerFuncTools: ToolsType = [
             {
                 type: "web_search",
@@ -55,13 +55,17 @@ export class PlannerAgent extends BaseAgent {
         const instructionsFilePath = path.join(dirname, "instructions.md");
         const instructions = fs.readFileSync(instructionsFilePath, "utf-8");
 
-        super("Planner",
-            plannerFuncTools,
+        super(
             ModelType.DeepSeekV4Flash,
-            instructions,
-            workspacePath);
+            instructions, "Planner",
+            plannerFuncTools, sessionId,
+            workspacePath,
+            turn
+        );
 
-        logger.info("new class PlannerAgent()");
+        printLogAndSaveToDB("new class PlannerAgent()", "info", sessionId, this.turn).catch((err) => {
+            logger.error(`ModelClient DB Log Error: ${err}`);
+        });
     }
 
     protected async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {

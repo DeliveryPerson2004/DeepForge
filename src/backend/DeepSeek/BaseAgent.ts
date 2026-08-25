@@ -8,7 +8,8 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {logger} from "../logger.ts";
+import {printLogAndSaveToDB, logger} from "../logger.ts";
+import {prisma} from "../database/prisma-client.ts";
 
 
 
@@ -16,26 +17,47 @@ export abstract class BaseAgent{
     private readonly functionTools: ToolsType;
     private readonly instructions: string;
     private readonly model: ModelType;
-    private modelClient = new ModelClient();
+    private modelClient: ModelClient;
     private readonly user: string;
+    protected turn: number;
 
+    protected sessionId: number;
     protected input: InputItemType[] = [];
     protected readonly workspacePath: string;
 
     protected constructor(
-        user: string,
-        functionTools: ToolsType,
         model: ModelType,
         instructions: string,
+        user: string,
+        functionTools: ToolsType,
+        sessionId: number,
         workspacePath: string,
+        turn: number,
     ) {
-        this.user = user;
         this.functionTools = functionTools;
-        this.model = model;
         this.instructions = instructions;
+        this.model = model;
+        this.modelClient = new ModelClient(sessionId, turn);
+        this.user = user;
+        this.sessionId = sessionId;
         this.workspacePath = workspacePath;
+        this.turn = turn;
 
-        logger.info("new class BaseAgent()");
+        printLogAndSaveToDB("new class BaseAgent()", "info", sessionId, turn).catch((err) => {
+            logger.error(`ModelClient DB Log Error: ${err}`);
+        });
+    }
+
+    public getInput(){
+        return this.input;
+    }
+
+    public setInput(input: InputItemType[]){
+        this.input = input;
+    }
+
+    public getTurn(){
+        return this.turn;
     }
 
     protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
@@ -52,20 +74,21 @@ export abstract class BaseAgent{
         this.input.push(functionCallOutputItem);
     }
 
-    private createInputMessageItemAndPush(userInput: string){
+    private async createInputMessageItemAndPush(userInput: string) {
         const inputMessageItem: InputMessageItem = {
             type: "message",
             role: "user",
             content: userInput,
         };
-
+        await printLogAndSaveToDB(inputMessageItem.type, "info", this.sessionId, this.turn);
+        await printLogAndSaveToDB(inputMessageItem.content, "info", this.sessionId, this.turn);
         this.input.push(inputMessageItem);
     }
 
-    async loop(userInput: string){
-        logger.info("class BaseAgent public loop() start");
+    public async loop(userInput: string){
+        await printLogAndSaveToDB("class BaseAgent public loop() start", "info", this.sessionId, this.turn);
 
-        this.createInputMessageItemAndPush(userInput);
+        await this.createInputMessageItemAndPush(userInput);
 
         while(true){
             const response: ResponseSchema = await this.modelClient.requestResponsesAPI(
@@ -78,21 +101,19 @@ export abstract class BaseAgent{
 
             let hasFunctionCall = false;
             for(const item of response.output){
+                this.input.push(item);
                 if(item.type == "message"){
-                    logger.info(item.type);
+                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
                     for(const contentItem of item.content){
-                        logger.info("\n" + contentItem.text);
+                        await printLogAndSaveToDB("\n" + contentItem.text, "info", this.sessionId, this.turn);
                     }
-                    this.input.push(item);
                 }else if(item.type == "reasoning"){
-                    logger.info(item.type);
+                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
                     for(const contentItem of item.content){
-                        logger.info("\n" + contentItem.text);
+                        await printLogAndSaveToDB("\n" + contentItem.text, "info", this.sessionId, this.turn);
                     }
-                    this.input.push(item);
                 }else if(item.type == "function_call"){
-                    logger.info(item.type);
-                    this.input.push(item);
+                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
@@ -101,14 +122,19 @@ export abstract class BaseAgent{
                         hasFunctionCall = true;
                     }
                 }else if(item.type == "web_search_call"){
-                    logger.info(item.type);
+                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
                 }
             }
             if(!hasFunctionCall){
                 break;
             }
         }
+        await printLogAndSaveToDB("class BaseAgent public loop() end", "info", this.sessionId, this.turn);
 
-        logger.info("class BaseAgent public loop() end");
+        this.turn += 1;
+        await prisma.session.update({
+            where: {id: this.sessionId},
+            data: {max_turn: this.turn},
+        });
     }
 }

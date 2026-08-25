@@ -3,20 +3,20 @@ export enum ModelType{
     DeepSeekV4Pro = "deepseek-v4-pro",
 }
 
-export interface InputMessageItem{
+export type InputMessageItem = {
     type: "message",
     role: "user" | "assistant" | "system",
     content: string,
 }
 
-export interface InputFunctionCallItem{
+export type InputFunctionCallItem = {
     type: "function_call",
     call_id: string,
     name: string,
     arguments: string,
 }
 
-export interface InputFunctionCallOutputItem{
+export type InputFunctionCallOutputItem = {
     type: "function_call_output",
     call_id: string,
     name: string,
@@ -24,20 +24,20 @@ export interface InputFunctionCallOutputItem{
     output: string,
 }
 
-interface InputCustomToolCallItem{
+type InputCustomToolCallItem = {
 
 }
 
-interface InputCustomToolCallOutputItem{
+type InputCustomToolCallOutputItem = {
 
 }
 
-interface InputReasoningItem{
+type InputReasoningItem = {
     type: "reasoning",
     content: string,
 }
 
-interface InputWebSearchCallItem{
+type InputWebSearchCallItem = {
 
 }
 

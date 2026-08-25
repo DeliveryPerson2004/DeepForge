@@ -1,16 +1,24 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
-import {logger} from "../logger.ts";
+import {printLogAndSaveToDB, logger} from "../logger.ts";
+
+
 
 export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
     private baseURL: string = "https://api.deepseek.com";
+    private readonly sessionId: number;
+    private readonly turn: number;
 
-    constructor() {
-        logger.info("new class ModelClient()");
+    constructor(sessionId: number, turn: number) {
+        this.sessionId = sessionId;
+        this.turn = turn;
+        printLogAndSaveToDB("new class ModelClient()", "info", this.sessionId, this.turn).catch((err) => {
+            logger.error(`ModelClient DB Log Error: ${err}`);
+        });
     }
 
-    async requestResponsesAPI(
+    public async requestResponsesAPI(
         model: ModelType,
         input: InputType,
         instructions: string,
@@ -28,7 +36,7 @@ export class ModelClient {
         }
         const requestBodyString = JSON.stringify(requestBody);
 
-        const responses = await fetch(
+        const response = await fetch(
             `${this.baseURL}${endPoint}`,
             {
                 method: "POST",
@@ -41,6 +49,6 @@ export class ModelClient {
             }
         );
 
-        return await responses.json();
+        return await response.json();
     }
 }

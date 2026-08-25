@@ -11,7 +11,7 @@
 
 ModelClient 是"使用模型的一个入口"，是整个项目中唯一接触网络细节的类：
 
-- 持有 provider 的 `baseURL`（`https://api.deepseek.com`）与 `DEEPSEEK_API_KEY`（读取自 `.env`）
+- 持有 provider 的 `baseURL`（`https://api.deepseek.com`）与 `DEEPSEEK_API_KEY`（读取自 `../../../.env`）
 - 对外暴露 `requestResponsesAPI()` 方法，封装 `/responses` endpoint 的完整调用流程
 - 上层（BaseAgent）只依赖该方法，无需关心 URL、鉴权头、序列化等实现细节
 
