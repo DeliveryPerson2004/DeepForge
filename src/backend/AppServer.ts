@@ -5,7 +5,7 @@ import {logger} from "./logger.ts";
 
 
 export class AppServer {
-    private session: Session | null = null;
+    // private session: Session | null = null;
     private modelProvider: string | null = null;
 
     public setModelProvider(modelProvider: string){
@@ -72,13 +72,13 @@ export class AppServer {
     }
 
     public async createNewSession(workspacePath: string){
-        this.session = await Session.createSession(workspacePath);
+        return await Session.createSession(workspacePath);
     }
 
-    public async resumeSession(workspacePath: string, sessionId: number){
-        const session = await Session.resumeSession(workspacePath, sessionId);
+    public async resumeSession(sessionId: number){
+        const session = await Session.resumeSession(sessionId);
         if(session != null){
-            this.session = session;
+            return session;
         }
     }
 }
