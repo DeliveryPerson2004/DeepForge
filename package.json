@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/main.ts",
   "scripts": {
+    "start": "tsx src/main.ts",
     "dev:main": "sh init-prisma.sh && tsc --noEmit && tsx src/main.ts",
     "dev:test": "tsx src/test.ts",
     "dev:db": "tsx src/database/query-db.ts",
@@ -33,5 +34,6 @@
   "devDependencies": {
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.2.0"
-  }
+  },
+  "homepage": "https://github.com/DeliveryPerson2004/DeepForge"
 }
