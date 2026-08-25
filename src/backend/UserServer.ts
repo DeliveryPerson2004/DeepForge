@@ -8,12 +8,6 @@ export class UserServer {
     private session!: Session;
     private modelProvider!: string;
 
-    public setModelProvider(modelProvider: string){
-        this.modelProvider = modelProvider;
-
-        return true;
-    }
-
     private async checkModelConnect(){
         const modelProvider = this.modelProvider.toUpperCase();
         if(modelProvider === "DEEPSEEK"){
@@ -49,6 +43,12 @@ export class UserServer {
             logger.error(`${modelProvider} client is wrong`);
             return false;
         }
+    }
+
+    public setModelProvider(modelProvider: string){
+        this.modelProvider = modelProvider;
+
+        return true;
     }
 
     public async checkEnvironment(){
