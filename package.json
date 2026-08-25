@@ -4,10 +4,10 @@
   "description": "",
   "main": "src/frontend/main.tsx",
   "scripts": {
-    "start": "tsx src/frontend/main.tsx",
-    "dev:main": "sh init-prisma.sh && tsc --noEmit && tsx src/frontend/main.tsx",
+    "dev:frontend:main": "tsx src/frontend/main.tsx",
     "dev:backend:main": "tsc --noEmit && tsx src/backend/main.ts",
-    "dev:test": "tsx test/*.ts"
+    "dev:test": "pnpm run dev:test:app",
+    "dev:test:app": "tsx test/app/*.ts"
   },
   "keywords": [],
   "author": "",
