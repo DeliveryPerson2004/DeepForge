@@ -59,8 +59,10 @@ export class AppServer {
     }
 
     public async checkEnvironment(){
-        let isSucceed: boolean;
-        isSucceed = await this.checkModelConnect();
+        let isSucceed: boolean = false;
+        if(await this.checkModelConnect()){
+            isSucceed = true;
+        }
 
         return isSucceed;
     }
