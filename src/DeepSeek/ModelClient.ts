@@ -36,7 +36,7 @@ export class ModelClient {
         }
         const requestBodyString = JSON.stringify(requestBody);
 
-        const responses = await fetch(
+        const response = await fetch(
             `${this.baseURL}${endPoint}`,
             {
                 method: "POST",
@@ -49,6 +49,6 @@ export class ModelClient {
             }
         );
 
-        return await responses.json();
+        return await response.json();
     }
 }
