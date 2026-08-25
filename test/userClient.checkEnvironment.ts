@@ -1,5 +1,5 @@
-import {UserClient} from "../src/UserClient.ts";
-import {logger} from "../src/logger.ts";
+import {UserClient} from "../src/backend/UserClient.ts";
+import {logger} from "../src/backend/logger.ts";
 
 
 

@@ -9,7 +9,7 @@ import {
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
 import {logger, printLogAndSaveToDB} from "./logger.ts";
 import {prisma} from "./database/prisma-client.ts";
-import {ContentLevel} from "../generated/prisma/enums.ts";
+import {ContentLevel} from "../../generated/prisma/enums.ts";
 
 
 export class Session{

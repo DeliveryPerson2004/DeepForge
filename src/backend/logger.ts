@@ -1,5 +1,5 @@
 import pino, {type Level} from 'pino';
-import {ContentLevel} from "../generated/prisma/enums.ts";
+import {ContentLevel} from "../../generated/prisma/enums.ts";
 import {prisma} from "./database/prisma-client.ts";
 
 export async function printLogAndSaveToDB(

@@ -22,7 +22,7 @@ shell 命令的执行**不会直接接触宿主机**，而是运行在 **Docker 
 
 - `sbx` 为每个沙箱提供独立的 microVM（独立文件系统、网络与 Docker daemon），agent 的 shell 命令全部在沙箱内完成
 - **针对注入的防护**：即使模型被诱导执行恶意命令，影响范围也被限制在沙箱内，宿主开发机不受影响
-- 运行环境与 agent 开发分离：宿主只负责 agent 代码的开发，`src/scripts/sandbox-init.sh` 负责初始化沙箱运行环境
+- 运行环境与 agent 开发分离：宿主只负责 agent 代码的开发，`src/backend/scripts/sandbox-init.sh` 负责初始化沙箱运行环境
 
 ```
 宿主机（agent 开发）
@@ -43,15 +43,15 @@ sbx cp /home/administrator/WebstormProjects/deep-forge shell-user-workspace:/hom
 
 ### 3. 编译期强类型数据契约
 
-请求体 / 响应体类型定义于 `src/DeepSeek/API/responses.ts`，直接从 DeepSeek API 文档翻译而来，编译期强类型、无运行时校验。开发者只需对照 API 文档即可开发，无需参考其他文件。
+请求体 / 响应体类型定义于 `src/backend/DeepSeek/API/responses.ts`，直接从 DeepSeek API 文档翻译而来，编译期强类型、无运行时校验。开发者只需对照 API 文档即可开发，无需参考其他文件。
 
 ### 4. 指令与代码解耦
 
-Agent 的系统指令存放在 `src/DeepSeek/Agents/Planner/instructions.md`，通过文件读取加载，调整提示词无需改动代码。
+Agent 的系统指令存放在 `src/backend/DeepSeek/Agents/Planner/instructions.md`，通过文件读取加载，调整提示词无需改动代码。
 
 ### 5. 日志贯穿全流程
 
-基于 pino + pino-pretty 的统一日志（`src/logger.ts`），agent 实例化、对话循环、工具调用与结果均有记录，便于追踪整个对话与工具执行过程。
+基于 pino + pino-pretty 的统一日志（`src/backend/logger.ts`），agent 实例化、对话循环、工具调用与结果均有记录，便于追踪整个对话与工具执行过程。
 
 ## 关键架构设计思想
 
@@ -88,7 +88,7 @@ function_call → requestFunctionCall() 按名称分发到对应工具
 
 ### 单一 provider 强绑的取舍
 
-模型与 model-provider 天然强绑定（不同 provider 的 API 格式截然不同），且 API 文档即最佳公开资料——因此项目围绕 DeepSeek 单一 provider 开发：类型契约、client 与 agent 字段与文档一一对应，实现简单、便于维护。代价是更换 provider 可能需要重构。详见 [src/README.md](src/README.md)。
+模型与 model-provider 天然强绑定（不同 provider 的 API 格式截然不同），且 API 文档即最佳公开资料——因此项目围绕 DeepSeek 单一 provider 开发：类型契约、client 与 agent 字段与文档一一对应，实现简单、便于维护。代价是更换 provider 可能需要重构。详见 [src/README.md](src/backend/README.md)。
 
 ### 开发环境与运行环境分离
 
@@ -118,8 +118,8 @@ pnpm dev:test
 
 | 文档 | 定位 |
 | ---- | ---- |
-| [src/README.md](src/README.md) | 技术细节：技术选型、分层架构、与 provider 耦合原因 |
-| [src/DeepSeek/README.md](src/DeepSeek/README.md) | ModelClient、BaseAgent 实现与设计说明 |
-| [src/Tools/README.md](src/Tools/README.md) | 工具调用链路与工具实现说明 |
-| [src/Tools/shell-command/README.md](src/Tools/shell-command/README.md) | shell 命令工具（shell-execute / ls / pwd）实现细节 |
-| [src/DeepSeek/API/responses.ts](src/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义 |
+| [src/README.md](src/backend/README.md) | 技术细节：技术选型、分层架构、与 provider 耦合原因 |
+| [src/DeepSeek/README.md](src/backend/DeepSeek/README.md) | ModelClient、BaseAgent 实现与设计说明 |
+| [src/Tools/README.md](src/backend/Tools/README.md) | 工具调用链路与工具实现说明 |
+| [src/Tools/shell-command/README.md](src/backend/Tools/shell-command/README.md) | shell 命令工具（shell-execute / ls / pwd）实现细节 |
+| [src/DeepSeek/API/responses.ts](src/backend/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义 |
