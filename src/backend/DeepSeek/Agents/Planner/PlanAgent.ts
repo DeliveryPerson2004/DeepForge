@@ -11,8 +11,8 @@ import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export class PlannerAgent extends BaseAgent {
-    private agentName = "planner";
+export class PlanAgent extends BaseAgent {
+    private agentName = "plan agent";
 
     constructor(workspacePath: string, sessionId: number, turn: number) {
         const plannerFuncTools: ToolsType = [

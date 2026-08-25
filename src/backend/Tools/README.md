@@ -39,7 +39,7 @@ function_call_output 输入项并追加进消息上下文
 
 ## 工具注册与分发
 
-- **注册**：具体 Agent（`PlannerAgent`）通过 `ToolsType` 声明工具列表，`function` 类工具在 `parameters` 中以 JSON Schema 声明参数形态，与 `responses.ts` 类型契约一一对应
+- **注册**：具体 Agent（`PlanAgent`）通过 `ToolsType` 声明工具列表，`function` 类工具在 `parameters` 中以 JSON Schema 声明参数形态，与 `responses.ts` 类型契约一一对应
 - **分发**：`requestFunctionCall()` 按 `inputFunctionCallItem.name` 分发到对应工具，`arguments`（JSON 字符串）反序列化为工具入参（如 `shellExecuteInput` / `askDeveloperInput`）
 - **回填**：工具执行完成后由 `createFunctionCallOutputItemAndPush()` 构造 `function_call_output` 输入项，使模型在下一轮推理中可见执行结果
 

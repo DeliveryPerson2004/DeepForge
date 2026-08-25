@@ -36,7 +36,7 @@ JSON.stringify 序列化    ← 类型契约保证字段形态（编译期）
 
 ### 职责
 
-BaseAgent 是通用 Agent 基类，为具体 Agent（如 `PlannerAgent`）提供对话能力：
+BaseAgent 是通用 Agent 基类，为具体 Agent（如 `PlanAgent`）提供对话能力：
 
 - 通过构造函数接收 `user`、`funcTools`、`model`、`instructions` 完成定制
 - 内部持有一个 `ModelClient` 实例和消息上下文 `input`（数组，累积全部历史消息）

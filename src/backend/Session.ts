@@ -6,7 +6,7 @@ import {
     type RequestBody,
     type ResponseSchema
 } from "./DeepSeek/API/responses.ts";
-import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
+import {PlanAgent} from "./DeepSeek/Agents/Planner/PlanAgent.ts";
 import {logger, printLogAndSaveToDB} from "./logger.ts";
 import {prisma} from "./prisma-client.ts";
 import {ContentLevel} from "../../generated/prisma/enums.ts";
@@ -71,7 +71,7 @@ export class Session{
             newSession.id,
             1);
 
-        const plannerAgent = new PlannerAgent(workspacePath, newSession.id, 1);
+        const plannerAgent = new PlanAgent(workspacePath, newSession.id, 1);
 
         await printLogAndSaveToDB(
             "class Session public createNewSession() end",
@@ -97,7 +97,7 @@ export class Session{
                     turn: "asc",
                 }
             })
-            const plannerAgent = new PlannerAgent(workspacePath, oldSession.id, oldSession.max_turn);
+            const plannerAgent = new PlanAgent(workspacePath, oldSession.id, oldSession.max_turn);
             plannerAgent.setInput(inputHistory.flatMap(row => row.input as InputItemType[]));
 
             const session = new Session(plannerAgent, workspacePath, oldSession.id, oldSession.max_turn);
