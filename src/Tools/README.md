@@ -45,4 +45,4 @@ function_call_output 输入项并追加进消息上下文
 
 ## 与沙箱运行环境的关系
 
-shell 命令工具的目标运行环境是 Docker Sandbox（`sbx`）提供的隔离沙箱，由 `src/sandbox-init.sh` 初始化：宿主机只负责 agent 开发，`sbx cp` 将项目同步进沙箱机器（`shell-user-workspace`），shell 命令在沙箱内执行，防止注入影响宿主机。当前 `shellExecute()` 以本地 `exec` 实现，并先行通过 sudo 正则拦截（`\bsudo\b`，大小写不敏感）做第一道防护。
+shell 命令工具的目标运行环境是 Docker Sandbox（`sbx`）提供的隔离沙箱，由 `../scripts/sandbox-init.sh` 初始化：宿主机只负责 agent 开发，`sbx cp` 将项目同步进沙箱机器（`shell-user-workspace`），shell 命令在沙箱内执行，防止注入影响宿主机。当前 `shellExecute()` 以本地 `exec` 实现，并先行通过 sudo 正则拦截（`\bsudo\b`，大小写不敏感）做第一道防护。
