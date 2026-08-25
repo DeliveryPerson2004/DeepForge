@@ -17,12 +17,18 @@ app.get('/session-list', async (req: Request, res: Response) => {
     res.send(sessionList);
 });
 
-app.post('/environment-is-ready', async (req: Request, res: Response) => {
-    const modelProvider: string = req.body.modelProvider;
-
-    const isReady = await userClient.checkEnvironment(modelProvider);
+app.get('/environment-is-ready', async (req: Request, res: Response) => {
+    const isReady = await userClient.checkEnvironment();
 
     res.send(isReady);
+});
+
+app.post('/model-provider', async (req: Request, res: Response) => {
+    const modelProvider: string = req.body.modelProvider;
+
+    userClient.setModelProvider(modelProvider);
+
+    res.send(true);
 });
 
 app.listen(port, () => {

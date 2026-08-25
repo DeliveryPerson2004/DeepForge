@@ -5,8 +5,15 @@ import {logger} from "./logger.ts";
 
 
 export class UserClient {
-    private async checkModelConnect(provider: string){
-        const modelProvider = provider.toUpperCase();
+    private session!: Session;
+    private modelProvider!: string;
+
+    public setModelProvider(modelProvider: string){
+        this.modelProvider = modelProvider;
+    }
+
+    private async checkModelConnect(){
+        const modelProvider = this.modelProvider.toUpperCase();
         if(modelProvider === "DEEPSEEK"){
             const API_KEY = process.env.DEEPSEEK_API_KEY;
             if(API_KEY === undefined){
@@ -42,9 +49,9 @@ export class UserClient {
         }
     }
 
-    public async checkEnvironment(modelProvider: string){
+    public async checkEnvironment(){
         let isSucceed: boolean;
-        isSucceed = await this.checkModelConnect(modelProvider);
+        isSucceed = await this.checkModelConnect();
 
         return isSucceed;
     }
@@ -54,10 +61,13 @@ export class UserClient {
     }
 
     public async createNewSession(workspacePath: string){
-        return await Session.createNewSession(workspacePath);
+        this.session = await Session.createNewSession(workspacePath);
     }
 
     public async resumeSession(workspacePath: string, sessionId: number){
-        return await Session.resumeSession(workspacePath, sessionId);
+        const session = await Session.resumeSession(workspacePath, sessionId);
+        if(session != null){
+            this.session = session;
+        }
     }
 }
