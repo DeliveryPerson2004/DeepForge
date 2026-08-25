@@ -5,10 +5,14 @@ import {logger} from "./logger.ts";
 
 
 export class UserServer {
-    private session!: Session;
-    private modelProvider!: string;
+    private session: Session | null = null;
+    private modelProvider: string | null = null;
 
     private async checkModelConnect(){
+        if(this.modelProvider === null){
+            logger.error("model provider is null");
+            return false;
+        }
         const modelProvider = this.modelProvider.toUpperCase();
         if(modelProvider === "DEEPSEEK"){
             const API_KEY = process.env.DEEPSEEK_API_KEY;
