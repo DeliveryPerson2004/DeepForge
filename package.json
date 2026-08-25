@@ -5,7 +5,7 @@
   "main": "src/frontend/main.tsx",
   "scripts": {
     "start": "tsx src/frontend/main.tsx",
-    "dev:main": "sh src/backend/scripts/init-prisma.sh && tsc --noEmit && tsx src/frontend/main.tsx",
+    "dev:main": "sh init-prisma.sh && tsc --noEmit && tsx src/frontend/main.tsx",
     "dev:test": "tsx test/*.ts"
   },
   "keywords": [],

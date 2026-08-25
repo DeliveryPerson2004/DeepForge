@@ -22,7 +22,7 @@ shell 命令的执行**不会直接接触宿主机**，而是运行在 **Docker 
 
 - `sbx` 为每个沙箱提供独立的 microVM（独立文件系统、网络与 Docker daemon），agent 的 shell 命令全部在沙箱内完成
 - **针对注入的防护**：即使模型被诱导执行恶意命令，影响范围也被限制在沙箱内，宿主开发机不受影响
-- 运行环境与 agent 开发分离：宿主只负责 agent 代码的开发，`src/backend/scripts/sandbox-init.sh` 负责初始化沙箱运行环境
+- 运行环境与 agent 开发分离：宿主只负责 agent 代码的开发，`src/backend/sandbox-init.sh` 负责初始化沙箱运行环境
 
 ```
 宿主机（agent 开发）
