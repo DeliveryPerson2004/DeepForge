@@ -3,6 +3,7 @@ import type {InputItemType} from "./DeepSeek/API/responses.ts";
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
 import {printLogAndSaveToDB, logger} from "./logger.ts";
 import {prisma} from "./database/prisma-client.ts";
+import {ContentLevel} from "../generated/prisma/enums.ts";
 
 
 
@@ -21,8 +22,23 @@ export class Session{
         });
     }
 
-    private logHistory(){
+    private async logHistory(){
+        const logs = await prisma.log.findMany({
+            where: {
+                session_id: this.sessionId,
+            },
+            orderBy: {
+                created_at: "asc",
+            },
+        });
 
+        for (const log of logs) {
+            if (log.content_level === ContentLevel.info) {
+                logger.info(log.content);
+            } else if (log.content_level === ContentLevel.warn) {
+                logger.warn(log.content);
+            }
+        }
     }
 
     private async saveInputToDB(input: InputItemType[]){
@@ -64,6 +80,7 @@ export class Session{
                 id: sessionId,
             }
         })
+
         if(oldSession != null){
             const inputHistory = await prisma.agentInput.findMany({
                 where: {
@@ -76,7 +93,11 @@ export class Session{
             const plannerAgent = new PlannerAgent(workspacePath, oldSession.id, oldSession.max_turn);
             plannerAgent.setInput(inputHistory.flatMap(row => row.input as InputItemType[]));
 
-            return new Session(plannerAgent, workspacePath, oldSession.id, oldSession.max_turn);
+            const session = new Session(plannerAgent, workspacePath, oldSession.id, oldSession.max_turn);
+
+            await session.logHistory();
+
+            return session;
         }
 
         return null;

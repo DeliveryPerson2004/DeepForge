@@ -74,20 +74,21 @@ export abstract class BaseAgent{
         this.input.push(functionCallOutputItem);
     }
 
-    private createInputMessageItemAndPush(userInput: string){
+    private async createInputMessageItemAndPush(userInput: string) {
         const inputMessageItem: InputMessageItem = {
             type: "message",
             role: "user",
             content: userInput,
         };
-
+        await printLogAndSaveToDB(inputMessageItem.type, "info", this.sessionId, this.turn);
+        await printLogAndSaveToDB(inputMessageItem.content, "info", this.sessionId, this.turn);
         this.input.push(inputMessageItem);
     }
 
     public async loop(userInput: string){
         await printLogAndSaveToDB("class BaseAgent public loop() start", "info", this.sessionId, this.turn);
 
-        this.createInputMessageItemAndPush(userInput);
+        await this.createInputMessageItemAndPush(userInput);
 
         while(true){
             const response: ResponseSchema = await this.modelClient.requestResponsesAPI(
