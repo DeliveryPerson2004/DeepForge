@@ -6,8 +6,7 @@
   "scripts": {
     "dev:frontend:main": "tsx src/frontend/main.tsx",
     "dev:backend:main": "tsc --noEmit && tsx src/backend/main.ts",
-    "dev:test": "pnpm run dev:test:app",
-    "dev:test:app": "tsx test/app/*.ts"
+    "dev:test": "pnpm run dev:test:app"
   },
   "keywords": [],
   "author": "",
