@@ -4,7 +4,7 @@ import {logger} from "./logger.ts";
 
 
 
-export class UserClient {
+export class UserServer {
     private session!: Session;
     private modelProvider!: string;
 
