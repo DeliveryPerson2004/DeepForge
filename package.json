@@ -6,7 +6,7 @@
   "scripts": {
     "start": "tsx src/main.ts",
     "dev:main": "sh src/init-prisma.sh && tsc --noEmit && tsx src/main.ts",
-    "dev:test": "tsx test/test.ts"
+    "dev:test": "tsx test/*.ts"
   },
   "keywords": [],
   "author": "",
