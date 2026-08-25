@@ -1,6 +1,7 @@
 -- CreateTable
 CREATE TABLE "Session" (
     "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "session_name" TEXT NOT NULL,
     "max_turn" INTEGER NOT NULL,
     "workspace_path" TEXT NOT NULL,
     "created_at" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
