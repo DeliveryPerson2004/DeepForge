@@ -8,7 +8,7 @@ import {
 } from "./DeepSeek/API/responses.ts";
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
 import {logger, printLogAndSaveToDB} from "./logger.ts";
-import {prisma} from "./database/prisma-client.ts";
+import {prisma} from "./prisma-client.ts";
 import {ContentLevel} from "../../generated/prisma/enums.ts";
 
 

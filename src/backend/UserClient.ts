@@ -1,4 +1,4 @@
-import {prisma} from "./database/prisma-client.ts";
+import {prisma} from "./prisma-client.ts";
 import {Session} from "./Session.ts";
 import {logger} from "./logger.ts";
 

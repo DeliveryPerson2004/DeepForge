@@ -9,7 +9,7 @@ import {
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
 import {printLogAndSaveToDB, logger} from "../logger.ts";
-import {prisma} from "../database/prisma-client.ts";
+import {prisma} from "../prisma-client.ts";
 
 
 
