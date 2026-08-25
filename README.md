@@ -58,7 +58,7 @@ Agent 的系统指令存放在 `src/backend/DeepSeek/Agents/Planner/instructions
 ### 分层依赖，自上而下
 
 ```
-main.ts → Session
+src/frontend/main.tsx → Session
   └── PlannerAgent (Agents 层)
         ├── BaseAgent (Agent 基类：多轮对话循环 + 工具分发契约)
         │     └── ModelClient (网络层：封装 /responses API)
@@ -94,6 +94,15 @@ function_call → requestFunctionCall() 按名称分发到对应工具
 
 借助 Docker Sandbox，agent 的 shell 执行环境与开发环境物理隔离：宿主上可以放心迭代 agent 代码，运行时通过 `sandbox-init.sh` 同步到沙箱，两边互不干扰。
 
+## 数据库说明
+
+对话会话与日志持久化在 **SQLite 单文件数据库**（`dev.db`）中，由 Prisma 管理：
+
+- `dev.db`（数据）与 `generated/prisma`（构建产物）均已在 `.gitignore` 中，**不会进入版本库**
+- clone 后执行 `init-prisma.sh` 即可重建：`prisma migrate dev` 创建 `dev.db`、应用 `prisma/migrations/` 下已提交的迁移，并自动生成 `generated/prisma` 客户端
+- 脚本幂等：数据库已存在且迁移同步时重复执行无副作用（非破坏性，不会清空数据）
+- SQLite 单文件，无需外部数据库服务；连接地址由 `.env` 中的 `DATABASE_URL` 指定
+
 ## 快速开始
 
 ```bash
@@ -102,15 +111,18 @@ pnpm install
 
 # 2. 配置环境变量
 cp .env.example .env
-# 在 .env 中填入 DEEPSEEK_API_KEY
+# 在 .env 中填入 DEEPSEEK_API_KEY 与 DATABASE_URL="file:./dev.db"
 
-# 3. 初始化 Docker Sandbox 运行环境（需已安装 sbx CLI）
-bash src/sandbox-init.sh
+# 3. 初始化数据库（首次 clone 必做；幂等，可重复执行）
+sh init-prisma.sh
 
-# 4. 运行 Agent 对话（main.ts，含类型检查）
+# 4. 初始化 Docker Sandbox 运行环境（需已安装 sbx CLI）
+bash src/backend/sandbox-init.sh
+
+# 5. 运行 Agent 对话（含数据库初始化与类型检查；步骤 3 可省略，dev:main 会自动执行）
 pnpm dev:main
 
-# 5. 运行 shell 工具测试脚本（test.ts）
+# 6. 运行 shell 工具测试脚本（test.ts）
 pnpm dev:test
 ```
 
