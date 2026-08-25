@@ -1,6 +1,6 @@
 import {prisma} from "./database/prisma-client.ts";
 
-export class Client{
+export class UserClient {
     public async getSessionList(){
         return await prisma.session.findMany();
     }

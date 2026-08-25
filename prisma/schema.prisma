@@ -19,6 +19,7 @@ enum ContentLevel {
 
 model Session{
   id Int @id@default(autoincrement())
+  session_name String
   logs Log[]
   agent_inputs AgentInput[]
   max_turn Int

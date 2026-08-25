@@ -1,16 +1,22 @@
 import type {BaseAgent} from "./DeepSeek/BaseAgent.ts";
-import type {InputItemType} from "./DeepSeek/API/responses.ts";
+import {
+    type InputItemType,
+    type InputMessageItem,
+    ModelType,
+    type RequestBody,
+    type ResponseSchema
+} from "./DeepSeek/API/responses.ts";
 import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
-import {printLogAndSaveToDB, logger} from "./logger.ts";
+import {logger, printLogAndSaveToDB} from "./logger.ts";
 import {prisma} from "./database/prisma-client.ts";
 import {ContentLevel} from "../generated/prisma/enums.ts";
-
 
 
 export class Session{
     private agent: BaseAgent;
     private workspacePath: string;
     private readonly sessionId: number;
+    private sessionName: string = "";
 
     private constructor(baseAgent: BaseAgent, workspacePath: string, sessionId: number, turn = 1) {
         this.agent = baseAgent;
@@ -56,6 +62,7 @@ export class Session{
             data: {
                 workspace_path: workspacePath,
                 max_turn: 1,
+                session_name: "会话名称未确定",
             },
         });
         await printLogAndSaveToDB(
@@ -103,6 +110,64 @@ export class Session{
         return null;
     }
 
+    public async createSessionName(input: InputItemType[], newUserInput: string){
+        const inputMessageItem: InputMessageItem = {
+            type: "message",
+            role: "user",
+            content: newUserInput,
+        }
+
+        input.push(inputMessageItem)
+        const requestBody: RequestBody = {
+            model: ModelType.DeepSeekV4Flash,
+            input: input,
+            instructions: "参考上述内容和格式化输出，生成会话名称",
+            user: "create_session_name",
+            text: {
+                format: {
+                    type: "json_schema",
+                    name: "session的名字",
+                    schema: {
+                        type: "object",
+                        properties: {
+                            sessionName: {
+                                type: "string",
+                                description: "生成的会话名称"
+                            }
+                        },
+                        required: ["sessionName"]
+                    }
+                }
+            }
+        }
+
+        const requestBodyString = JSON.stringify(requestBody);
+
+        const response = await fetch(
+            `https://api.deepseek.com/responses`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    "Authorization": `Bearer ${process.env.DEEPSEEK_API_KEY}` // 此处传入实际的 API Token
+                },
+                body: requestBodyString,
+            }
+        );
+
+        const responseJSONed: ResponseSchema = await response.json();
+        for(const item of responseJSONed.output){
+            if(item.type == "message"){
+                for(const contentItem of item.content){
+                    const output = contentItem.text;
+                    const outputJSONed = JSON.parse(output);
+                    this.sessionName = outputJSONed.sessionName;
+                }
+            }
+        }
+    }
+
     public async input(userInput: string) {
         await printLogAndSaveToDB(
             "class Session public input() start.",
@@ -112,9 +177,15 @@ export class Session{
 
         const agentInput = this.agent.getInput();
         const turnStartInputLength = agentInput.length;
+        await this.createSessionName(agentInput, userInput);
         await this.agent.loop(userInput);
         const newAgentInput = this.agent.getInput();
         await this.saveInputToDB(newAgentInput.slice(turnStartInputLength));
+        await prisma.session.update({
+            where: {id: this.sessionId},
+            data: {session_name: this.sessionName},
+        });
+
         await printLogAndSaveToDB(
             "class Session public input() end.",
             "info",
