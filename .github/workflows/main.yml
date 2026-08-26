@@ -11,9 +11,11 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: 安装 pnpm
-        uses: pnpm/setup@v2
+        uses: pnpm/setup@v1
         with:
-          version: 11.24.0
+          version: 11
+          runtime: node@22
+          cache: true
 
       - name: 查看pnpm版本
         run: pnpm --version
