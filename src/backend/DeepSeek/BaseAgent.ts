@@ -19,8 +19,8 @@ export abstract class BaseAgent{
     private readonly model: ModelType;
     private modelClient: ModelClient;
     private readonly user: string;
-    protected turn: number;
 
+    protected turn: number;
     protected sessionId: number;
     protected input: InputItemType[] = [];
     protected readonly workspacePath: string;
