@@ -27,7 +27,7 @@ export class Session{
         });
     }
 
-    private async logHistory(){
+    private async printLogHistory(){
         const logs = await prisma.log.findMany({
             where: {
                 session_id: this.sessionId,
@@ -102,7 +102,7 @@ export class Session{
 
             const session = new Session(plannerAgent, oldSession.id, oldSession.max_turn);
 
-            await session.logHistory();
+            await session.printLogHistory();
 
             return session;
         }
