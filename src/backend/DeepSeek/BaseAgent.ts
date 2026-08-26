@@ -18,17 +18,17 @@ export abstract class BaseAgent{
     private readonly instructions: string;
     private readonly model: ModelType;
     private modelClient: ModelClient;
-    private readonly name: string;
-    private readonly workspacePath: string;
     private logs: LogRecord[] = [];
 
+    protected readonly agentName: string;
+    protected readonly workspacePath: string;
     protected turn: number;
     protected input: InputItemType[] = [];
 
     protected constructor(
         model: ModelType,
         instructions: string,
-        user: string,
+        agentName: string,
         functionTools: ToolsType,
         workspacePath: string,
         turn: number,
@@ -37,7 +37,7 @@ export abstract class BaseAgent{
         this.instructions = instructions;
         this.model = model;
         this.modelClient = new ModelClient();
-        this.name = user;
+        this.agentName = agentName;
         this.workspacePath = workspacePath;
         this.turn = turn;
 
@@ -55,7 +55,7 @@ export abstract class BaseAgent{
         this.input.push(inputMessageItem);
     }
 
-    private printLogAndPushToLogs(log: string, logLevel: Level){
+    protected printLogAndPushToLogs(log: string, logLevel: Level){
         const logRecord: LogRecord = {
             content: log,
             createdAt: new Date(),
@@ -85,10 +85,6 @@ export abstract class BaseAgent{
         return this.input;
     }
 
-    public setInput(input: InputItemType[]){
-        this.input = input;
-    }
-
     public getTurn(){
         return this.turn;
     }
@@ -111,7 +107,7 @@ export abstract class BaseAgent{
                 this.input,
                 this.instructions,
                 this.functionTools,
-                this.name,
+                this.agentName,
             )
 
             let hasFunctionCall = false;
