@@ -10,10 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: 安装pnpm
-        uses: pnpm/setup@v2.0.2
-        with:
-          version: 11
+      - name: 安装 pnpm
+        uses: pnpm/setup@v2
 
       - name: 查看pnpm版本
         run: pnpm --version
