@@ -1,0 +1,41 @@
+name: test
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: 安装 pnpm
+        uses: pnpm/setup@v1
+        with:
+          version: 11
+          runtime: node@22
+          cache: true
+
+      - name: 查看pnpm版本
+        run: pnpm --version
+
+      - name: 安装依赖
+        run: pnpm install
+
+      - name: 迁移数据库
+        env:
+          DATABASE_URL: "file:./dev.db"
+        run: pnpm exec prisma migrate deploy
+
+      - name: 生成 Prisma Client
+        run: pnpm exec prisma generate
+
+      - name: 运行测试
+        env:
+          DATABASE_URL: "file:./dev.db"
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          pnpm run dev:backend:main &
+          pnpm dlx wait-on tcp:30000 -t 30000
+          pnpm run test

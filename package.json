@@ -6,7 +6,7 @@
   "scripts": {
     "dev:frontend:main": "tsx src/frontend/main.tsx",
     "dev:backend:main": "tsc --noEmit && tsx src/backend/main.ts",
-    "dev:test": "tsx test/app/backend-API.ts"
+    "test": "node --import tsx --test test/**/*.ts"
   },
   "keywords": [],
   "author": "",
