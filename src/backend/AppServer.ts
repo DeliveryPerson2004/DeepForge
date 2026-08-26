@@ -1,18 +1,26 @@
-import {prisma} from "./database/prisma-client.ts";
+import {prisma} from "./prisma-client.ts";
 import {Session} from "./Session.ts";
 import {logger} from "./logger.ts";
 
 
 
-export class UserClient {
-    private readonly modelProvider: string;
+export class AppServer {
+    // private session: Session | null = null;
+    private modelProvider: string | null = null;
 
-    constructor(modelProvider: string) {
-        this.modelProvider = modelProvider.toUpperCase();
+    public setModelProvider(modelProvider: string){
+        this.modelProvider = modelProvider;
+
+        return true;
     }
 
     private async checkModelConnect(){
-        const modelProvider = this.modelProvider;
+        if(this.modelProvider === null){
+            logger.error("model provider is null");
+            return false;
+        }
+
+        const modelProvider = this.modelProvider.toUpperCase();
         if(modelProvider === "DEEPSEEK"){
             const API_KEY = process.env.DEEPSEEK_API_KEY;
             if(API_KEY === undefined){
@@ -37,20 +45,24 @@ export class UserClient {
             for(const dataItem of responseJSONed.data){
                 const modelProvider: string = dataItem.owned_by.toUpperCase();
                 if(modelProvider === "DEEPSEEK"){
+                    logger.info("model provider is DeepSeek");
                     return true;
                 }
             }
 
+            logger.error("model provider is wrong");
             return false;
         }else{
-            logger.error(`${this.modelProvider} client is wrong`);
+            logger.error(`${modelProvider} client is wrong`);
             return false;
         }
     }
 
     public async checkEnvironment(){
-        let isSucceed: boolean;
-        isSucceed = await this.checkModelConnect();
+        let isSucceed: boolean = false;
+        if(await this.checkModelConnect()){
+            isSucceed = true;
+        }
 
         return isSucceed;
     }
@@ -60,10 +72,13 @@ export class UserClient {
     }
 
     public async createNewSession(workspacePath: string){
-        return await Session.createNewSession(workspacePath);
+        return await Session.createSession(workspacePath);
     }
 
-    public async resumeSession(workspacePath: string, sessionId: number){
-        return await Session.resumeSession(workspacePath, sessionId);
+    public async resumeSession(sessionId: number){
+        const session = await Session.resumeSession(sessionId);
+        if(session != null){
+            return session;
+        }
     }
 }

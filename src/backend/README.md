@@ -52,7 +52,7 @@ main.ts
 
 ### 核心机制
 
-- **Agent 继承体系**：`PlannerAgent` 继承 `BaseAgent`，通过构造函数传入 `user`、`funcTools`、`model`、`instructions` 完成定制；`instructions` 从同级 `instructions.md` 文件读取，指令与代码解耦。
+- **Agent 继承体系**：`PlanAgent` 继承 `BaseAgent`，通过构造函数传入 `user`、`funcTools`、`model`、`instructions` 完成定制；`instructions` 从同级 `instructions.md` 文件读取，指令与代码解耦。
 - **多轮对话循环**：`BaseAgent.loop()` 将用户输入加入消息上下文后循环调用 `ModelClient.requestResponsesAPI()`，逐条处理响应中的四类输出项：
   - `message`（assistant 文本回复，追加进上下文）
   - `reasoning`（推理过程，追加进上下文）
@@ -61,7 +61,7 @@ main.ts
 
   当一轮响应中不再包含 `function_call` 时循环终止。
 - **数据契约**：请求体与响应体由 `responses.ts` 中的类型契约定义，全程编译期强类型；运行时不做校验。
-- **工具机制**：`PlannerAgent` 通过 `ToolsType` 声明两个工具——`web_search`（内建搜索）与 `execute_shell_command`（本地执行 Shell 命令）。模型发出 `function_call` 后，`requestFunctionCall()` 按 `name` 分发到 `Tools` 下的对应实现，执行结果通过 `createFunctionCallOutputItemAndPush()` 以 `function_call_output` 形式回填上下文，供模型下一轮推理使用。工具的完整调用链路见 `ToolsDME.md`。
+- **工具机制**：`PlanAgent` 通过 `ToolsType` 声明两个工具——`web_search`（内建搜索）与 `execute_shell_command`（本地执行 Shell 命令）。模型发出 `function_call` 后，`requestFunctionCall()` 按 `name` 分发到 `Tools` 下的对应实现，执行结果通过 `createFunctionCallOutputItemAndPush()` 以 `function_call_output` 形式回填上下文，供模型下一轮推理使用。工具的完整调用链路见 `ToolsDME.md`。
 
 ## 3. 与模型 provider 耦合的原因
 

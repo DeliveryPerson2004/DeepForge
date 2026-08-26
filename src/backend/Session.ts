@@ -6,9 +6,9 @@ import {
     type RequestBody,
     type ResponseSchema
 } from "./DeepSeek/API/responses.ts";
-import {PlannerAgent} from "./DeepSeek/Agents/Planner/PlannerAgent.ts";
+import {PlanAgent} from "./DeepSeek/Agents/Planner/PlanAgent.ts";
 import {logger, printLogAndSaveToDB} from "./logger.ts";
-import {prisma} from "./database/prisma-client.ts";
+import {prisma} from "./prisma-client.ts";
 import {ContentLevel} from "../../generated/prisma/enums.ts";
 
 
@@ -57,7 +57,7 @@ export class Session{
         })
     }
 
-    static async createNewSession(workspacePath: string) {
+    static async createSession(workspacePath: string) {
         const newSession = await prisma.session.create({
             data: {
                 workspace_path: workspacePath,
@@ -71,7 +71,7 @@ export class Session{
             newSession.id,
             1);
 
-        const plannerAgent = new PlannerAgent(workspacePath, newSession.id, 1);
+        const plannerAgent = new PlanAgent(workspacePath, newSession.id, 1);
 
         await printLogAndSaveToDB(
             "class Session public createNewSession() end",
@@ -81,7 +81,7 @@ export class Session{
         return new Session(plannerAgent, workspacePath, newSession.id);
     }
 
-    static async resumeSession(workspacePath: string, sessionId: number){
+    static async resumeSession(sessionId: number){
         const oldSession = await prisma.session.findUnique({
             where: {
                 id: sessionId,
@@ -97,10 +97,10 @@ export class Session{
                     turn: "asc",
                 }
             })
-            const plannerAgent = new PlannerAgent(workspacePath, oldSession.id, oldSession.max_turn);
+            const plannerAgent = new PlanAgent(oldSession.workspace_path, oldSession.id, oldSession.max_turn);
             plannerAgent.setInput(inputHistory.flatMap(row => row.input as InputItemType[]));
 
-            const session = new Session(plannerAgent, workspacePath, oldSession.id, oldSession.max_turn);
+            const session = new Session(plannerAgent, oldSession.workspace_path, oldSession.id, oldSession.max_turn);
 
             await session.logHistory();
 
