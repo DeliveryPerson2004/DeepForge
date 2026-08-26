@@ -7,15 +7,11 @@ import {printLogAndSaveToDB, logger} from "../logger.ts";
 export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
     private baseURL: string = "https://api.deepseek.com";
-    private readonly sessionId: number;
-    private readonly turn: number;
+    private logs: string[] = [];
 
-    constructor(sessionId: number, turn: number) {
-        this.sessionId = sessionId;
-        this.turn = turn;
-        printLogAndSaveToDB("new class ModelClient()", "info", this.sessionId, this.turn).catch((err) => {
-            logger.error(`ModelClient DB Log Error: ${err}`);
-        });
+    constructor() {
+        logger.info("new class ModelClient()");
+        this.logs.push("new class ModelClient()");
     }
 
     public async requestResponsesAPI(
