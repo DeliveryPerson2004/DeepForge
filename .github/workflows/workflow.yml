@@ -1,21 +1,32 @@
-name: workflow.yml
+name: test
 on:
-    push:
-        branches:
-            - main
-            - feat/prisma
+  push:
+    branches:
+      - main
+      - feat/prisma
 
 jobs:
-    test:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-            - name: Install pnpm
-              uses: pnpm/action-setup@v3
-              with:
-                  version: 9
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
 
-            - run: pnpm --version
-            - run: pnpm install
-            - run: pnpm run test
+      - name: 查看pnpm版本
+        run: pnpm --version
+
+      - name: 安装依赖
+        run: pnpm install
+
+      - name: 迁移数据库
+        run: pnpm dlx prisma migrate dev --name init
+
+      - name: 生成 Prisma Client
+        run: pnpm dlx prisma generate
+
+      - name: 运行测试
+        run: pnpm run test
