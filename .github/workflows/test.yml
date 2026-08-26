@@ -23,6 +23,8 @@ jobs:
         run: pnpm install
 
       - name: 迁移数据库
+        env:
+          DATABASE_URL: "file:./dev.db"
         run: pnpm exec prisma migrate dev --name init
 
       - name: 生成 Prisma Client
