@@ -2,6 +2,11 @@ import pino, {type Level} from 'pino';
 import {ContentLevel} from "../../generated/prisma/enums.ts";
 import {prisma} from "./prisma-client.ts";
 
+export type LogRecord = {
+    content: string;
+    createdAt: Date;
+};
+
 export async function printLogAndSaveToDB(
     content: string,
     logLevel: Level,
