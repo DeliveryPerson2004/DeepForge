@@ -8,8 +8,7 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {printLogAndSaveToDB, logger} from "../logger.ts";
-import {prisma} from "../prisma-client.ts";
+import {logger} from "../logger.ts";
 
 
 
@@ -18,44 +17,45 @@ export abstract class BaseAgent{
     private readonly instructions: string;
     private readonly model: ModelType;
     private modelClient: ModelClient;
-    private readonly user: string;
+    private readonly name: string;
 
     protected turn: number;
-    protected sessionId: number;
     protected input: InputItemType[] = [];
-    protected readonly workspacePath: string;
+    private readonly workspacePath: string;
+    private logs: string[] = [];
 
     protected constructor(
         model: ModelType,
         instructions: string,
         user: string,
         functionTools: ToolsType,
-        sessionId: number,
         workspacePath: string,
         turn: number,
     ) {
         this.functionTools = functionTools;
         this.instructions = instructions;
         this.model = model;
-        this.modelClient = new ModelClient(sessionId, turn);
-        this.user = user;
-        this.sessionId = sessionId;
+        this.modelClient = new ModelClient();
+        this.name = user;
         this.workspacePath = workspacePath;
         this.turn = turn;
 
-        printLogAndSaveToDB("new class BaseAgent()", "info", sessionId, turn).catch((err) => {
-            logger.error(`ModelClient DB Log Error: ${err}`);
-        });
+        this.printLogAndPush("new class BaseAgent()");
     }
 
-    private async createInputMessageItemAndPush(userInput: string) {
+    protected printLogAndPush(loggerString: string){
+        logger.info(loggerString);
+        this.logs.push(loggerString);
+    }
+
+    private createInputMessageItemAndPush(userInput: string) {
         const inputMessageItem: InputMessageItem = {
             type: "message",
             role: "user",
             content: userInput,
         };
-        await printLogAndSaveToDB(inputMessageItem.type, "info", this.sessionId, this.turn);
-        await printLogAndSaveToDB(inputMessageItem.content, "info", this.sessionId, this.turn);
+        this.printLogAndPush(inputMessageItem.type);
+        this.printLogAndPush(inputMessageItem.content)
         this.input.push(inputMessageItem);
     }
 
@@ -86,9 +86,9 @@ export abstract class BaseAgent{
     }
 
     public async loop(userInput: string){
-        await printLogAndSaveToDB("class BaseAgent public loop() start", "info", this.sessionId, this.turn);
+        this.printLogAndPush("class BaseAgent public loop() start");
 
-        await this.createInputMessageItemAndPush(userInput);
+        this.createInputMessageItemAndPush(userInput);
 
         while(true){
             const response: ResponseSchema = await this.modelClient.requestResponsesAPI(
@@ -96,24 +96,24 @@ export abstract class BaseAgent{
                 this.input,
                 this.instructions,
                 this.functionTools,
-                this.user,
+                this.name,
             )
 
             let hasFunctionCall = false;
             for(const item of response.output){
                 this.input.push(item);
                 if(item.type == "message"){
-                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
+                    this.printLogAndPush(item.type);
                     for(const contentItem of item.content){
-                        await printLogAndSaveToDB("\n" + contentItem.text, "info", this.sessionId, this.turn);
+                        this.printLogAndPush("\n" + contentItem.text);
                     }
                 }else if(item.type == "reasoning"){
-                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
+                    this.printLogAndPush(item.type);
                     for(const contentItem of item.content){
-                        await printLogAndSaveToDB("\n" + contentItem.text, "info", this.sessionId, this.turn);
+                        this.printLogAndPush("\n" + contentItem.text);
                     }
                 }else if(item.type == "function_call"){
-                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
+                    this.printLogAndPush(item.type);
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
@@ -122,19 +122,14 @@ export abstract class BaseAgent{
                         hasFunctionCall = true;
                     }
                 }else if(item.type == "web_search_call"){
-                    await printLogAndSaveToDB(item.type, "info", this.sessionId, this.turn);
+                    this.printLogAndPush(item.type);
                 }
             }
             if(!hasFunctionCall){
                 break;
             }
         }
-        await printLogAndSaveToDB("class BaseAgent public loop() end", "info", this.sessionId, this.turn);
 
-        this.turn += 1;
-        await prisma.session.update({
-            where: {id: this.sessionId},
-            data: {max_turn: this.turn},
-        });
+        this.printLogAndPush("class BaseAgent public loop() end");
     }
 }
