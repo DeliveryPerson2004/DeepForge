@@ -1,6 +1,6 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
-import {printLogAndSaveToDB, logger} from "../logger.ts";
+import {logger} from "../logger.ts";
 
 
 
