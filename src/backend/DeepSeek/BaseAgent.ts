@@ -8,7 +8,8 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {logger} from "../logger.ts";
+import {logger, type LogRecord} from "../logger.ts";
+import type {Level} from "pino";
 
 
 
@@ -19,7 +20,7 @@ export abstract class BaseAgent{
     private modelClient: ModelClient;
     private readonly name: string;
     private readonly workspacePath: string;
-    private logs: string[] = [];
+    private logs: LogRecord[] = [];
 
     protected turn: number;
     protected input: InputItemType[] = [];
@@ -40,7 +41,7 @@ export abstract class BaseAgent{
         this.workspacePath = workspacePath;
         this.turn = turn;
 
-        this.printLogAndPush("new class BaseAgent()");
+        this.printLogAndPushToLogs("new class BaseAgent()", "info");
     }
 
     private createInputMessageItemAndPush(userInput: string) {
@@ -49,14 +50,21 @@ export abstract class BaseAgent{
             role: "user",
             content: userInput,
         };
-        this.printLogAndPush(inputMessageItem.type);
-        this.printLogAndPush(inputMessageItem.content)
+        this.printLogAndPushToLogs(inputMessageItem.type, "info");
+        this.printLogAndPushToLogs(inputMessageItem.content, "info")
         this.input.push(inputMessageItem);
     }
 
-    protected printLogAndPush(loggerString: string){
-        logger.info(loggerString);
-        this.logs.push(loggerString);
+    private printLogAndPushToLogs(log: string, logLevel: Level){
+        const logRecord: LogRecord = {
+            content: log,
+            createdAt: new Date(),
+        }
+
+        this.logs.push(logRecord);
+
+        if(logLevel === "info")
+            logger.info(log);
     }
 
     protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
@@ -85,8 +93,12 @@ export abstract class BaseAgent{
         return this.turn;
     }
 
+    public getLogs(){
+
+    }
+
     public async loop(userInput: string){
-        this.printLogAndPush("class BaseAgent public loop() start");
+        this.printLogAndPushToLogs("class BaseAgent public loop() start", "info");
 
         this.createInputMessageItemAndPush(userInput);
 
@@ -103,17 +115,17 @@ export abstract class BaseAgent{
             for(const item of response.output){
                 this.input.push(item);
                 if(item.type == "message"){
-                    this.printLogAndPush(item.type);
+                    this.printLogAndPushToLogs(item.type, "info");
                     for(const contentItem of item.content){
-                        this.printLogAndPush("\n" + contentItem.text);
+                        this.printLogAndPushToLogs("\n" + contentItem.text, "info");
                     }
                 }else if(item.type == "reasoning"){
-                    this.printLogAndPush(item.type);
+                    this.printLogAndPushToLogs(item.type, "info");
                     for(const contentItem of item.content){
-                        this.printLogAndPush("\n" + contentItem.text);
+                        this.printLogAndPushToLogs("\n" + contentItem.text, "info");
                     }
                 }else if(item.type == "function_call"){
-                    this.printLogAndPush(item.type);
+                    this.printLogAndPushToLogs(item.type, "info");
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
@@ -122,7 +134,7 @@ export abstract class BaseAgent{
                         hasFunctionCall = true;
                     }
                 }else if(item.type == "web_search_call"){
-                    this.printLogAndPush(item.type);
+                    this.printLogAndPushToLogs(item.type, "info");
                 }
             }
             if(!hasFunctionCall){
@@ -130,6 +142,6 @@ export abstract class BaseAgent{
             }
         }
 
-        this.printLogAndPush("class BaseAgent public loop() end");
+        this.printLogAndPushToLogs("class BaseAgent public loop() end", "info");
     }
 }
