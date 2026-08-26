@@ -31,4 +31,6 @@ jobs:
         run: pnpm exec prisma generate
 
       - name: 运行测试
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: pnpm run test
