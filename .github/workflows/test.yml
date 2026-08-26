@@ -30,6 +30,9 @@ jobs:
       - name: 生成 Prisma Client
         run: pnpm exec prisma generate
 
+      - name: 启动后端
+        run: pnpm run dev:backend:main
+
       - name: 运行测试
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
