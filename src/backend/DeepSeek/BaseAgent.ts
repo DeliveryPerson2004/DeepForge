@@ -18,11 +18,11 @@ export abstract class BaseAgent{
     private readonly model: ModelType;
     private modelClient: ModelClient;
     private readonly name: string;
+    private readonly workspacePath: string;
+    private logs: string[] = [];
 
     protected turn: number;
     protected input: InputItemType[] = [];
-    private readonly workspacePath: string;
-    private logs: string[] = [];
 
     protected constructor(
         model: ModelType,
@@ -43,11 +43,6 @@ export abstract class BaseAgent{
         this.printLogAndPush("new class BaseAgent()");
     }
 
-    protected printLogAndPush(loggerString: string){
-        logger.info(loggerString);
-        this.logs.push(loggerString);
-    }
-
     private createInputMessageItemAndPush(userInput: string) {
         const inputMessageItem: InputMessageItem = {
             type: "message",
@@ -57,6 +52,11 @@ export abstract class BaseAgent{
         this.printLogAndPush(inputMessageItem.type);
         this.printLogAndPush(inputMessageItem.content)
         this.input.push(inputMessageItem);
+    }
+
+    protected printLogAndPush(loggerString: string){
+        logger.info(loggerString);
+        this.logs.push(loggerString);
     }
 
     protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
