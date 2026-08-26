@@ -12,15 +12,14 @@ import {prisma} from "./prisma-client.ts";
 import {ContentLevel} from "../../generated/prisma/enums.ts";
 
 
+
 export class Session{
     private agent: BaseAgent;
-    private workspacePath: string;
     private readonly sessionId: number;
     private sessionName: string = "";
 
-    private constructor(baseAgent: BaseAgent, workspacePath: string, sessionId: number, turn = 1) {
+    private constructor(baseAgent: BaseAgent, sessionId: number, turn = 1) {
         this.agent = baseAgent;
-        this.workspacePath = workspacePath;
         this.sessionId = sessionId;
 
         printLogAndSaveToDB("new class Session()", "info", sessionId, turn).catch((err) => {
@@ -71,14 +70,14 @@ export class Session{
             newSession.id,
             1);
 
-        const plannerAgent = new PlanAgent(workspacePath, newSession.id, 1);
+        const plannerAgent = new PlanAgent(workspacePath, newSession.id, []);
 
         await printLogAndSaveToDB(
             "class Session public createNewSession() end",
             "info",
             newSession.id,
             1);
-        return new Session(plannerAgent, workspacePath, newSession.id);
+        return new Session(plannerAgent, newSession.id);
     }
 
     static async resumeSession(sessionId: number){
@@ -97,10 +96,11 @@ export class Session{
                     turn: "asc",
                 }
             })
-            const plannerAgent = new PlanAgent(oldSession.workspace_path, oldSession.id, oldSession.max_turn);
-            plannerAgent.setInput(inputHistory.flatMap(row => row.input as InputItemType[]));
 
-            const session = new Session(plannerAgent, oldSession.workspace_path, oldSession.id, oldSession.max_turn);
+            const agentInput = inputHistory.flatMap(row => row.input as InputItemType[]);
+            const plannerAgent = new PlanAgent(oldSession.workspace_path, oldSession.max_turn, agentInput);
+
+            const session = new Session(plannerAgent, oldSession.id, oldSession.max_turn);
 
             await session.logHistory();
 
