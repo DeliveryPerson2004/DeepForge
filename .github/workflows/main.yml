@@ -12,6 +12,8 @@ jobs:
 
       - name: 安装 pnpm
         uses: pnpm/setup@v2
+        with:
+          version: 11.24.0
 
       - name: 查看pnpm版本
         run: pnpm --version
