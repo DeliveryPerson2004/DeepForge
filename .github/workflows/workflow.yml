@@ -1,0 +1,15 @@
+name: workflow.yml
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v6.1.0
+            - run: pnpm --version
+            - run: pnpm install
+            - run: pnpm run test
+
