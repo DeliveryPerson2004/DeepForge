@@ -1,8 +1,7 @@
 import path from "node:path";
 import {fileURLToPath} from "node:url";
 import {BaseAgent} from "../../BaseAgent.ts";
-import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../API/responses.ts";
-import {printLogAndSaveToDB, logger} from "../../../logger.ts";
+import {type InputFunctionCallItem, type InputItemType, ModelType, type ToolsType} from "../../API/responses.ts";
 import * as fs from "node:fs";
 import {shellExecute, type shellExecuteInput} from "../../../Tools/shell-command/shell-execute.ts";
 import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer.ts";
@@ -12,9 +11,7 @@ import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export class PlanAgent extends BaseAgent {
-    private agentName = "plan agent";
-
-    constructor(workspacePath: string, sessionId: number, turn: number) {
+    constructor(workspacePath: string, turn: number, input: InputItemType[]) {
         const plannerFuncTools: ToolsType = [
             {
                 type: "web_search",
@@ -57,15 +54,16 @@ export class PlanAgent extends BaseAgent {
 
         super(
             ModelType.DeepSeekV4Flash,
-            instructions, "Planner",
-            plannerFuncTools, sessionId,
+            instructions,
+            "Plan Agent",
+            plannerFuncTools,
             workspacePath,
-            turn
+            turn,
         );
 
-        printLogAndSaveToDB("new class PlannerAgent()", "info", sessionId, this.turn).catch((err) => {
-            logger.error(`ModelClient DB Log Error: ${err}`);
-        });
+        this.input = input;
+
+        this.printLogAndPushToLogs("new class PlannerAgent()", "info");
     }
 
     protected async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {
