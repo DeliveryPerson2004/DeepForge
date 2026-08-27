@@ -58,6 +58,7 @@ export abstract class BaseAgent{
     protected printLogAndPushToLogs(log: string, logLevel: Level){
         const logRecord: LogRecord = {
             content: log,
+            level: logLevel,
             createdAt: new Date(),
         }
 

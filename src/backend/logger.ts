@@ -3,33 +3,34 @@ import {ContentLevel} from "../../generated/prisma/enums.ts";
 import {prisma} from "./prisma-client.ts";
 
 export type LogRecord = {
-    content: string;
-    createdAt: Date;
+    content: string,
+    level: Level,
+    createdAt: Date,
 };
 
-export async function printLogAndSaveToDB(
-    content: string,
-    logLevel: Level,
-    sessionId: number,
-    turn: number
-) {
-    let contentLevel: ContentLevel = "info";
-    if (logLevel === "info") {
-        logger.info(content);
-        contentLevel = ContentLevel.info;
-    } else if (logLevel === "warn") {
-        logger.warn(content);
-        contentLevel = ContentLevel.warn;
-    }
-
-    await prisma.log.create({
-        data: {
-            content: content,
-            content_level: contentLevel,
-            session_id: sessionId,
-            turn: turn,
-        }});
-}
+// export async function printLogAndSaveToDB(
+//     content: string,
+//     logLevel: Level,
+//     sessionId: number,
+//     turn: number
+// ) {
+//     let contentLevel: ContentLevel = "info";
+//     if (logLevel === "info") {
+//         logger.info(content);
+//         contentLevel = ContentLevel.info;
+//     } else if (logLevel === "warn") {
+//         logger.warn(content);
+//         contentLevel = ContentLevel.warn;
+//     }
+//
+//     await prisma.log.create({
+//         data: {
+//             content: content,
+//             content_level: contentLevel,
+//             session_id: sessionId,
+//             turn: turn,
+//         }});
+// }
 
 export const logger = pino({
     transport: {
