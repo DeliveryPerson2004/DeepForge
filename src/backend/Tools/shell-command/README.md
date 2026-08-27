@@ -116,3 +116,15 @@ createFunctionCallOutputItemAndPush() 构造 function_call_output 回填上下�
         ▼
 下一轮请求时，模型可见工具执行结果，继续推理直至无 function_call
 ```
+
+## 测试
+
+对应测试位于根目录 `test/`，运行 `pnpm test`：
+
+| 测试文件 | 覆盖内容 |
+| ---- | ---- |
+| `test/shell-execute.test.ts` | `shellExecute()`：sudo 拦截（开头 / 嵌入 / 管道 / 大写 / 引号包裹，`csudo` 不误伤）、成功执行与输出 trim、指定 cwd、失败返回错误信息而非抛异常 |
+| `test/shell-pwd.test.ts` | `executeShellCommandPWD()`：返回指定 cwd 的绝对路径 |
+| `test/shell-ls.test.ts` | `executeShellCommandLs()`：列出目录内容，空目录返回空字符串 |
+
+测试使用 `fs.mkdtempSync` 创建临时目录并在 `after()` 中清理，不污染宿主机工作区。

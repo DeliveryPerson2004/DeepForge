@@ -122,9 +122,40 @@ bash src/backend/sandbox-init.sh
 # 5. 运行 Agent 对话（含数据库初始化与类型检查；步骤 3 可省略，dev:main 会自动执行）
 pnpm dev:main
 
-# 6. 运行 shell 工具测试脚本（test.ts）
-pnpm dev:test
+# 6. 运行测试
+pnpm test
 ```
+
+## 测试说明
+
+测试套件位于根目录 `test/`，采用 Node.js 内置测试框架（`node:test` + `node:assert`），经 tsx 直接运行 TypeScript 源码，无第三方测试依赖：
+
+```bash
+pnpm test   # 等价于 node --import tsx --test test/**/*.ts
+```
+
+前置条件：`.env` 中需配置 `DATABASE_URL`（`Session` / `AppServer` 相关测试会只读连接 `dev.db`，不会写入数据）。
+
+### 测试覆盖
+
+| 测试文件 | 覆盖内容 |
+| ---- | ---- |
+| `test/shell-execute.test.ts` | `shellExecute()`：sudo 拦截（开头 / 嵌入 / 管道 / 大写 / 引号包裹，`csudo` 不误伤）、成功执行与输出 trim、指定 cwd、失败返回错误信息而非抛异常 |
+| `test/shell-pwd.test.ts` | `executeShellCommandPWD()`：返回指定 cwd 的绝对路径 |
+| `test/shell-ls.test.ts` | `executeShellCommandLs()`：列出目录内容，空目录返回空字符串 |
+| `test/model-client.test.ts` | `ModelClient`：mock 全局 `fetch`，断言请求 URL / 请求头 / 请求体结构、响应解析、日志获取 |
+| `test/plan-agent.test.ts` | `PlanAgent`：`execute_shell_command` 分发与 `function_call_output` 回填（含失败与 sudo 拦截场景）、`ask_developer` 分发 |
+| `test/app-server.test.ts` / `test/session.test.ts` | `AppServer` / `Session`：`checkEnvironment()` 未设置 provider 时返回 false（不触发网络）、`getSessionList()` 返回数组、`resumeSession()` 对不存在的 id 返回 null |
+
+### 测试策略
+
+- 网络层（`ModelClient`）通过 `node:test` 的 `mock.method(globalThis, "fetch", ...)` 模拟请求，测试过程中不会发起真实网络请求
+- shell 工具测试使用 `fs.mkdtempSync` 创建临时目录并在 `after()` 中清理，不污染宿主机工作区
+- 数据库相关测试仅执行只读查询，不写入数据
+
+### CI
+
+PR 合并至 `main` 时，GitHub Actions（`.github/workflows/main.yml`）自动执行：`prisma migrate deploy` → `prisma generate` → `pnpm test`，并注入 `DATABASE_URL` 与 `DEEPSEEK_API_KEY` 环境变量。
 
 ## 文档导航
 
@@ -135,3 +166,4 @@ pnpm dev:test
 | [src/Tools/README.md](src/backend/Tools/README.md) | 工具调用链路与工具实现说明 |
 | [src/Tools/shell-command/README.md](src/backend/Tools/shell-command/README.md) | shell 命令工具（shell-execute / ls / pwd）实现细节 |
 | [src/DeepSeek/API/responses.ts](src/backend/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义 |
+| [test/](test/) | 测试套件：shell 工具、ModelClient、PlanAgent、AppServer / Session 测试 |
