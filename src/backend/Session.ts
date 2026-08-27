@@ -7,9 +7,10 @@ import {
     type ResponseSchema
 } from "./DeepSeek/API/responses.ts";
 import {PlanAgent} from "./DeepSeek/Agents/Planner/PlanAgent.ts";
-import {logger, printLogAndSaveToDB} from "./logger.ts";
+import {logger, type LogRecord} from "./logger.ts";
 import {prisma} from "./prisma-client.ts";
 import {ContentLevel} from "../../generated/prisma/enums.ts";
+import type {Level} from "pino";
 
 
 
@@ -17,14 +18,25 @@ export class Session{
     private agent: BaseAgent;
     private readonly sessionId: number;
     private sessionName: string = "";
+    private logs: LogRecord[] = [];
 
     private constructor(baseAgent: BaseAgent, sessionId: number, turn = 1) {
         this.agent = baseAgent;
         this.sessionId = sessionId;
 
-        printLogAndSaveToDB("new class Session()", "info", sessionId, turn).catch((err) => {
-            logger.error(`ModelClient DB Log Error: ${err}`);
-        });
+        this.printLogAndPushToLogs("new class Session()", "info");
+    }
+
+    private printLogAndPushToLogs(log: string, logLevel: Level){
+        const logRecord: LogRecord = {
+            content: log,
+            createdAt: new Date(),
+        }
+
+        this.logs.push(logRecord);
+
+        if(logLevel === "info")
+            logger.info(log);
     }
 
     private async printLogHistory(){
@@ -64,19 +76,13 @@ export class Session{
                 session_name: "会话名称未确定",
             },
         });
-        await printLogAndSaveToDB(
-            "class Session public createNewSession() start",
-            "info",
-            newSession.id,
-            1);
 
-        const plannerAgent = new PlanAgent(workspacePath, newSession.id, []);
+        logger.info("class Session public createNewSession() start");
 
-        await printLogAndSaveToDB(
-            "class Session public createNewSession() end",
-            "info",
-            newSession.id,
-            1);
+        const agentInput: InputItemType[] = [];
+        const plannerAgent = new PlanAgent(workspacePath, newSession.id, agentInput);
+
+        logger.info("class Session public createNewSession() end");
         return new Session(plannerAgent, newSession.id);
     }
 
@@ -169,11 +175,7 @@ export class Session{
     }
 
     public async input(userInput: string) {
-        await printLogAndSaveToDB(
-            "class Session public input() start.",
-            "info",
-            this.sessionId,
-            this.agent.getTurn());
+        this.printLogAndPushToLogs("class Session public input() start.", "info");
 
         const agentInput = this.agent.getInput();
         const turnStartInputLength = agentInput.length;
@@ -186,10 +188,6 @@ export class Session{
             data: {session_name: this.sessionName},
         });
 
-        await printLogAndSaveToDB(
-            "class Session public input() end.",
-            "info",
-            this.sessionId,
-            this.agent.getTurn());
+        this.printLogAndPushToLogs("class Session public input() end.", "info");
     }
 }
