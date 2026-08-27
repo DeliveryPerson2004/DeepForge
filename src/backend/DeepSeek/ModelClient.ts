@@ -1,6 +1,6 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
-import {logger, type LogRecord} from "../logger.ts";
+import {logger, type Log} from "../logger.ts";
 import type {Level} from "pino";
 
 
@@ -8,14 +8,14 @@ import type {Level} from "pino";
 export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
     private baseURL: string = "https://api.deepseek.com";
-    private logs: LogRecord[] = [];
+    private logs: Log[] = [];
 
     constructor() {
         this.printLogAndPushToLogs("new class ModelClient()", "info");
     }
 
     private printLogAndPushToLogs(log: string, logLevel: Level){
-        const logRecord: LogRecord = {
+        const logRecord: Log = {
             content: log,
             level: logLevel,
             createdAt: new Date(),

@@ -8,7 +8,7 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {logger, type LogRecord} from "../logger.ts";
+import {logger, type Log} from "../logger.ts";
 import type {Level} from "pino";
 
 
@@ -18,7 +18,7 @@ export abstract class BaseAgent{
     private readonly instructions: string;
     private readonly model: ModelType;
     private modelClient: ModelClient;
-    private logs: LogRecord[] = [];
+    private logs: Log[] = [];
 
     protected readonly agentName: string;
     protected readonly workspacePath: string;
@@ -56,7 +56,7 @@ export abstract class BaseAgent{
     }
 
     protected printLogAndPushToLogs(log: string, logLevel: Level){
-        const logRecord: LogRecord = {
+        const logRecord: Log = {
             content: log,
             level: logLevel,
             createdAt: new Date(),

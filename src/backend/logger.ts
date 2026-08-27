@@ -1,6 +1,6 @@
 import pino, {type Level} from 'pino';
 
-export type LogRecord = {
+export type Log = {
     content: string,
     level: Level,
     createdAt: Date,
