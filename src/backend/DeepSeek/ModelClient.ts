@@ -27,7 +27,9 @@ export class ModelClient {
     }
 
     public getLogs(){
-        return this.logs;
+        const logs = this.logs;
+        this.logs = [];
+        return logs;
     }
 
     public async requestResponsesAPI(
