@@ -35,7 +35,4 @@ jobs:
         env:
           DATABASE_URL: "file:./dev.db"
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: |
-          pnpm run dev:backend:main &
-          pnpm dlx wait-on tcp:30000 -t 30000
-          pnpm run test
+        run: pnpm run test
