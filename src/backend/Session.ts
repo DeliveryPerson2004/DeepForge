@@ -127,9 +127,11 @@ export class Session{
     }
 
     private async updateAndSaveDataToDB(userInput: string, agentInputBeforeLoop: InputItemType[], agentInputAfterLoop: InputItemType[]) {
-        await this.updateSessionName(userInput, agentInputAfterLoop);
-        await this.saveLogToDB();
-        await this.saveAgentInputToDB(agentInputBeforeLoop, agentInputAfterLoop);
+        await Promise.all([
+            this.updateSessionName(userInput, agentInputAfterLoop),
+            this.saveLogToDB(),
+            this.saveAgentInputToDB(agentInputBeforeLoop, agentInputAfterLoop),
+        ]);
     }
 
     private printLogAndPushToLogs(log: string, logLevel: Level){
