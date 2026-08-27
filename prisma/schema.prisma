@@ -12,36 +12,40 @@ datasource db {
   provider = "sqlite"
 }
 
-enum ContentLevel {
+enum LogLevel {
+  fatal
+  error
   warn
   info
+  debug
+  trace
+  silent
 }
 
-model Session{
-  id Int @id@default(autoincrement())
-  session_name String
-  logs Log[]
-  agent_inputs AgentInput[]
-  max_turn Int
+model Session {
+  id             Int          @id @default(autoincrement())
+  session_name   String
+  logs           Log[]
+  agent_inputs   AgentInput[]
+  max_turn       Int
   workspace_path String
-  created_at DateTime @default(now())
+  created_at     DateTime     @default(now())
 }
 
-model Log{
-  id Int @id@default(autoincrement())
-  turn Int
-  content String
-  content_level ContentLevel
-  session Session @relation(fields: [session_id], references: [id])
+model Log {
+  id         Int      @id @default(autoincrement())
+  session    Session  @relation(fields: [session_id], references: [id])
   session_id Int
-  created_at DateTime @default(now())
+  content    String
+  log_level  LogLevel
+  created_at DateTime
 }
 
-model AgentInput{
-  id Int @id@default(autoincrement())
-  input Json
-  session Session @relation(fields: [session_id], references: [id])
+model AgentInput {
+  id         Int      @id @default(autoincrement())
+  session    Session  @relation(fields: [session_id], references: [id])
   session_id Int
-  turn Int
+  turn       Int
+  input      Json
   created_at DateTime @default(now())
 }

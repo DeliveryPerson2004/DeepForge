@@ -7,120 +7,46 @@ import {
     type ResponseSchema
 } from "./DeepSeek/API/responses.ts";
 import {PlanAgent} from "./DeepSeek/Agents/Planner/PlanAgent.ts";
-import {logger, printLogAndSaveToDB} from "./logger.ts";
+import {logger, type Log} from "./logger.ts";
 import {prisma} from "./prisma-client.ts";
-import {ContentLevel} from "../../generated/prisma/enums.ts";
+import type {Level} from "pino";
+import {LogLevel} from "../../generated/prisma/enums.ts";
+
 
 
 export class Session{
     private agent: BaseAgent;
-    private workspacePath: string;
     private readonly sessionId: number;
     private sessionName: string = "";
+    private logs: Log[] = [];
 
-    private constructor(baseAgent: BaseAgent, workspacePath: string, sessionId: number, turn = 1) {
+    private constructor(baseAgent: BaseAgent, sessionId: number) {
         this.agent = baseAgent;
-        this.workspacePath = workspacePath;
         this.sessionId = sessionId;
 
-        printLogAndSaveToDB("new class Session()", "info", sessionId, turn).catch((err) => {
-            logger.error(`ModelClient DB Log Error: ${err}`);
-        });
+        this.printLogAndPushToLogs("new class Session()", "info");
     }
 
-    private async logHistory(){
-        const logs = await prisma.log.findMany({
-            where: {
-                session_id: this.sessionId,
-            },
-            orderBy: {
-                created_at: "asc",
-            },
-        });
+    private getLogs(){
+        const agentLogs = this.agent.getLogs();
+        this.logs.push(...agentLogs);
+        const sessionLogs = this.logs;
+        this.logs = [];
 
-        for (const log of logs) {
-            if (log.content_level === ContentLevel.info) {
-                logger.info(log.content);
-            } else if (log.content_level === ContentLevel.warn) {
-                logger.warn(log.content);
-            }
-        }
+        return sessionLogs;
     }
 
-    private async saveInputToDB(input: InputItemType[]){
-        await prisma.agentInput.create({
-            data: {
-                input: input,
-                session_id: this.sessionId,
-                turn: this.agent.getTurn(),
-            }
-        })
-    }
-
-    static async createSession(workspacePath: string) {
-        const newSession = await prisma.session.create({
-            data: {
-                workspace_path: workspacePath,
-                max_turn: 1,
-                session_name: "会话名称未确定",
-            },
-        });
-        await printLogAndSaveToDB(
-            "class Session public createNewSession() start",
-            "info",
-            newSession.id,
-            1);
-
-        const plannerAgent = new PlanAgent(workspacePath, newSession.id, 1);
-
-        await printLogAndSaveToDB(
-            "class Session public createNewSession() end",
-            "info",
-            newSession.id,
-            1);
-        return new Session(plannerAgent, workspacePath, newSession.id);
-    }
-
-    static async resumeSession(sessionId: number){
-        const oldSession = await prisma.session.findUnique({
-            where: {
-                id: sessionId,
-            }
-        })
-
-        if(oldSession != null){
-            const inputHistory = await prisma.agentInput.findMany({
-                where: {
-                    session_id: oldSession.id,
-                },
-                orderBy: {
-                    turn: "asc",
-                }
-            })
-            const plannerAgent = new PlanAgent(oldSession.workspace_path, oldSession.id, oldSession.max_turn);
-            plannerAgent.setInput(inputHistory.flatMap(row => row.input as InputItemType[]));
-
-            const session = new Session(plannerAgent, oldSession.workspace_path, oldSession.id, oldSession.max_turn);
-
-            await session.logHistory();
-
-            return session;
-        }
-
-        return null;
-    }
-
-    public async createSessionName(input: InputItemType[], newUserInput: string){
+    private async updateSessionName(userInput: string, agentInputAfterLoop: InputItemType[]){
         const inputMessageItem: InputMessageItem = {
             type: "message",
             role: "user",
-            content: newUserInput,
+            content: userInput,
         }
 
-        input.push(inputMessageItem)
+        agentInputAfterLoop.push(inputMessageItem)
         const requestBody: RequestBody = {
             model: ModelType.DeepSeekV4Flash,
-            input: input,
+            input: agentInputAfterLoop,
             instructions: "参考上述内容和格式化输出，生成会话名称",
             user: "create_session_name",
             text: {
@@ -166,30 +92,137 @@ export class Session{
                 }
             }
         }
-    }
 
-    public async input(userInput: string) {
-        await printLogAndSaveToDB(
-            "class Session public input() start.",
-            "info",
-            this.sessionId,
-            this.agent.getTurn());
-
-        const agentInput = this.agent.getInput();
-        const turnStartInputLength = agentInput.length;
-        await this.createSessionName(agentInput, userInput);
-        await this.agent.loop(userInput);
-        const newAgentInput = this.agent.getInput();
-        await this.saveInputToDB(newAgentInput.slice(turnStartInputLength));
         await prisma.session.update({
             where: {id: this.sessionId},
             data: {session_name: this.sessionName},
         });
+    }
 
-        await printLogAndSaveToDB(
-            "class Session public input() end.",
-            "info",
-            this.sessionId,
-            this.agent.getTurn());
+    private async saveLogToDB(){
+        const logs = this.getLogs();
+
+        const logMapped = logs.map((log) => ({
+            session_id: this.sessionId,
+            content: log.content,
+            log_level: log.level as LogLevel,
+            created_at: log.createdAt,
+        }));
+
+        await prisma.log.createMany({
+            data: logMapped,
+        })
+    }
+
+    private async saveAgentInputToDB(agentInputBeforeLoop: InputItemType[], agentInputAfterLoop: InputItemType[]){
+        const inputDelta = agentInputAfterLoop.slice(agentInputBeforeLoop.length);
+
+        await prisma.agentInput.create({
+            data: {
+                input: inputDelta,
+                session_id: this.sessionId,
+                turn: this.agent.getTurn(),
+            }
+        })
+    }
+
+    private async updateAndSaveDataToDB(userInput: string, agentInputBeforeLoop: InputItemType[], agentInputAfterLoop: InputItemType[]) {
+        await Promise.all([
+            this.updateSessionName(userInput, agentInputAfterLoop),
+            this.saveLogToDB(),
+            this.saveAgentInputToDB(agentInputBeforeLoop, agentInputAfterLoop),
+        ]);
+    }
+
+    private printLogAndPushToLogs(log: string, logLevel: Level){
+        const logRecord: Log = {
+            content: log,
+            level: logLevel,
+            createdAt: new Date(),
+        }
+
+        this.logs.push(logRecord);
+
+        if(logLevel === "info")
+            logger.info(log);
+    }
+
+    private async printLogHistory(){
+        const logs = await prisma.log.findMany({
+            where: {
+                session_id: this.sessionId,
+            },
+            orderBy: {
+                created_at: "asc",
+            },
+        });
+
+        for (const log of logs) {
+            if (log.log_level === LogLevel.info) {
+                logger.info(log.content);
+            } else if (log.log_level === LogLevel.warn) {
+                logger.warn(log.content);
+            }
+        }
+    }
+
+    static async createSession(workspacePath: string) {
+        const newSession = await prisma.session.create({
+            data: {
+                workspace_path: workspacePath,
+                max_turn: 1,
+                session_name: "会话名称未确定",
+            },
+        });
+
+        logger.info("class Session public createNewSession() start");
+
+        const agentInput: InputItemType[] = [];
+        const plannerAgent = new PlanAgent(workspacePath, newSession.id, agentInput);
+
+        logger.info("class Session public createNewSession() end");
+        return new Session(plannerAgent, newSession.id);
+    }
+
+    static async resumeSession(sessionId: number){
+        const oldSession = await prisma.session.findUnique({
+            where: {
+                id: sessionId,
+            }
+        })
+
+        if(oldSession != null){
+            const inputHistory = await prisma.agentInput.findMany({
+                where: {
+                    session_id: oldSession.id,
+                },
+                orderBy: {
+                    turn: "asc",
+                }
+            })
+
+            const agentInput = inputHistory.flatMap(row => row.input as InputItemType[]);
+            const plannerAgent = new PlanAgent(oldSession.workspace_path, oldSession.max_turn, agentInput);
+
+            const session = new Session(plannerAgent, oldSession.id);
+
+            await session.printLogHistory();
+
+            return session;
+        }
+
+        return null;
+    }
+
+    public async input(userInput: string) {
+        this.printLogAndPushToLogs("class Session public input() start.", "info");
+
+        const agentInputBeforeLoop = this.agent.getInput();
+        await this.agent.loop(userInput);
+        const agentInputAfterLoop = this.agent.getInput();
+
+        this.printLogAndPushToLogs("class Session public input() end.", "info");
+
+        await this.updateAndSaveDataToDB(userInput, agentInputBeforeLoop, agentInputAfterLoop);
     }
 }

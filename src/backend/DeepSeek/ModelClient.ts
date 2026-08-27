@@ -1,21 +1,36 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
-import {printLogAndSaveToDB, logger} from "../logger.ts";
+import {logger, type Log} from "../logger.ts";
+import type {Level} from "pino";
 
 
 
 export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
     private baseURL: string = "https://api.deepseek.com";
-    private readonly sessionId: number;
-    private readonly turn: number;
+    private logs: Log[] = [];
 
-    constructor(sessionId: number, turn: number) {
-        this.sessionId = sessionId;
-        this.turn = turn;
-        printLogAndSaveToDB("new class ModelClient()", "info", this.sessionId, this.turn).catch((err) => {
-            logger.error(`ModelClient DB Log Error: ${err}`);
-        });
+    constructor() {
+        this.printLogAndPushToLogs("new class ModelClient()", "info");
+    }
+
+    private printLogAndPushToLogs(log: string, logLevel: Level){
+        const logRecord: Log = {
+            content: log,
+            level: logLevel,
+            createdAt: new Date(),
+        }
+
+        this.logs.push(logRecord);
+
+        if(logLevel === "info")
+            logger.info(log);
+    }
+
+    public getLogs(){
+        const logs = this.logs;
+        this.logs = [];
+        return logs;
     }
 
     public async requestResponsesAPI(
