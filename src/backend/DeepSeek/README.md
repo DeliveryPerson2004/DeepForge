@@ -32,6 +32,8 @@ JSON.stringify 序列化    ← 类型契约保证字段形态（编译期）
 
 请求与响应两侧均受 `responses.ts` 类型契约约束，编译期强类型；运行时不做校验。
 
+请求 URL / 请求头 / 请求体结构与响应解析由 `test/model-client.test.ts` 覆盖：该测试通过 `mock.method(globalThis, "fetch", ...)` 模拟网络层，断言请求构造正确且不发起真实网络请求。
+
 ## BaseAgent.ts
 
 ### 职责
@@ -60,6 +62,8 @@ BaseAgent 是通用 Agent 基类，为具体 Agent（如 `PlanAgent`）提供对
 - 子类按 `inputFunctionCallItem.name` 分发到 `Tools/` 目录下的对应工具实现
 - 工具执行完成后，调用受保护的 `createFunctionCallOutputItemAndPush()` 方法，将结果构造为 `function_call_output` 输入项（`InputFunctionCallOutputItem`）追加进上下文
 - 下一轮请求时，模型即可看到工具执行结果，继续推理直至不再发出 `function_call`
+
+工具分发与 `function_call_output` 回填由 `test/plan-agent.test.ts` 覆盖：该测试以 `TestablePlanAgent` 子类暴露受保护的 `requestFunctionCall()`，验证 `execute_shell_command`（含失败与 sudo 拦截场景）与 `ask_developer` 的分发行为。
 
 ### 与 model provider 的耦合
 

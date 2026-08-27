@@ -14,13 +14,13 @@
 | Shell 执行 | node:child_process（exec） | 工具层执行命令，zsh 环境，无第三方依赖 |
 | 环境变量 | dotenv | 读取 `../../.env` 中的 `DEEPSEEK_API_KEY` |
 | 模型 API | DeepSeek `/responses` | 兼容 OpenAI Responses API 格式 |
+| 测试 | node:test + node:assert | Node 内置测试框架，经 tsx 直接运行 TS 源码，无第三方测试依赖 |
 
 ## 2. 项目架构
 
 ```
 src/
-├── main.ts                          # 程序入口：实例化 PlannerAgent 并启动对话循环
-├── test.ts                          # shellExecute 的独立测试脚本
+├── main.ts                          # 程序入口：启动 Express 服务（端口 30000）
 ├── logger.ts                        # pino 日志封装（横切所有类与工具）
 ├── Agents/
 │   └── Planner/
@@ -74,3 +74,14 @@ main.ts
 3. **耦合换取实现简洁**。`BaseAgent` 直接以 provider 的请求字段形态组织代码，便于调用 `ModelClient` 的方法，省去了中间抽象层。代价是：如需更换模型 provider，可能需要对类型契约、client 与 agent 字段做重构。
 
 综上，当前阶段以"快速可用、贴合文档"为优先，接受与单一 provider 的耦合，为未来的抽象与扩展预留了空间。
+
+## 4. 测试
+
+测试套件位于根目录 `test/`，运行 `pnpm test`（等价 `node --import tsx --test test/**/*.ts`）。覆盖：
+
+- **shell 工具**（`test/shell-execute.test.ts`、`test/shell-pwd.test.ts`、`test/shell-ls.test.ts`）：sudo 拦截边界、命令执行 / 失败、cwd 指定、输出 trim
+- **ModelClient**（`test/model-client.test.ts`）：mock 全局 `fetch`，断言请求 URL / 请求头 / 请求体结构与响应解析
+- **PlanAgent**（`test/plan-agent.test.ts`）：工具分发与 `function_call_output` 上下文回填
+- **AppServer / Session**（`test/app-server.test.ts`、`test/session.test.ts`）：只读 DB 查询，不写入数据
+
+测试细节见根目录 [README.md](../../README.md) 的「测试说明」章节。
