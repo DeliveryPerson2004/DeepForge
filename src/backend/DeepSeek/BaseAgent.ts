@@ -93,7 +93,10 @@ export abstract class BaseAgent{
         const modelLogs = this.modelClient.getLogs();
         this.logs.push(...modelLogs);
 
-        return this.logs;
+        const logs = this.logs;
+        this.logs = [];
+
+        return logs;
     }
 
     public async loop(userInput: string){
