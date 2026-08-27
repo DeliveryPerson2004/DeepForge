@@ -5,7 +5,6 @@ import {logger} from "./logger.ts";
 
 
 export class AppServer {
-    // private session: Session | null = null;
     private modelProvider: string | null = null;
 
     public setModelProvider(modelProvider: string){
