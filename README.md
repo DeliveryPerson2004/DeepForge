@@ -10,11 +10,11 @@
 
 当前 Planner Agent 注册了三个工具：
 
-| 工具 | 说明 |
-| ---- | ---- |
-| `web_search` | DeepSeek 内建 web 搜索 |
-| `execute_shell_command` | 在指定工作目录中执行 shell 命令（bash 环境，禁用 sudo） |
-| `ask_developer` | 有疑问时主动向开发者提问（如用户要求调用一个并不存在的工具） |
+| 工具                    | 说明                                                         |
+|-------------------------|--------------------------------------------------------------|
+| `web_search`            | DeepSeek 内建 web 搜索                                       |
+| `execute_shell_command` | 在指定工作目录中执行 shell 命令（bash 环境，禁用 sudo）      |
+| `ask_developer`         | 有疑问时主动向开发者提问（如用户要求调用一个并不存在的工具） |
 
 ### 2. shell 命令在 Docker Sandbox 中隔离执行
 
@@ -138,13 +138,13 @@ pnpm test   # 等价于 node --import tsx --test test/**/*.ts
 
 ### 测试覆盖
 
-| 测试文件 | 覆盖内容 |
-| ---- | ---- |
-| `test/shell-execute.test.ts` | `shellExecute()`：sudo 拦截（开头 / 嵌入 / 管道 / 大写 / 引号包裹，`csudo` 不误伤）、成功执行与输出 trim、指定 cwd、失败返回错误信息而非抛异常 |
-| `test/shell-pwd.test.ts` | `executeShellCommandPWD()`：返回指定 cwd 的绝对路径 |
-| `test/shell-ls.test.ts` | `executeShellCommandLs()`：列出目录内容，空目录返回空字符串 |
-| `test/model-client.test.ts` | `ModelClient`：mock 全局 `fetch`，断言请求 URL / 请求头 / 请求体结构、响应解析、日志获取 |
-| `test/plan-agent.test.ts` | `PlanAgent`：`execute_shell_command` 分发与 `function_call_output` 回填（含失败与 sudo 拦截场景）、`ask_developer` 分发 |
+| 测试文件                                           | 覆盖内容                                                                                                                                                         |
+|----------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `test/shell-execute.test.ts`                       | `shellExecute()`：sudo 拦截（开头 / 嵌入 / 管道 / 大写 / 引号包裹，`csudo` 不误伤）、成功执行与输出 trim、指定 cwd、失败返回错误信息而非抛异常                   |
+| `test/shell-pwd.test.ts`                           | `executeShellCommandPWD()`：返回指定 cwd 的绝对路径                                                                                                              |
+| `test/shell-ls.test.ts`                            | `executeShellCommandLs()`：列出目录内容，空目录返回空字符串                                                                                                      |
+| `test/model-client.test.ts`                        | `ModelClient`：mock 全局 `fetch`，断言请求 URL / 请求头 / 请求体结构、响应解析、日志获取                                                                         |
+| `test/plan-agent.test.ts`                          | `PlanAgent`：`execute_shell_command` 分发与 `function_call_output` 回填（含失败与 sudo 拦截场景）、`ask_developer` 分发                                          |
 | `test/app-server.test.ts` / `test/session.test.ts` | `AppServer` / `Session`：`checkEnvironment()` 未设置 provider 时返回 false（不触发网络）、`getSessionList()` 返回数组、`resumeSession()` 对不存在的 id 返回 null |
 
 ### 测试策略
@@ -159,11 +159,11 @@ PR 合并至 `main` 时，GitHub Actions（`.github/workflows/main.yml`）自动
 
 ## 文档导航
 
-| 文档 | 定位 |
-| ---- | ---- |
-| [src/README.md](src/backend/README.md) | 技术细节：技术选型、分层架构、与 provider 耦合原因 |
-| [src/DeepSeek/README.md](src/backend/DeepSeek/README.md) | ModelClient、BaseAgent 实现与设计说明 |
-| [src/Tools/README.md](src/backend/Tools/README.md) | 工具调用链路与工具实现说明 |
-| [src/Tools/shell-command/README.md](src/backend/Tools/shell-command/README.md) | shell 命令工具（shell-execute / ls / pwd）实现细节 |
-| [src/DeepSeek/API/responses.ts](src/backend/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义 |
-| [test/](test/) | 测试套件：shell 工具、ModelClient、PlanAgent、AppServer / Session 测试 |
+| 文档                                                                           | 定位                                                                   |
+|--------------------------------------------------------------------------------|------------------------------------------------------------------------|
+| [src/README.md](src/backend/README.md)                                         | 技术细节：技术选型、分层架构、与 provider 耦合原因                     |
+| [src/DeepSeek/README.md](src/backend/DeepSeek/README.md)                       | ModelClient、BaseAgent 实现与设计说明                                  |
+| [src/Tools/README.md](src/backend/Tools/README.md)                             | 工具调用链路与工具实现说明                                             |
+| [src/Tools/shell-command/README.md](src/backend/Tools/shell-command/README.md) | shell 命令工具（shell-execute / ls / pwd）实现细节                     |
+| [src/DeepSeek/API/responses.ts](src/backend/DeepSeek/API/responses.ts)         | 请求 / 响应 TypeScript 类型契约定义                                    |
+| [test/](test)                                                                  | 测试套件：shell 工具、ModelClient、PlanAgent、AppServer / Session 测试 |
