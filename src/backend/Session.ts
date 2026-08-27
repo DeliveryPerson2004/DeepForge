@@ -20,7 +20,7 @@ export class Session{
     private sessionName: string = "";
     private logs: LogRecord[] = [];
 
-    private constructor(baseAgent: BaseAgent, sessionId: number, turn = 1) {
+    private constructor(baseAgent: BaseAgent, sessionId: number) {
         this.agent = baseAgent;
         this.sessionId = sessionId;
 
@@ -106,7 +106,7 @@ export class Session{
             const agentInput = inputHistory.flatMap(row => row.input as InputItemType[]);
             const plannerAgent = new PlanAgent(oldSession.workspace_path, oldSession.max_turn, agentInput);
 
-            const session = new Session(plannerAgent, oldSession.id, oldSession.max_turn);
+            const session = new Session(plannerAgent, oldSession.id);
 
             await session.printLogHistory();
 
