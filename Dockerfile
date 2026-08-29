@@ -12,13 +12,15 @@ WORKDIR /app
 
 COPY . .
 
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 RUN cp ./.env.example ./.env
 
 RUN pnpm exec prisma migrate deploy
 
 RUN pnpm exec prisma generate
+
+RUN pnpm prune --prod
 
 ENTRYPOINT ["pnpm", "run", "start"]
 
