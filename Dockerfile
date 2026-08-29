@@ -12,7 +12,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN pnpm install
+RUN pnpm install --frozen-lockfile
 
 RUN cp ./.env.example ./.env
 
@@ -20,9 +20,8 @@ RUN pnpm exec prisma migrate deploy
 
 RUN pnpm exec prisma generate
 
+RUN pnpm prune --prod
+
 ENTRYPOINT ["pnpm", "run", "start"]
 
-# docker build \
-  #  --build-arg HTTP_PROXY="http://host.docker.internal:7897" \
-  #  --build-arg HTTPS_PROXY="http://host.docker.internal:7897" \
-  #  -t gxp/deep-forge .
+# docker build --build-arg HTTP_PROXY="http://host.docker.internal:7897" --build-arg HTTPS_PROXY="http://host.docker.internal:7897" -t deliveryperson2004/deep-forge .
