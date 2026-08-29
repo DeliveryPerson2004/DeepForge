@@ -1,25 +1,23 @@
-FROM docker/sandbox-templates:shell-docker
-LABEL authors="administrator"
+FROM node:24.20.0-bookworm-slim
 
-# 1. 在 root 权限下更新系统并全局安装 pnpm
-USER root
-RUN apt-get update && apt-get upgrade -y
-RUN npm install -g pnpm
+# 接收构建参数
+ARG HTTP_PROXY
+ARG HTTPS_PROXY
+ARG http_proxy
+ARG https_proxy
 
-# 2. 切换到 agent 用户并配置绝对路径工作区
-USER agent
-WORKDIR /home/agent/deep-forge
+RUN npm install -g pnpm@11.24.0
 
-# 3. 拷贝源码
+WORKDIR /app
+
 COPY . .
 
-# 4. 注入环境变量（供 pnpm 与 prisma 构建期使用）
-ENV DATABASE_URL="file:./dev.db"
-
-# 5. 安装依赖、执行数据库迁移与生成客户端
 RUN pnpm install
+
+RUN cp ./.env.example ./.env
+
 RUN pnpm exec prisma migrate deploy
+
 RUN pnpm exec prisma generate
 
-# 6. 容器启动入口
-ENTRYPOINT ["pnpm", "run", "dev:backend:main"]
+ENTRYPOINT ["pnpm", "run", "start"]

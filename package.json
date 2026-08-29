@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/frontend/main.tsx",
   "scripts": {
-    "dev:frontend:main": "tsx src/frontend/main.tsx",
+    "start": "tsx src/backend/main.ts",
     "dev:backend:main": "tsc --noEmit && tsx src/backend/main.ts",
     "test": "node --import tsx --test test/**/*.ts"
   },
