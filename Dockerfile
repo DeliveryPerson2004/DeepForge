@@ -21,3 +21,8 @@ RUN pnpm exec prisma migrate deploy
 RUN pnpm exec prisma generate
 
 ENTRYPOINT ["pnpm", "run", "start"]
+
+# docker build \
+  #  --build-arg HTTP_PROXY="http://host.docker.internal:7897" \
+  #  --build-arg HTTPS_PROXY="http://host.docker.internal:7897" \
+  #  -t gxp/deep-forge .
