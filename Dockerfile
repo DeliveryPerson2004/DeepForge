@@ -24,7 +24,4 @@ RUN pnpm prune --prod
 
 ENTRYPOINT ["pnpm", "run", "start"]
 
-# docker build \
-  #  --build-arg HTTP_PROXY="http://host.docker.internal:7897" \
-  #  --build-arg HTTPS_PROXY="http://host.docker.internal:7897" \
-  #  -t gxp/deep-forge .
+# docker build --build-arg HTTP_PROXY="http://host.docker.internal:7897" --build-arg HTTPS_PROXY="http://host.docker.internal:7897" -t deliveryperson2004/deep-forge .
