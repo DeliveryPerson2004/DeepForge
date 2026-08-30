@@ -5,6 +5,7 @@ import {type InputFunctionCallItem, type InputItemType, ModelType, type ToolsTyp
 import * as fs from "node:fs";
 import {shellExecute, type shellExecuteInput} from "../../../Tools/shell-command/shell-execute.ts";
 import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer.ts";
+import {printLogAndReturnNewLogs} from "../../../logger.ts";
 
 
 
@@ -63,7 +64,7 @@ export class PlanAgent extends BaseAgent {
 
         this.input = input;
 
-        this.printLogAndPushToLogs("new class PlannerAgent()", "info");
+        this.logs = printLogAndReturnNewLogs(this.logs, "new class PlannerAgent()", "info");
     }
 
     protected async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {

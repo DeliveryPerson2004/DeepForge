@@ -1,7 +1,6 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
-import {logger, type Log} from "../logger.ts";
-import type {Level} from "pino";
+import {type Log, printLogAndReturnNewLogs} from "../logger.ts";
 
 
 
@@ -11,20 +10,7 @@ export class ModelClient {
     private logs: Log[] = [];
 
     constructor() {
-        this.printLogAndPushToLogs("new class ModelClient()", "info");
-    }
-
-    private printLogAndPushToLogs(log: string, logLevel: Level){
-        const logRecord: Log = {
-            content: log,
-            level: logLevel,
-            createdAt: new Date(),
-        }
-
-        this.logs.push(logRecord);
-
-        if(logLevel === "info")
-            logger.info(log);
+        this.logs = printLogAndReturnNewLogs(this.logs, "new class ModelClient()", "info");
     }
 
     public getLogs(){

@@ -8,8 +8,7 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {logger, type Log} from "../logger.ts";
-import type {Level} from "pino";
+import {type Log, printLogAndReturnNewLogs} from "../logger.ts";
 
 
 
@@ -18,7 +17,7 @@ export abstract class BaseAgent{
     private readonly instructions: string;
     private readonly model: ModelType;
     private modelClient: ModelClient;
-    private logs: Log[] = [];
+    protected logs: Log[] = [];
 
     protected readonly agentName: string;
     protected readonly workspacePath: string;
@@ -41,7 +40,7 @@ export abstract class BaseAgent{
         this.workspacePath = workspacePath;
         this.turn = turn;
 
-        this.printLogAndPushToLogs("new class BaseAgent()", "info");
+        this.logs = printLogAndReturnNewLogs(this.logs, "new class BaseAgent()", "info");
     }
 
     private createInputMessageItemAndPush(userInput: string) {
@@ -50,22 +49,9 @@ export abstract class BaseAgent{
             role: "user",
             content: userInput,
         };
-        this.printLogAndPushToLogs(inputMessageItem.type, "info");
-        this.printLogAndPushToLogs(inputMessageItem.content, "info")
+        this.logs = printLogAndReturnNewLogs(this.logs, inputMessageItem.type, "info");
+        this.logs = printLogAndReturnNewLogs(this.logs, inputMessageItem.content, "info")
         this.input.push(inputMessageItem);
-    }
-
-    protected printLogAndPushToLogs(log: string, logLevel: Level){
-        const logRecord: Log = {
-            content: log,
-            level: logLevel,
-            createdAt: new Date(),
-        }
-
-        this.logs.push(logRecord);
-
-        if(logLevel === "info")
-            logger.info(log);
     }
 
     protected abstract requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void>;
@@ -101,7 +87,7 @@ export abstract class BaseAgent{
     }
 
     public async loop(userInput: string){
-        this.printLogAndPushToLogs("class BaseAgent public loop() start", "info");
+        this.logs = printLogAndReturnNewLogs(this.logs, "class BaseAgent public loop() start", "info");
 
         this.createInputMessageItemAndPush(userInput);
 
@@ -118,17 +104,17 @@ export abstract class BaseAgent{
             for(const item of response.output){
                 this.input.push(item);
                 if(item.type == "message"){
-                    this.printLogAndPushToLogs(item.type, "info");
+                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
                     for(const contentItem of item.content){
-                        this.printLogAndPushToLogs("\n" + contentItem.text, "info");
+                        this.logs = printLogAndReturnNewLogs(this.logs, "\n" + contentItem.text, "info");
                     }
                 }else if(item.type == "reasoning"){
-                    this.printLogAndPushToLogs(item.type, "info");
+                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
                     for(const contentItem of item.content){
-                        this.printLogAndPushToLogs("\n" + contentItem.text, "info");
+                        this.logs = printLogAndReturnNewLogs(this.logs, "\n" + contentItem.text, "info");
                     }
                 }else if(item.type == "function_call"){
-                    this.printLogAndPushToLogs(item.type, "info");
+                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
@@ -137,7 +123,7 @@ export abstract class BaseAgent{
                         hasFunctionCall = true;
                     }
                 }else if(item.type == "web_search_call"){
-                    this.printLogAndPushToLogs(item.type, "info");
+                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
                 }
             }
             if(!hasFunctionCall){
@@ -145,6 +131,6 @@ export abstract class BaseAgent{
             }
         }
 
-        this.printLogAndPushToLogs("class BaseAgent public loop() end", "info");
+        this.logs = printLogAndReturnNewLogs(this.logs, "class BaseAgent public loop() end", "info");
     }
 }

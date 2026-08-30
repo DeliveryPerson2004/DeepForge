@@ -12,3 +12,18 @@ export const logger = pino({
         options: { colorize: true }
     }
 });
+
+export function printLogAndReturnNewLogs(logs: Log[], log: string, logLevel: Level){
+    const logRecord: Log = {
+        content: log,
+        level: logLevel,
+        createdAt: new Date(),
+    }
+
+    logs.push(logRecord);
+
+    if(logLevel === "info")
+        logger.info(log);
+
+    return logs;
+}
