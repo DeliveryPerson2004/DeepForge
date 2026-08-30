@@ -4,7 +4,7 @@ import {AppServer} from "./AppServer.ts";
 
 
 const app: Express = express();
-const userClient = new AppServer();
+const appServer = new AppServer();
 const port = 30000;
 
 app.use(express.json());
