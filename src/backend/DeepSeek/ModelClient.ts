@@ -1,22 +1,15 @@
 import "dotenv/config";
 import type {InputType, ModelType, RequestBody, ToolsType} from "./API/responses.ts";
-import {type Log, printLogAndReturnNewLogs} from "../logger.ts";
+import {logger} from "../logger.ts";
 
 
 
 export class ModelClient {
     private API_KEY = process.env.DEEPSEEK_API_KEY;
     private baseURL: string = "https://api.deepseek.com";
-    private logs: Log[] = [];
 
     constructor() {
-        this.logs = printLogAndReturnNewLogs(this.logs, "new class ModelClient()", "info");
-    }
-
-    public getLogs(){
-        const logs = this.logs;
-        this.logs = [];
-        return logs;
+        logger.info("new class ModelClient()");
     }
 
     public async requestResponsesAPI(
