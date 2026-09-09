@@ -126,7 +126,7 @@ export abstract class BaseAgent{
         //TODO 获取当前input的长度，用原有的input长度和现在的进行切片
         const inputDeltaAfterLoop = this.input.slice(inputLengthBeforeLoop);
 
-        insertIntoMessageTableStmt.run(this.agent_id, this.turn, JSON.stringify(inputDeltaAfterLoop));
+        insertIntoMessageTableStmt.run(this.agentId, this.turn, JSON.stringify(inputDeltaAfterLoop));
 
         logger.info("class BaseAgent public loop() end");
     }
