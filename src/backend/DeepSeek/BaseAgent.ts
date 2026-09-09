@@ -78,7 +78,6 @@ export abstract class BaseAgent{
     public async loop(userInput: string){
         logger.info("class BaseAgent public loop() start");
 
-        //TODO 获取当前input的长度
         const inputLengthBeforeLoop = this.input.length;
 
         this.createInputMessageItemAndPush(userInput);
@@ -123,7 +122,6 @@ export abstract class BaseAgent{
             }
         }
 
-        //TODO 获取当前input的长度，用原有的input长度和现在的进行切片
         const inputDeltaAfterLoop = this.input.slice(inputLengthBeforeLoop);
 
         insertIntoMessageTableStmt.run(this.agentId, this.turn, JSON.stringify(inputDeltaAfterLoop));
