@@ -19,9 +19,11 @@ sh init-prisma.sh           # 初始化数据库（幂等）
 pnpm dev:backend:main       # 启动后端（先跑 tsc --noEmit 类型检查）
 ```
 
-> 下面六节是本项目的主要 **thinking**——围绕架构与产品形态的设计取舍与方向设想，其中**部分内容尚未在代码中实现**，只是思考的记录。放在最前面，是希望你在读代码前先理解这些"为什么这么做 / 为什么不那么做"的决定：既不至于把它们误当成缺陷，也别把未落地的设想当成已实现的能力。已实现的部分，以 [src/backend/README.md](src/backend/README.md) 的说明与代码为准。
+## 方向与取舍（thinking）
 
-## 不用 SDK，才能留住每个模型自己的特色
+下面六节是本项目的主要 **thinking**——围绕架构与产品形态的设计取舍与方向设想，其中**部分内容尚未在代码中实现**，只是思考的记录。放在最前面，是希望你在读代码前先理解这些"为什么这么做 / 为什么不那么做"的决定：既不至于把它们误当成缺陷，也别把未落地的设想当成已实现的能力。已实现的部分，以 [src/backend/README.md](src/backend/README.md) 的说明与代码为准。
+
+### 不用 SDK，才能留住每个模型自己的特色
 
 初次打开本项目的读者可能好奇：为什么放着官方 SDK 不用，却自己用 `fetch` 裸调 HTTP？答案是——本项目是一个**由输出项驱动的 Agent 运行时**，而不是一个"消费一段文本"的客户端；而一个模型区别于其他模型的特色，恰好都藏在那些输出项与请求参数里。
 
@@ -33,7 +35,7 @@ pnpm dev:backend:main       # 启动后端（先跑 tsc --noEmit 类型检查）
   - 内建 `web_search` 工具、预留的 `custom_tool_call` 输入 / 输出项、`reasoning` 的 effort 档位……这些一旦改走 SDK，大多只能靠 `as any` 逃生，编译期契约当场失效。
 - 若目标只是"拿到一段文本"，SDK 是更短的路；但当你需要模型"边推理边搜、边搜边调工具、且把每一步都回填进上下文"时，SDK 替你省掉的细节恰恰是你不能丢的细节。这正是本项目选择"直连 API + 手写类型契约"、并接受与单一 provider 强绑的原因，详见 [src/backend/README.md](src/backend/README.md) 中"与模型 provider 耦合的取舍"一节。
 
-## 不引入 ORM，三张表 + 单文件 SQLite 才是项目本来的复杂度
+### 不引入 ORM，三张表 + 单文件 SQLite 才是项目本来的复杂度
 
 这句话不是否定 ORM，而是对照本项目的数据形态说的——当你的持久化只有三张表、单文件 SQLite、几条简单查询时，ORM 提供的便捷和它索取的成本会失衡。
 
@@ -47,7 +49,7 @@ pnpm dev:backend:main       # 启动后端（先跑 tsc --noEmit 类型检查）
 - 一个单文件数据库 + 三张表 + 少量 CRUD，用 `better-sqlite3` 加几条 SQL 即可完整覆盖；上述抽象里的大多数维度（多数据库、多环境迁移、关系型对象导航）在本项目中根本用不到。
 - 所以：ORM 让项目"起步快"，但数据模型稳定后，它就从便捷变成了纯维护负担——这正是 [src/backend/README.md](src/backend/README.md) 路线图第 1 条（改用 `better-sqlite3` 直接管理 `dev.db`、去掉 migrate/generate 步骤）要解决的问题，记在这里与路线图互相印证。
 
-## Agent Loop 与 model 的耦合不是缺陷，而是协议本身
+### Agent Loop 与 model 的耦合不是缺陷，而是协议本身
 
 Agent Loop 指 `BaseAgent.loop()` 那段"把用户输入追加进上下文 → 循环请求模型 → 处理输出 → 直到模型不再发 `function_call`"的驱动循环。说它与 model 耦合，是因为它消费、回填的字段与某一 provider 的请求 / 响应格式一一对应。
 
@@ -58,7 +60,7 @@ Agent Loop 指 `BaseAgent.loop()` 那段"把用户输入追加进上下文 → �
 - **关键点：耦合被圈在一条很窄的协议链上**：`BaseAgent ⇄ ModelClient ⇄ responses.ts`（`ModelClient.requestResponsesAPI()` 的形参与 `BaseAgent.loop()` 每次要带的东西一一对应）。链条之上全部是模型无关的：`Session` 管会话 / 工作目录 / 持久化，`PlanAgent` 只做工具注册与 `requestFunctionCall()` 分发，`Tools/` 层实现工具本身。真要换 provider 时，需要动的是这条链（类型契约、client、agent 请求字段）——一次范围被圈定、结果可预期的重构，而不是全架构推倒。
 - 对"为某一模型写运行时"的项目，让 Agent Loop 直接贴着模型协议，比预先支付一层通用抽象更务实。这与 [src/backend/README.md](src/backend/README.md) 中"与模型 provider 耦合的取舍"一节的判断一致。
 
-## MCP 只该用于外部服务，不该复刻一台电脑上本有的 bash
+### MCP 只该用于外部服务，不该复刻一台电脑上本有的 bash
 
 初次接触 MCP 的人容易形成一个直觉：既然 MCP 是 Agent 工具的标准协议，那我所有能力都应该包一层 MCP server。本节想厘清一个分界——**MCP 真正解决的是"工具实现不在 Agent 手里"时的标准化问题**；而像 bash 这种"每台电脑上都有"的普适能力，直接注册成本地 function 工具就有同等效果。结论不是"不用 MCP"，而是把它用在本质所在之处：把**外部服务 API** 标准化成"一组工具"。
 
@@ -69,7 +71,7 @@ Agent Loop 指 `BaseAgent.loop()` 那段"把用户输入追加进上下文 → �
 
 落到本项目上：当前所有工具都是本地 function 分发，正是"能本地就不上协议"的体现；而 [src/backend/README.md](src/backend/README.md) 路线图第 2 条"实现 MCP client 模块"的价值边界也因此清晰——它不是为了给 Agent 的每个能力都加一层 server，而是让 Agent 能以标准协议接入**外部工具与数据源（第三方服务）**。MCP 应聚焦于"一组外部工具 + 标准化调用"，而不是复刻一个运行在每台电脑上的 bash。
 
-## 工具安全：Sandbox 替代逐条 approve，最小权限决定工具归属
+### 工具安全：Sandbox 替代逐条 approve，最小权限决定工具归属
 
 许多 Agent 框架把"工具安全"做成**每次调用弹一次 approve**。本节想说明这是错的层级：真正要回答的是两个不同的问题——**执行边界**（用 Sandbox 兜住，于是无需逐条 approve）与**工具归属**（按最小权限切分，把 git 这类"checkpoint"留给审核 Agent）。
 
@@ -78,7 +80,7 @@ Agent Loop 指 `BaseAgent.loop()` 那段"把用户输入追加进上下文 → �
 - **git 应在审核 Agent 手里，而非执行 Agent 手里**：执行 Agent 的职责是"产出修改"，它的世界里不该有"哪些修改值得沉淀为历史"的决定权。git 是强大的 checkpoint 工具——能提交、回滚、对比、合并；若执行 Agent 同时握着它，就等于既当选手又当裁判：它可自行决定哪些改动成为历史、甚至掩盖中间过程。正确的切分是：执行 Agent 只在沙箱的工作副本里改（即使副本里有 git，它操作的也只是可丢弃的复本，提交不触碰宿主历史）；审核 Agent 才持有真正的 git——检查产出、以 commit 生成 checkpoint、diff 后决定合并或回滚。于是"修改由谁批准"的答案也顺带清楚了：审批者是**审核 Agent**，而不是人类逐条 confirm，git 为这种审批提供了可回退的载体。
 - 这正对应路线图第 4 条（A2A：执行 / 审核作为独立 Agent 相互协商）与第 5 条（沙箱按 Agent 粒度控制工具，最小权限）。本项目当前是单 Agent、尚无"审核者"，但地基已经铺好：shell 进沙箱（先隔离、后授权）+ 工具由 `PlanAgent` 的 `ToolsType` 显式注册。把"修改型"工具与 git 这类"checkpoint 型"工具拆给不同 Agent，体系会自然长成最小权限的审核协作，而不是退化回逐条 approve。
 
-## 会话是单 Agent 时代的产物：隔离该交给路由，而不是用户手动"新开一个"
+### 会话是单 Agent 时代的产物：隔离该交给路由，而不是用户手动"新开一个"
 
 本项目目前确实有"会话"：`Session.ts` 负责创建 / 续接一个会话、自动起名，并把日志与 agent 输入按会话持久化进 `dev.db`。会话解决的是真问题——**上下文隔离**，防止不相关的内容互相污染。问题在于，它把隔离外包给了用户：由人来判断"这属于新话题、该另开一个"，就像对员工说"我们现在重新开一个会话"一样，既不自然，也打断思路。
 
