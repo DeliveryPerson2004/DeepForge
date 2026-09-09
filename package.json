@@ -30,6 +30,7 @@
     "@types/better-sqlite3": "^9.6.0",
     "@types/express": "^5.0.6",
     "@types/node": "^26.2.0",
+    "@types/pino": "^7.0.5",
     "typescript": "^7.0.2"
   },
   "homepage": "https://github.com/DeliveryPerson2004/DeepForge"
