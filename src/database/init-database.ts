@@ -4,20 +4,21 @@ const db = new Database("./database.db", { verbose: console.log });
 
 const createAgentTable = `
     CREATE TABLE IF NOT EXISTS agent (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    max_turn INTEGER NOT NULL ,
-    description TEXT
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        max_turn INTEGER NOT NULL ,
+        description TEXT
     );
 `;
 
 const createMessageTable = `
     CREATE TABLE IF NOT EXISTS message (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    agent_id INTEGER NOT NULL,
-    turn INTEGER NOT NULL,
-    content TEXT NOT NULL,
-    FOREIGN KEY (agent_id) REFERENCES agent(id) ON DELETE CASCADE
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        agent_id INTEGER NOT NULL,
+        turn INTEGER NOT NULL,
+        content TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (agent_id) REFERENCES agent(id) ON DELETE CASCADE
     );
 `;
 
