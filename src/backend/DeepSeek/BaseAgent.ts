@@ -8,7 +8,7 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {type Log, printLogAndReturnNewLogs} from "../logger.ts";
+import {logger} from "../logger.ts";
 
 
 
@@ -17,7 +17,6 @@ export abstract class BaseAgent{
     private readonly instructions: string;
     private readonly model: ModelType;
     private modelClient: ModelClient;
-    protected logs: Log[] = [];
 
     protected readonly agentName: string;
     protected readonly workspacePath: string;
@@ -40,7 +39,7 @@ export abstract class BaseAgent{
         this.workspacePath = workspacePath;
         this.turn = turn;
 
-        this.logs = printLogAndReturnNewLogs(this.logs, "new class BaseAgent()", "info");
+        logger.info("new class BaseAgent()");
     }
 
     private createInputMessageItemAndPush(userInput: string) {
@@ -49,8 +48,8 @@ export abstract class BaseAgent{
             role: "user",
             content: userInput,
         };
-        this.logs = printLogAndReturnNewLogs(this.logs, inputMessageItem.type, "info");
-        this.logs = printLogAndReturnNewLogs(this.logs, inputMessageItem.content, "info")
+        logger.info(inputMessageItem.type);
+        logger.info(inputMessageItem.content);
         this.input.push(inputMessageItem);
     }
 
@@ -72,22 +71,8 @@ export abstract class BaseAgent{
         return this.input;
     }
 
-    public getTurn(){
-        return this.turn;
-    }
-
-    public getLogs(){
-        const modelLogs = this.modelClient.getLogs();
-        this.logs.push(...modelLogs);
-
-        const logs = this.logs;
-        this.logs = [];
-
-        return logs;
-    }
-
     public async loop(userInput: string){
-        this.logs = printLogAndReturnNewLogs(this.logs, "class BaseAgent public loop() start", "info");
+        logger.info("class BaseAgent public loop() start");
 
         this.createInputMessageItemAndPush(userInput);
 
@@ -104,17 +89,17 @@ export abstract class BaseAgent{
             for(const item of response.output){
                 this.input.push(item);
                 if(item.type == "message"){
-                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
+                    logger.info(item.type);
                     for(const contentItem of item.content){
-                        this.logs = printLogAndReturnNewLogs(this.logs, "\n" + contentItem.text, "info");
+                        logger.info("\n" + contentItem.text);
                     }
                 }else if(item.type == "reasoning"){
-                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
+                    logger.info(item.type);
                     for(const contentItem of item.content){
-                        this.logs = printLogAndReturnNewLogs(this.logs, "\n" + contentItem.text, "info");
+                        logger.info("\n" + contentItem.text);
                     }
                 }else if(item.type == "function_call"){
-                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
+                    logger.info(item.type);
                     await this.requestFunctionCall(item);
 
                     if(item.name == "ask_developer"){
@@ -123,7 +108,7 @@ export abstract class BaseAgent{
                         hasFunctionCall = true;
                     }
                 }else if(item.type == "web_search_call"){
-                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
+                    logger.info(item.type);
                 }
             }
             if(!hasFunctionCall){
@@ -131,6 +116,6 @@ export abstract class BaseAgent{
             }
         }
 
-        this.logs = printLogAndReturnNewLogs(this.logs, "class BaseAgent public loop() end", "info");
+        logger.info("class BaseAgent public loop() end");
     }
 }
