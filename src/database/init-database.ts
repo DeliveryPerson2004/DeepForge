@@ -11,7 +11,18 @@ const createAgentTable = `
     );
 `;
 
+const createMessageTable = `
+    CREATE TABLE IF NOT EXISTS message (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    agent_id INTEGER NOT NULL,
+    turn INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    FOREIGN KEY (agent_id) REFERENCES agent(id) ON DELETE CASCADE
+    );
+`;
+
 db.exec(createAgentTable);
+db.exec(createMessageTable);
 
 const insertIntoAgentTableStmt = db.prepare(`
     INSERT INTO agent (name, max_turn, description) VALUES (?, ?, ?)
