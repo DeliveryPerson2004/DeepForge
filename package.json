@@ -19,8 +19,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@prisma/adapter-better-sqlite3": "^7.9.1",
-    "@prisma/client": "^7.9.1",
+    "better-sqlite3": "^13.0.3",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "pino": "^10.3.1",
@@ -31,7 +30,6 @@
     "@types/better-sqlite3": "^9.6.0",
     "@types/express": "^5.0.6",
     "@types/node": "^26.2.0",
-    "prisma": "^7.9.1",
     "typescript": "^7.0.2"
   },
   "homepage": "https://github.com/DeliveryPerson2004/DeepForge"
