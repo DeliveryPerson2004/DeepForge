@@ -1,10 +1,4 @@
-import pino, {type Level} from 'pino';
-
-export type Log = {
-    content: string,
-    level: Level,
-    createdAt: Date,
-};
+import pino from 'pino';
 
 export const logger = pino({
     transport: {
@@ -12,18 +6,3 @@ export const logger = pino({
         options: { colorize: true }
     }
 });
-
-export function printLogAndReturnNewLogs(logs: Log[], log: string, logLevel: Level){
-    const logRecord: Log = {
-        content: log,
-        level: logLevel,
-        createdAt: new Date(),
-    }
-
-    logs.push(logRecord);
-
-    if(logLevel === "info")
-        logger.info(log);
-
-    return logs;
-}
