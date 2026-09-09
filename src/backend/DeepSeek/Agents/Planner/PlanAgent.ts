@@ -5,7 +5,7 @@ import {type InputFunctionCallItem, type InputItemType, ModelType, type ToolsTyp
 import * as fs from "node:fs";
 import {shellExecute, type shellExecuteInput} from "../../../Tools/shell-command/shell-execute.ts";
 import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer.ts";
-import {printLogAndReturnNewLogs} from "../../../logger.ts";
+import {logger} from "../../../logger.ts";
 
 
 
@@ -53,9 +53,14 @@ export class PlanAgent extends BaseAgent {
         const instructionsFilePath = path.join(dirname, "instructions.md");
         const instructions = fs.readFileSync(instructionsFilePath, "utf-8");
 
+        //TODO 用agent name向数据库获取真实的agent id
+        const agentId = 1;
+
+
         super(
             ModelType.DeepSeekV4Flash,
             instructions,
+            agentId,
             "Plan Agent",
             plannerFuncTools,
             workspacePath,
@@ -64,7 +69,7 @@ export class PlanAgent extends BaseAgent {
 
         this.input = input;
 
-        this.logs = printLogAndReturnNewLogs(this.logs, "new class PlannerAgent()", "info");
+        logger.info("new class PlannerAgent()");
     }
 
     protected async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {
