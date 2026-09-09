@@ -9,6 +9,7 @@ import {
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
 import {logger} from "../logger.ts";
+import {insertIntoMessageTableStmt} from "../../database/init-database.ts";
 
 
 
@@ -18,6 +19,7 @@ export abstract class BaseAgent{
     private readonly model: ModelType;
     private modelClient: ModelClient;
 
+    protected readonly agentId: number;
     protected readonly agentName: string;
     protected readonly workspacePath: string;
     protected turn: number;
@@ -26,6 +28,7 @@ export abstract class BaseAgent{
     protected constructor(
         model: ModelType,
         instructions: string,
+        agentId: number,
         agentName: string,
         functionTools: ToolsType,
         workspacePath: string,
@@ -35,6 +38,7 @@ export abstract class BaseAgent{
         this.instructions = instructions;
         this.model = model;
         this.modelClient = new ModelClient();
+        this.agentId = agentId;
         this.agentName = agentName;
         this.workspacePath = workspacePath;
         this.turn = turn;
@@ -73,6 +77,9 @@ export abstract class BaseAgent{
 
     public async loop(userInput: string){
         logger.info("class BaseAgent public loop() start");
+
+        //TODO 获取当前input的长度
+        const inputLengthBeforeLoop = this.input.length;
 
         this.createInputMessageItemAndPush(userInput);
 
@@ -115,6 +122,11 @@ export abstract class BaseAgent{
                 break;
             }
         }
+
+        //TODO 获取当前input的长度，用原有的input长度和现在的进行切片
+        const inputDeltaAfterLoop = this.input.slice(inputLengthBeforeLoop);
+
+        insertIntoMessageTableStmt.run(this.agent_id, this.turn, JSON.stringify(inputDeltaAfterLoop));
 
         logger.info("class BaseAgent public loop() end");
     }

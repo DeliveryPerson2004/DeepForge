@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 
-const db = new Database("./database.db", { verbose: console.log });
+export const db = new Database("./database.db", { verbose: console.log });
 
 const createAgentTable = `
     CREATE TABLE IF NOT EXISTS agent (
@@ -27,6 +27,10 @@ db.exec(createMessageTable);
 
 const insertIntoAgentTableStmt = db.prepare(`
     INSERT INTO agent (name, max_turn, description) VALUES (?, ?, ?)
+`);
+
+export const insertIntoMessageTableStmt = db.prepare(`
+    INSERT INTO message (agent_id, turn, content) VALUES (?, ?, ?)
 `);
 
 insertIntoAgentTableStmt.run("gexep", 0, "agent");
