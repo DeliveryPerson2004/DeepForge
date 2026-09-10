@@ -1,6 +1,5 @@
-import path from "node:path";
-import {fileURLToPath} from "node:url";
+import {LexeyAgent} from "./Agents/DeepSeek/Agents/Lexey/LexeyAgent.ts";
 
-const dirname = path.dirname(fileURLToPath(import.meta.url));
+const lexeyAgent = new LexeyAgent();
 
-console.log(dirname);
+await lexeyAgent.ask("我喜欢吃什么水果");
