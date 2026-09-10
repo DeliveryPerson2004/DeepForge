@@ -6,9 +6,10 @@ import {
     ModelType,
     type ResponseSchema,
     type ToolsType
-} from "./API/responses.ts";
-import {ModelClient} from "./ModelClient.ts";
-import {type Log, printLogAndReturnNewLogs} from "../logger.ts";
+} from "../API/responses.ts";
+import {ModelClient} from "../ModelClient.ts";
+import {logger} from "../../../logger.ts";
+import {insertIntoMessageTableStmt} from "../../../database/stmt.ts";
 
 
 
@@ -17,30 +18,31 @@ export abstract class BaseAgent{
     private readonly instructions: string;
     private readonly model: ModelType;
     private modelClient: ModelClient;
-    protected logs: Log[] = [];
 
+    protected readonly agentId: number;
     protected readonly agentName: string;
-    protected readonly workspacePath: string;
     protected turn: number;
-    protected input: InputItemType[] = [];
+    protected input: InputItemType[];
 
     protected constructor(
         model: ModelType,
         instructions: string,
+        agentId: number,
         agentName: string,
         functionTools: ToolsType,
-        workspacePath: string,
         turn: number,
+        input: InputItemType[],
     ) {
         this.functionTools = functionTools;
         this.instructions = instructions;
         this.model = model;
         this.modelClient = new ModelClient();
+        this.agentId = agentId;
         this.agentName = agentName;
-        this.workspacePath = workspacePath;
         this.turn = turn;
+        this.input = input;
 
-        this.logs = printLogAndReturnNewLogs(this.logs, "new class BaseAgent()", "info");
+        logger.info("new class BaseAgent()");
     }
 
     private createInputMessageItemAndPush(userInput: string) {
@@ -49,8 +51,8 @@ export abstract class BaseAgent{
             role: "user",
             content: userInput,
         };
-        this.logs = printLogAndReturnNewLogs(this.logs, inputMessageItem.type, "info");
-        this.logs = printLogAndReturnNewLogs(this.logs, inputMessageItem.content, "info")
+        logger.info(inputMessageItem.type);
+        logger.info(inputMessageItem.content);
         this.input.push(inputMessageItem);
     }
 
@@ -68,26 +70,10 @@ export abstract class BaseAgent{
         this.input.push(functionCallOutputItem);
     }
 
-    public getInput(){
-        return this.input;
-    }
+    public async ask(userInput: string){
+        logger.info("class BaseAgent public loop() start");
 
-    public getTurn(){
-        return this.turn;
-    }
-
-    public getLogs(){
-        const modelLogs = this.modelClient.getLogs();
-        this.logs.push(...modelLogs);
-
-        const logs = this.logs;
-        this.logs = [];
-
-        return logs;
-    }
-
-    public async loop(userInput: string){
-        this.logs = printLogAndReturnNewLogs(this.logs, "class BaseAgent public loop() start", "info");
+        const inputLengthBeforeLoop = this.input.length;
 
         this.createInputMessageItemAndPush(userInput);
 
@@ -104,26 +90,21 @@ export abstract class BaseAgent{
             for(const item of response.output){
                 this.input.push(item);
                 if(item.type == "message"){
-                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
+                    logger.info(item.type);
                     for(const contentItem of item.content){
-                        this.logs = printLogAndReturnNewLogs(this.logs, "\n" + contentItem.text, "info");
+                        logger.info("\n" + contentItem.text);
                     }
                 }else if(item.type == "reasoning"){
-                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
+                    logger.info(item.type);
                     for(const contentItem of item.content){
-                        this.logs = printLogAndReturnNewLogs(this.logs, "\n" + contentItem.text, "info");
+                        logger.info("\n" + contentItem.text);
                     }
                 }else if(item.type == "function_call"){
-                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
+                    logger.info(item.type);
                     await this.requestFunctionCall(item);
-
-                    if(item.name == "ask_developer"){
-                        break;
-                    }else{
-                        hasFunctionCall = true;
-                    }
+                    hasFunctionCall = true;
                 }else if(item.type == "web_search_call"){
-                    this.logs = printLogAndReturnNewLogs(this.logs, item.type, "info");
+                    logger.info(item.type);
                 }
             }
             if(!hasFunctionCall){
@@ -131,6 +112,10 @@ export abstract class BaseAgent{
             }
         }
 
-        this.logs = printLogAndReturnNewLogs(this.logs, "class BaseAgent public loop() end", "info");
+        const inputDeltaAfterLoop = this.input.slice(inputLengthBeforeLoop);
+
+        insertIntoMessageTableStmt.run(this.agentId, this.turn, JSON.stringify(inputDeltaAfterLoop), 1);
+
+        logger.info("class BaseAgent public loop() end");
     }
 }

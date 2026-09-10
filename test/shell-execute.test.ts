@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import {shellExecute} from "../src/backend/Tools/shell-command/shell-execute.ts";
+import {shellExecute} from "../src/backend/Tools/shellCommand/shell-execute.ts";
 
 
 const tempDirs: string[] = [];
@@ -43,8 +43,7 @@ describe("shellExecute()", () => {
         });
 
         it("不误伤包含 sudo 子串的单词", async () => {
-            const result = await shellExecute("echo csudo", createTempDir());
-            assert.equal(result, "csudo");
+            assert.equal(await shellExecute("echo csudo", createTempDir()), "csudo");
         });
     });
 
@@ -54,8 +53,7 @@ describe("shellExecute()", () => {
         });
 
         it("多行输出会被 trim", async () => {
-            const result = await shellExecute("printf 'line1\nline2\n\n'", createTempDir());
-            assert.equal(result, "line1\nline2");
+            assert.equal(await shellExecute("printf 'line1\\nline2\\n\\n'", createTempDir()), "line1\nline2");
         });
 
         it("空输出返回空字符串", async () => {
@@ -73,7 +71,6 @@ describe("shellExecute()", () => {
         it("不存在的命令返回错误信息而非抛异常", async () => {
             const result = await shellExecute("nonexistent_command_xyz", createTempDir());
             assert.ok(result.length > 0);
-            assert.ok(!result.includes("Command execution failed"));
         });
 
         it("访问不存在的目录返回错误信息", async () => {

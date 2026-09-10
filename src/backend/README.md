@@ -2,7 +2,7 @@
 
 基于 DeepSeek `/responses` API，为个人开发者打造的最小 AI Agent 运行时。核心能力为**多轮对话循环 + 工具调用**：Agent 可调用 web 搜索、执行 shell 命令、在拿不准时主动询问开发者，工具结果回填对话上下文供模型继续推理。整体采用 TypeScript 编写，代码从 API 文档直接翻译出类型契约，全程编译期强类型。
 
-本文件为项目的完整技术文档（由原根目录 `README.md` 与 `src` 说明文档整合而成），覆盖技术选型、项目架构、运行方式、测试与路线图。
+本文件为项目的完整技术文档（由原根目录 `Agent设定.md` 与 `src` 说明文档整合而成），覆盖技术选型、项目架构、运行方式、测试与路线图。
 
 ## 1. 特色特点
 
@@ -45,11 +45,11 @@ sbx cp /home/administrator/WebstormProjects/deep-forge shell-user-workspace:/hom
 
 ### 1.3 编译期强类型数据契约
 
-请求体 / 响应体类型定义于 `DeepSeek/API/responses.ts`，直接从 DeepSeek API 文档翻译而来，编译期强类型、无运行时校验。开发者只需对照 API 文档即可开发，无需参考其他文件。
+请求体 / 响应体类型定义于 `Agents/DeepSeek`，直接从 DeepSeek API 文档翻译而来，编译期强类型、无运行时校验。开发者只需对照 API 文档即可开发，无需参考其他文件。
 
 ### 1.4 指令与代码解耦
 
-Agent 的系统指令存放在 `DeepSeek/Agents/Planner/instructions.md`，通过文件读取加载，调整提示词无需改动代码。
+Agent 的系统指令存放在 `Agents/DeepSeek`，通过文件读取加载，调整提示词无需改动代码。
 
 ### 1.5 日志贯穿全流程
 
@@ -63,7 +63,7 @@ Agent 的系统指令存放在 `DeepSeek/Agents/Planner/instructions.md`，通�
 | 模块体系 | ESM（`module: nodenext`） | 使用 `type: "module"`，代码中显式携带 `.ts` 扩展名导入 |
 | 运行方式 | tsx | 直接执行 TypeScript 源码，无需预先编译；`tsc --noEmit` 负责类型检查 |
 | 包管理器 | pnpm | 通过 `devEngines` 锁定 `pnpm ^11.22.0` |
-| 数据契约 | TypeScript 类型（编译期） | 请求体 / 响应体类型定义于 `DeepSeek/API/responses.ts`，仅编译期强类型，无运行时校验 |
+| 数据契约 | TypeScript 类型（编译期） | 请求体 / 响应体类型定义于 `Agents/DeepSeek`，仅编译期强类型，无运行时校验 |
 | HTTP 客户端 | Node.js 原生 fetch | 无第三方 HTTP 依赖 |
 | 日志 | pino + pino-pretty | `logger.ts` 统一封装，控制台彩色输出，贯穿所有层 |
 | Shell 执行 | node:child_process（exec） | 工具层执行命令，zsh 环境，无第三方依赖 |
@@ -95,7 +95,7 @@ src/backend/
 │           ├── PlanAgent.ts     # 具体 Agent：注册 web_search / execute_shell_command / ask_developer
 │           └── instructions.md  # Agent 系统指令（独立于代码维护）
 └── Tools/
-    ├── ask-developer.ts     # 询问开发者工具
+    ├── askDeveloper.ts     # 询问开发者工具
     └── shell-command/
         ├── shell-execute.ts # 核心执行器：在指定 cwd 执行 shell 命令（bash，sudo 拦截）
         ├── shell-ls.ts      # 薄封装：固定执行 ls
@@ -143,7 +143,7 @@ logger.ts（日志，横切所有层）
   - `web_search_call`（web 搜索调用）
 
   当一轮响应中不再包含 `function_call` 时循环终止。
-- **数据契约**：请求体与响应体由 `DeepSeek/API/responses.ts` 中的类型契约定义，全程编译期强类型；运行时不做校验。
+- **数据契约**：请求体与响应体由 `Agents/DeepSeek` 中的类型契约定义，全程编译期强类型；运行时不做校验。
 - **工具机制**：`PlanAgent` 通过 `ToolsType` 声明工具——`web_search`（内建搜索）、`execute_shell_command`（本地执行 Shell 命令）与 `ask_developer`。模型发出 `function_call` 后，`requestFunctionCall()` 按 `name` 分发到 `Tools/` 下的对应实现，执行结果通过 `createFunctionCallOutputItemAndPush()` 以 `function_call_output` 形式回填上下文，供模型下一轮推理使用。
 
 ## 4. 工具调用闭环与上下文回填
@@ -166,7 +166,7 @@ function_call → requestFunctionCall() 按名称分发到对应工具
 - **分发**：`requestFunctionCall()` 按 `inputFunctionCallItem.name` 分发到对应工具，`arguments`（JSON 字符串）反序列化为工具入参（如 `shellExecuteInput` / `askDeveloperInput`）
 - **回填**：工具执行完成后由 `createFunctionCallOutputItemAndPush()` 构造 `function_call_output` 输入项，使模型在下一轮推理中可见执行结果
 
-工具的注册、分发与 shell 工具的详细实现见 [Tools/README.md](Tools/README.md) 与 [Tools/shell-command/README.md](Tools/shell-command/README.md)。
+工具的注册、分发与 shell 工具的详细实现见 [Tools/README.md](Tools/README.md) 与 [Tools/shell-command/README.md](Tools/shellCommand/README.md)。
 
 ## 5. 与模型 provider 耦合的取舍
 
@@ -174,11 +174,11 @@ function_call → requestFunctionCall() 按名称分发到对应工具
 
 1. **model 与 model-provider 天然强绑定**。不同 provider 的 API 格式截然不同（例如 OpenAI 与 Anthropic 的 client 完全不同），无法抽象出统一接口。国内大部分 provider 目前兼容 OpenAI 或 Anthropic 的 API 格式，但未来模型训练范式可能变化，API 格式也存在变数，因此围绕单一 provider 开发是合理选择。
 
-2. **API 文档即最佳公开资料**。`DeepSeek/API/responses.ts` 直接翻译 DeepSeek API 文档的 request / responses 部分，`BaseAgent` 的字段与 API 请求字段一一对应。开发者只需对照文档即可开发，无需参考其他文件或代码，实现简单、便于维护。
+2. **API 文档即最佳公开资料**。`Agents/DeepSeek` 直接翻译 DeepSeek API 文档的 request / responses 部分，`BaseAgent` 的字段与 API 请求字段一一对应。开发者只需对照文档即可开发，无需参考其他文件或代码，实现简单、便于维护。
 
 3. **耦合换取实现简洁**。`BaseAgent` 直接以 provider 的请求字段形态组织代码，便于调用 `ModelClient` 的方法，省去了中间抽象层。
 
-综上，当前阶段以"快速可用、贴合文档"为优先，接受与单一 provider 的耦合，为未来的抽象与扩展预留了空间。代价是：如需更换模型 provider，可能需要对类型契约、client 与 agent 字段做重构。更多设计细节见 [DeepSeek/README.md](DeepSeek/README.md)。
+综上，当前阶段以"快速可用、贴合文档"为优先，接受与单一 provider 的耦合，为未来的抽象与扩展预留了空间。代价是：如需更换模型 provider，可能需要对类型契约、client 与 agent 字段做重构。更多设计细节见 [DeepSeek/README.md](Agents/DeepSeek/README.md)。
 
 ## 6. 数据库说明
 
@@ -270,8 +270,8 @@ PR 合并至 `main` 时，GitHub Actions（`../../.github/workflows/main.yml`）
 |------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | [根目录 README.md](../../README.md)                                                | 项目入口 / 文档导航（本文件的精简版）                               |
 | [本文件（README.md）](README.md)                                                    | 项目完整技术文档：特色、技术选型、架构、快速开始、测试、路线图      |
-| [DeepSeek/README.md](DeepSeek/README.md)                                            | ModelClient、BaseAgent 实现与设计说明                               |
+| [DeepSeek/README.md](Agents/DeepSeek/README.md)                                            | ModelClient、BaseAgent 实现与设计说明                               |
 | [Tools/README.md](Tools/README.md)                                                  | 工具调用链路与工具实现说明                                          |
-| [Tools/shell-command/README.md](Tools/shell-command/README.md)                      | shell 命令工具（shell-execute / ls / pwd）实现细节                  |
-| [DeepSeek/API/responses.ts](DeepSeek/API/responses.ts)                              | 请求 / 响应 TypeScript 类型契约定义                                 |
+| [Tools/shell-command/README.md](Tools/shellCommand/README.md)                      | shell 命令工具（shell-execute / ls / pwd）实现细节                  |
+| [DeepSeek/API/responses.ts](Agents/DeepSeek/API/responses.ts)                              | 请求 / 响应 TypeScript 类型契约定义                                 |
 | [../../test/](../../test)                                                           | 测试套件：shell 工具、ModelClient、PlanAgent、AppServer / Session   |

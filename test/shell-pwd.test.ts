@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import {executeShellCommandPWD} from "../src/backend/Tools/shell-command/shell-pwd.ts";
+import {executeShellCommandPWD} from "../src/backend/Tools/shellCommand/shell-pwd.ts";
 
 
 const tempDirs: string[] = [];
@@ -27,8 +27,7 @@ describe("executeShellCommandPWD()", () => {
     });
 
     it("返回绝对路径", async () => {
-        const cwd = createTempDir();
-        const result = await executeShellCommandPWD(cwd);
+        const result = await executeShellCommandPWD(createTempDir());
         assert.ok(path.isAbsolute(result));
     });
 });

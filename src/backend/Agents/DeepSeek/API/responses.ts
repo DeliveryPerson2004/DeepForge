@@ -1,6 +1,5 @@
 export enum ModelType{
-    DeepSeekV4Flash = "deepseek-v4-flash",
-    DeepSeekV4Pro = "deepseek-v4-pro",
+    DeepSeekFlash = "deepseek-flash",
 }
 
 export type InputMessageItem = {

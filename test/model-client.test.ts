@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, describe, it, mock} from "node:test";
 import assert from "node:assert/strict";
-import {ModelClient} from "../src/backend/DeepSeek/ModelClient.ts";
-import {ModelType, type ResponseSchema} from "../src/backend/DeepSeek/API/responses.ts";
+import {ModelClient} from "../src/backend/Agents/DeepSeek/ModelClient.ts";
+import {ModelType, type ResponseSchema, type ToolsType} from "../src/backend/Agents/DeepSeek/API/responses.ts";
 
 
 const fakeResponse: ResponseSchema = {
@@ -11,7 +11,7 @@ const fakeResponse: ResponseSchema = {
     status: "completed",
     error: {},
     incomplete_details: {},
-    model: "deepseek-v4-flash",
+    model: "deepseek-flash",
     output: [
         {
             type: "message",
@@ -56,7 +56,7 @@ describe("ModelClient", () => {
     it("向 /responses 端点发送 POST 请求", async () => {
         const client = new ModelClient();
         await client.requestResponsesAPI(
-            ModelType.DeepSeekV4Flash,
+            ModelType.DeepSeekFlash,
             [{type: "message", role: "user", content: "hi"}],
             "instructions",
             [],
@@ -67,15 +67,9 @@ describe("ModelClient", () => {
         assert.equal(capturedInit?.method, "POST");
     });
 
-    it("携带正确的请求头", async () => {
+    it("携带正确的请求头（含 Bearer Token）", async () => {
         const client = new ModelClient();
-        await client.requestResponsesAPI(
-            ModelType.DeepSeekV4Flash,
-            [],
-            "instructions",
-            [],
-            "test_user",
-        );
+        await client.requestResponsesAPI(ModelType.DeepSeekFlash, [], "instructions", [], "test_user");
 
         const headers = capturedInit?.headers as Record<string, string>;
         assert.equal(headers["Content-Type"], "application/json");
@@ -85,13 +79,13 @@ describe("ModelClient", () => {
 
     it("请求体包含 model/input/instructions/tools/user", async () => {
         const client = new ModelClient();
-        const tools = [
+        const tools: ToolsType = [
             {
-                type: "function" as const,
-                name: "execute_shell_command",
+                type: "function",
+                name: "load_skill",
                 description: "desc",
                 parameters: {
-                    "type": "object" as const,
+                    "type": "object",
                     properties: {},
                     required: [],
                 },
@@ -100,7 +94,7 @@ describe("ModelClient", () => {
         const input = [{type: "message" as const, role: "user" as const, content: "hello"}];
 
         await client.requestResponsesAPI(
-            ModelType.DeepSeekV4Flash,
+            ModelType.DeepSeekFlash,
             input,
             "system instructions",
             tools,
@@ -108,7 +102,7 @@ describe("ModelClient", () => {
         );
 
         const body = JSON.parse(capturedInit?.body as string);
-        assert.equal(body.model, ModelType.DeepSeekV4Flash);
+        assert.equal(body.model, ModelType.DeepSeekFlash);
         assert.deepEqual(body.input, input);
         assert.equal(body.instructions, "system instructions");
         assert.deepEqual(body.tools, tools);
@@ -117,23 +111,12 @@ describe("ModelClient", () => {
 
     it("返回解析后的 JSON 响应", async () => {
         const client = new ModelClient();
-        const result = await client.requestResponsesAPI(
-            ModelType.DeepSeekV4Flash,
-            [],
-            "instructions",
-            [],
-            "test_user",
-        );
+        const result = await client.requestResponsesAPI(ModelType.DeepSeekFlash, [], "instructions", [], "test_user");
 
         assert.deepEqual(result, fakeResponse);
     });
 
-    it("getLogs() 返回并清空日志", async () => {
-        const client = new ModelClient();
-        const logs = client.getLogs();
-        assert.equal(logs.length, 1);
-        assert.equal(logs[0]?.content, "new class ModelClient()");
-
-        assert.deepEqual(client.getLogs(), []);
+    it("ModelType.DeepSeekFlash 的值为 deepseek-flash", () => {
+        assert.equal(ModelType.DeepSeekFlash, "deepseek-flash");
     });
 });

@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import {executeShellCommandLs} from "../src/backend/Tools/shell-command/shell-ls.ts";
+import {executeShellCommandLs} from "../src/backend/Tools/shellCommand/shell-ls.ts";
 
 
 const tempDirs: string[] = [];
@@ -21,7 +21,7 @@ after(() => {
 });
 
 describe("executeShellCommandLs()", () => {
-    it("列出指定目录下的文件", async () => {
+    it("列出指定目录下的文件与子目录", async () => {
         const cwd = createTempDir();
         fs.writeFileSync(path.join(cwd, "a.txt"), "a");
         fs.writeFileSync(path.join(cwd, "b.txt"), "b");
@@ -34,7 +34,6 @@ describe("executeShellCommandLs()", () => {
     });
 
     it("空目录返回空字符串", async () => {
-        const cwd = createTempDir();
-        assert.equal(await executeShellCommandLs(cwd), "");
+        assert.equal(await executeShellCommandLs(createTempDir()), "");
     });
 });
