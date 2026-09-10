@@ -1,9 +1,6 @@
-// 开启 SQLite 外键级联约束
-import {db, insertIntoAgentTableStmt} from "./stmt.ts";
+import { db } from "./db.ts";
 
-db.pragma("foreign_keys = ON");
-
-const createAgentTable = `
+export const createAgentTable = `
     CREATE TABLE IF NOT EXISTS agent (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
@@ -13,12 +10,13 @@ const createAgentTable = `
     );
 `;
 
-const createMessageTable = `
+export const createMessageTable = `
     CREATE TABLE IF NOT EXISTS message (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         agent_id INTEGER NOT NULL,
         turn INTEGER NOT NULL,
         content TEXT NOT NULL,
+        is_activated BLOB NOT NULL ,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (agent_id) REFERENCES agent(id) ON DELETE CASCADE
     );
@@ -27,4 +25,4 @@ const createMessageTable = `
 db.exec(createAgentTable);
 db.exec(createMessageTable);
 
-insertIntoAgentTableStmt.run("Lexey", 0, "language agent");
+db.exec("INSERT INTO agent (name, max_turn, description) VALUES ('Lexey', 0, 'language agent')");
