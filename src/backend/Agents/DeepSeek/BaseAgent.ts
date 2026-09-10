@@ -8,8 +8,8 @@ import {
     type ToolsType
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
-import {logger} from "../logger.ts";
-import {insertIntoMessageTableStmt} from "../../database/init-database.ts";
+import {logger} from "../../logger.ts";
+import {insertIntoMessageTableStmt} from "../../../database/init-database.ts";
 
 
 
@@ -21,7 +21,6 @@ export abstract class BaseAgent{
 
     protected readonly agentId: number;
     protected readonly agentName: string;
-    protected readonly workspacePath: string;
     protected turn: number;
     protected input: InputItemType[] = [];
 
@@ -31,7 +30,6 @@ export abstract class BaseAgent{
         agentId: number,
         agentName: string,
         functionTools: ToolsType,
-        workspacePath: string,
         turn: number,
     ) {
         this.functionTools = functionTools;
@@ -40,7 +38,6 @@ export abstract class BaseAgent{
         this.modelClient = new ModelClient();
         this.agentId = agentId;
         this.agentName = agentName;
-        this.workspacePath = workspacePath;
         this.turn = turn;
 
         logger.info("new class BaseAgent()");
