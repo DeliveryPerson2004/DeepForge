@@ -51,10 +51,37 @@ src/backend/
 
 ## 文档导航
 
+不同角色关心的问题不同，按三类读者给出各自的阅读路径；文末附完整文档总表。
+
+### 面试官：先看判断力，再看工程完整度
+
+1. [THINKING.md](src/backend/THINKING.md) — 8 条设计取舍，回答"为什么这么做 / 为什么不那么做"（部分尚未实现）
+2. [src/backend/README.md](src/backend/README.md) — 技术选型、分层、核心机制、路线图与局限
+3. [src/backend/Agents/README.md](src/backend/Agents/README.md) — 多智能体愿景、名册与最小权限协作设想
+4. [test/](test) — 测试套件，佐证关键链路均有覆盖
+
+### 普通开发者：先跑起来，再看结构
+
+1. [快速开始](#快速开始) — 安装、配置、建表、启动
+2. [src/backend/README.md](src/backend/README.md) §1–2 — 技术选型与目录结构
+3. [src/backend/README.md](src/backend/README.md) §7 — 后端快速开始
+4. [test/](test) — 如何运行测试
+
+### Agent 开发者：深入机制，动手扩展
+
+1. [src/backend/README.md](src/backend/README.md) §3–5 — 分层依赖、核心机制、数据库
+2. [src/backend/Agents/DeepSeek/README.md](src/backend/Agents/DeepSeek/README.md) — ModelClient / BaseAgent / LexeyAgent
+3. [src/backend/Tools/README.md](src/backend/Tools/README.md) — 工具注册、分发与回填链路
+4. [src/backend/Tools/shellCommand/README.md](src/backend/Tools/shellCommand/README.md) — shell 工具实现细节
+5. [src/backend/Agents/README.md](src/backend/Agents/README.md) — 新增 Agent 的命名与协作约定
+6. [THINKING.md](src/backend/THINKING.md) — 理解设计边界后再扩展
+
+### 全部文档
+
 | 文档 | 定位 |
 |------|------|
 | [src/backend/README.md](src/backend/README.md) | 架构细节：技术选型、分层、核心机制、数据库、路线图、局限 |
-| [src/backend/THINKING.md](src/backend/THINKING.md) | 7 条设计取舍与方向设想（部分尚未实现） |
+| [src/backend/THINKING.md](src/backend/THINKING.md) | 8 条设计取舍与方向设想（部分尚未实现） |
 | [src/backend/Agents/README.md](src/backend/Agents/README.md) | Agent 名册与命名约定 |
 | [src/backend/Agents/DeepSeek/README.md](src/backend/Agents/DeepSeek/README.md) | ModelClient、BaseAgent 与 LexeyAgent |
 | [src/backend/Tools/README.md](src/backend/Tools/README.md) | 工具调用链路与各工具实现 |

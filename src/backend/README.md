@@ -224,7 +224,7 @@ pnpm test   # 等价于 node --import tsx --test test/**/*.ts
 | 文档 | 定位 |
 | ---- | ---- |
 | [根目录 README.md](../../README.md) | 项目入口 / 命名故事 |
-| [THINKING.md](THINKING.md) | 7 条设计取舍与方向设想（部分尚未实现） |
+| [THINKING.md](THINKING.md) | 8 条设计取舍与方向设想（部分尚未实现） |
 | [Agents/README.md](Agents/README.md) | Agent 名册与命名约定 |
 | [Agents/DeepSeek/README.md](Agents/DeepSeek/README.md) | ModelClient、BaseAgent 与 LexeyAgent |
 | [Tools/README.md](Tools/README.md) | 工具调用链路与各工具实现 |
