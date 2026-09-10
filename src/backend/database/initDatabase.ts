@@ -1,5 +1,5 @@
 // 开启 SQLite 外键级联约束
-import {db, insertIntoAgentTableStmt} from "./database.ts";
+import {db, insertIntoAgentTableStmt} from "./stmt.ts";
 
 db.pragma("foreign_keys = ON");
 
