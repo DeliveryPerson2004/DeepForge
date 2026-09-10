@@ -39,4 +39,8 @@ export const insertIntoMessageTableStmt: Statement<[agentId: number, turn: numbe
     INSERT INTO message (agent_id, turn, content) VALUES (?, ?, ?)
 `);
 
+export const selectIdFromAgentTableStmt: Statement = db.prepare(`
+    SELECT id FROM agent WHERE name = ?;
+`)
+
 insertIntoAgentTableStmt.run("gexep", 0, "agent");
