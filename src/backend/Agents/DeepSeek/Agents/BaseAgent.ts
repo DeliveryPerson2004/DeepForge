@@ -9,7 +9,7 @@ import {
 } from "../API/responses.ts";
 import {ModelClient} from "../ModelClient.ts";
 import {logger} from "../../../logger.ts";
-import {insertIntoMessageTableStmt} from "../../../database.ts";
+import {insertIntoMessageTableStmt} from "../../../database/stmt.ts";
 
 
 
@@ -22,7 +22,7 @@ export abstract class BaseAgent{
     protected readonly agentId: number;
     protected readonly agentName: string;
     protected turn: number;
-    protected input: InputItemType[] = [];
+    protected input: InputItemType[];
 
     protected constructor(
         model: ModelType,
@@ -31,6 +31,7 @@ export abstract class BaseAgent{
         agentName: string,
         functionTools: ToolsType,
         turn: number,
+        input: InputItemType[],
     ) {
         this.functionTools = functionTools;
         this.instructions = instructions;
@@ -39,6 +40,7 @@ export abstract class BaseAgent{
         this.agentId = agentId;
         this.agentName = agentName;
         this.turn = turn;
+        this.input = input;
 
         logger.info("new class BaseAgent()");
     }
