@@ -9,7 +9,7 @@ import {
 } from "./API/responses.ts";
 import {ModelClient} from "./ModelClient.ts";
 import {logger} from "../../logger.ts";
-import {insertIntoMessageTableStmt} from "../../../database/init-database.ts";
+import {insertIntoMessageTableStmt} from "../../database/init-database.ts";
 
 
 
