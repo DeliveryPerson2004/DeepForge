@@ -1,4 +1,4 @@
-# deep-forge · 架构说明
+# Pantheon of Confidants · 架构说明
 
 > 项目门面与命名故事见 [根目录 README.md](../../README.md)。
 
