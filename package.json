@@ -5,6 +5,7 @@
   "scripts": {
     "start": "tsx src/backend/main.ts",
     "dev:backend:main": "tsc --noEmit && tsx src/backend/main.ts",
+    "dev:backend:initDatabase": "tsx src/backend/database/initDatabase.ts",
     "test": "node --import tsx --test test/**/*.ts"
   },
   "keywords": [],
