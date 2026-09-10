@@ -1,7 +1,7 @@
 import {BaseAgent} from "../../BaseAgent.ts";
 import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../API/responses.ts";
 import {loadInstructions} from "../../../../Tools/loadInstructions.ts";
-import {selectIdFromAgentTableStmt, selectMaxTurnFromAgentTableStmt} from "../../../../database/init-database.ts";
+import {selectIdFromAgentTableStmt, selectMaxTurnFromAgentTableStmt} from "../../../../database.ts";
 
 const dirPath = import.meta.dirname;
 

@@ -14,7 +14,7 @@ import {
     type InputType
 } from "../../API/responses.ts";
 import { BaseAgent } from "../../BaseAgent.ts";
-import {selectIdFromAgentTableStmt} from "../../../../database/init-database.ts";
+import {selectIdFromAgentTableStmt} from "../../../../database/database.ts";
 
 
 
