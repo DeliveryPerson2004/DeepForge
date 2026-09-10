@@ -1,6 +1,7 @@
 import {exec, type ExecException} from 'node:child_process';
 import {promisify} from 'node:util';
 import {logger} from '../../logger.ts';
+import {z} from "zod";
 
 const execAsync = promisify(exec);
 
@@ -9,9 +10,11 @@ interface ExecError extends ExecException {
     stderr?: string;
 }
 
-export interface shellExecuteInput {
-    command: string,
-}
+export const shellExecuteInputSchema = z.object({
+    command: z.string(),
+});
+
+export type ShellExecuteInputType = z.infer<typeof shellExecuteInputSchema>;
 
 export async function shellExecute(
     command: string,
