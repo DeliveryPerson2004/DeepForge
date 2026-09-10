@@ -95,7 +95,7 @@ src/backend/
 │           ├── PlanAgent.ts     # 具体 Agent：注册 web_search / execute_shell_command / ask_developer
 │           └── instructions.md  # Agent 系统指令（独立于代码维护）
 └── Tools/
-    ├── ask-developer.ts     # 询问开发者工具
+    ├── askDeveloper.ts     # 询问开发者工具
     └── shell-command/
         ├── shell-execute.ts # 核心执行器：在指定 cwd 执行 shell 命令（bash，sudo 拦截）
         ├── shell-ls.ts      # 薄封装：固定执行 ls

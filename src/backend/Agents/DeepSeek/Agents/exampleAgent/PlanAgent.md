@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { logger } from "../../../logger.ts";
-import { askDeveloper, type askDeveloperInput } from "../../../Tools/ask-developer.ts";
+import { askDeveloper, type askDeveloperInput } from "../../../Tools/askDeveloper.ts";
 import { shellExecute, type ShellExecuteInputType } from "../../../Tools/shellCommand/shell-execute.ts";
 
 import {
