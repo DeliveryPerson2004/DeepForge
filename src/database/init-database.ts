@@ -41,6 +41,10 @@ export const insertIntoMessageTableStmt: Statement<[agentId: number, turn: numbe
 
 export const selectIdFromAgentTableStmt: Statement = db.prepare(`
     SELECT id FROM agent WHERE name = ?;
-`)
+`).pluck();
+
+export const selectMaxTurnFromAgentTableStmt: Statement = db.prepare(`
+    SELECT max_turn FROM agent WHERE id = ?;
+`);
 
 insertIntoAgentTableStmt.run("gexep", 0, "agent");
