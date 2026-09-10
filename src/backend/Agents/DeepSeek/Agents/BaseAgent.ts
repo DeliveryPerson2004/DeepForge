@@ -114,7 +114,7 @@ export abstract class BaseAgent{
 
         const inputDeltaAfterLoop = this.input.slice(inputLengthBeforeLoop);
 
-        insertIntoMessageTableStmt.run(this.agentId, this.turn, JSON.stringify(inputDeltaAfterLoop));
+        insertIntoMessageTableStmt.run(this.agentId, this.turn, JSON.stringify(inputDeltaAfterLoop), 1);
 
         logger.info("class BaseAgent public loop() end");
     }
