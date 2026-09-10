@@ -1,5 +1,5 @@
-import {existsSync, readFileSync, readdirSync} from "node:fs";
-import {join} from "node:path";
+import fs, {existsSync, readFileSync, readdirSync} from "node:fs";
+import path, {join} from "node:path";
 
 function loadSkillsMetaData(skillsDirPath: string): string {
     const skillMetaDataList: string[] = [];
@@ -48,4 +48,14 @@ function loadSkillsMetaData(skillsDirPath: string): string {
     }
 
     return skillMetaDataList.join("\n");
+}
+
+export function loadInstructions(dirPath: string): string{
+    const instructionsFilePath = path.join(dirPath, "instructions.md");
+    const instructionsContent = fs.readFileSync(instructionsFilePath, "utf-8");
+
+    const skillsDirPath = path.join(dirPath, "skills");
+    const skillsMetaData = loadSkillsMetaData(skillsDirPath);
+
+    return instructionsContent + skillsMetaData;
 }
