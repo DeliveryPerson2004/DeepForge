@@ -1,4 +1,4 @@
-# shell-command 目录说明文档
+# shellCommand 目录说明文档
 
 本目录存放 shell 命令相关工具的实现，包含三个文件：
 
@@ -9,6 +9,8 @@
 | `shell-pwd.ts` | 薄封装：固定执行 `pwd`，输出当前工作目录路径 |
 
 依赖关系：`shell-ls.ts` 与 `shell-pwd.ts` 均调用 `shell-execute.ts` 的 `shellExecute()`，三层共享同一套执行与安全逻辑。
+
+> 当前 shell 工具**尚未注册**到具体 Agent（`LexeyAgent` 只注册了 `web_search` / `load_skill`）。它们是为后续"执行类 Agent"准备的，见 [../../README.md](../../README.md) 路线图。
 
 ## shell-execute.ts
 
@@ -102,7 +104,7 @@ export async function executeShellCommandPWD(
 BaseAgent.loop() 识别 item.type === "function_call"
         │
         ▼
-requestFunctionCall()（由具体 Agent 实现，如 PlannerAgent）
+requestFunctionCall()（由具体 Agent 实现，如 LexeyAgent）
         │
         ▼
 JSON.parse(arguments) → shellExecuteInput → shellExecute(command, workspacePath)
