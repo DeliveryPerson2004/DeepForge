@@ -28,7 +28,7 @@ pnpm dev:backend:main       # 启动后端（先跑 tsc --noEmit 类型检查）
 初次打开本项目的读者可能好奇：为什么放着官方 SDK 不用，却自己用 `fetch` 裸调 HTTP？答案是——本项目是一个**由输出项驱动的 Agent 运行时**，而不是一个"消费一段文本"的客户端；而一个模型区别于其他模型的特色，恰好都藏在那些输出项与请求参数里。
 
 - 如果只把 SDK 当 `chat.completions` 用，你拿到的大概率是 text + tool_calls 这个被抹平后的"最小公约数"。SDK 面向"能用"而抽象，会天然把各家特有的能力收敛成其原作者模型的假设，你的代码里再也见不到它们。
-- 本项目绕开了这一层：`src/backend/DeepSeek/ModelClient.ts` 用 Node 原生 `fetch` 直连 `POST https://api.deepseek.com/responses`，请求体按 `RequestBody` 手写，类型全部由 `src/backend/DeepSeek/API/responses.ts` 约束，`package.json` 里没有任何 openai 依赖。
+- 本项目绕开了这一层：`src/backend/Agents/DeepSeek` 用 Node 原生 `fetch` 直连 `POST https://api.deepseek.com/responses`，请求体按 `RequestBody` 手写，类型全部由 `src/backend/DeepSeek/API/responses.ts` 约束，`package.json` 里没有任何 openai 依赖。
 - 而 DeepSeek `/responses` 的特色在这套类型契约里全是"一等公民"：
   - 响应输出项远不止 `message`：还有 `reasoning`（推理过程）、`web_search_call`（内建搜索调用）、`function_call`。`BaseAgent.loop()` 正是按这四类 item 分别处理、回填与判定终止的（见 `BaseAgent.ts`）。
   - 请求侧 `text.format` 支持 `json_schema` 结构化输出——`Session.ts` 的 `updateSessionName()` 就靠它把"生成会话名"约束成固定 JSON 形态。
@@ -102,8 +102,8 @@ Agent Loop 指 `BaseAgent.loop()` 那段"把用户输入追加进上下文 → �
 | 文档                                                                       | 定位                                                                          |
 |----------------------------------------------------------------------------|-------------------------------------------------------------------------------|
 | [src/backend/README.md](src/backend/README.md)                             | 项目完整技术文档：特色、技术选型、架构、快速开始、测试说明、路线图、局限      |
-| [src/backend/DeepSeek/README.md](src/backend/DeepSeek/README.md)           | ModelClient、BaseAgent 实现与设计说明                                         |
+| [src/backend/DeepSeek/README.md](src/backend/Agents/DeepSeek/README.md)           | ModelClient、BaseAgent 实现与设计说明                                         |
 | [src/backend/Tools/README.md](src/backend/Tools/README.md)                 | 工具调用链路与工具实现说明                                                     |
 | [src/backend/Tools/shell-command/README.md](src/backend/Tools/shell-command/README.md) | shell 命令工具（shell-execute / ls / pwd）实现细节               |
-| [src/backend/DeepSeek/API/responses.ts](src/backend/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义                                          |
+| [src/backend/DeepSeek/API/responses.ts](src/backend/Agents/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义                                          |
 | [test/](test)                                                              | 测试套件：shell 工具、ModelClient、PlanAgent、AppServer / Session 测试         |
