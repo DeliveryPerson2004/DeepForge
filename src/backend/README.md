@@ -166,7 +166,7 @@ function_call → requestFunctionCall() 按名称分发到对应工具
 - **分发**：`requestFunctionCall()` 按 `inputFunctionCallItem.name` 分发到对应工具，`arguments`（JSON 字符串）反序列化为工具入参（如 `shellExecuteInput` / `askDeveloperInput`）
 - **回填**：工具执行完成后由 `createFunctionCallOutputItemAndPush()` 构造 `function_call_output` 输入项，使模型在下一轮推理中可见执行结果
 
-工具的注册、分发与 shell 工具的详细实现见 [Tools/README.md](Tools/README.md) 与 [Tools/shell-command/README.md](Tools/shell-command/README.md)。
+工具的注册、分发与 shell 工具的详细实现见 [Tools/README.md](Tools/README.md) 与 [Tools/shell-command/README.md](Tools/shellCommand/README.md)。
 
 ## 5. 与模型 provider 耦合的取舍
 
@@ -272,6 +272,6 @@ PR 合并至 `main` 时，GitHub Actions（`../../.github/workflows/main.yml`）
 | [本文件（README.md）](README.md)                                                    | 项目完整技术文档：特色、技术选型、架构、快速开始、测试、路线图      |
 | [DeepSeek/README.md](Agents/DeepSeek/README.md)                                            | ModelClient、BaseAgent 实现与设计说明                               |
 | [Tools/README.md](Tools/README.md)                                                  | 工具调用链路与工具实现说明                                          |
-| [Tools/shell-command/README.md](Tools/shell-command/README.md)                      | shell 命令工具（shell-execute / ls / pwd）实现细节                  |
+| [Tools/shell-command/README.md](Tools/shellCommand/README.md)                      | shell 命令工具（shell-execute / ls / pwd）实现细节                  |
 | [DeepSeek/API/responses.ts](Agents/DeepSeek/API/responses.ts)                              | 请求 / 响应 TypeScript 类型契约定义                                 |
 | [../../test/](../../test)                                                           | 测试套件：shell 工具、ModelClient、PlanAgent、AppServer / Session   |

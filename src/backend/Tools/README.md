@@ -6,12 +6,12 @@
 
 | 工具 | 文件 | 说明 |
 | ---- | ---- | ---- |
-| shell 命令执行 | `shell-command/shell-execute.ts` | 在指定工作目录中执行 shell 命令（bash，禁用 sudo） |
-| 目录查看 | `shell-command/shell-ls.ts` | 固定执行 `ls`，查看目录内容 |
-| 工作目录输出 | `shell-command/shell-pwd.ts` | 固定执行 `pwd`，输出当前工作目录路径 |
+| shell 命令执行 | `shellCommand` | 在指定工作目录中执行 shell 命令（bash，禁用 sudo） |
+| 目录查看 | `shellCommand` | 固定执行 `ls`，查看目录内容 |
+| 工作目录输出 | `shellCommand` | 固定执行 `pwd`，输出当前工作目录路径 |
 | 询问开发者 | `ask-developer.ts` | 将 agent 的问题以 warn 日志形式转达给开发者 |
 
-各工具的技术细节见 [shell-command/README.md](shell-command/README.md)。
+各工具的技术细节见 [shell-command/README.md](shellCommand/README.md)。
 
 ## 工具调用链路
 

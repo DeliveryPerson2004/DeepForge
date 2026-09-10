@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 import { logger } from "../../../logger.ts";
 import { askDeveloper, type askDeveloperInput } from "../../../Tools/ask-developer.ts";
-import { shellExecute, type ShellExecuteInputType } from "../../../Tools/shell-command/shell-execute.ts";
+import { shellExecute, type ShellExecuteInputType } from "../../../Tools/shellCommand/shell-execute.ts";
 
 import {
     ModelType,

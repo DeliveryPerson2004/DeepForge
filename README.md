@@ -31,6 +31,6 @@ pnpm dev:backend:main       # 启动后端（先跑 tsc --noEmit 类型检查）
 | [src/backend/README.md](src/backend/README.md)                             | 项目完整技术文档：特色、技术选型、架构、快速开始、测试说明、路线图、局限      |
 | [src/backend/DeepSeek/README.md](src/backend/Agents/DeepSeek/README.md)           | ModelClient、BaseAgent 实现与设计说明                                         |
 | [src/backend/Tools/README.md](src/backend/Tools/README.md)                 | 工具调用链路与工具实现说明                                                     |
-| [src/backend/Tools/shell-command/README.md](src/backend/Tools/shell-command/README.md) | shell 命令工具（shell-execute / ls / pwd）实现细节               |
+| [src/backend/Tools/shell-command/README.md](src/backend/Tools/shellCommand/README.md) | shell 命令工具（shell-execute / ls / pwd）实现细节               |
 | [src/backend/DeepSeek/API/responses.ts](src/backend/Agents/DeepSeek/API/responses.ts) | 请求 / 响应 TypeScript 类型契约定义                                          |
 | [test/](test)                                                              | 测试套件：shell 工具、ModelClient、PlanAgent、AppServer / Session 测试         |
