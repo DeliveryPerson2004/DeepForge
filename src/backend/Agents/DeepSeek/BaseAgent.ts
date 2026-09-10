@@ -100,12 +100,7 @@ export abstract class BaseAgent{
                 }else if(item.type == "function_call"){
                     logger.info(item.type);
                     await this.requestFunctionCall(item);
-
-                    if(item.name == "ask_developer"){
-                        break;
-                    }else{
-                        hasFunctionCall = true;
-                    }
+                    hasFunctionCall = true;
                 }else if(item.type == "web_search_call"){
                     logger.info(item.type);
                 }
