@@ -2,7 +2,7 @@ import path from "node:path";
 import {fileURLToPath} from "node:url";
 import {BaseAgent} from "../../BaseAgent.ts";
 import {type InputFunctionCallItem, type InputItemType, ModelType, type ToolsType} from "../../API/responses.ts";
-import * as fs from "node:fs";
+import fs from "fs";
 import {shellExecute, type shellExecuteInput} from "../../../Tools/shell-command/shell-execute.ts";
 import {askDeveloper, type askDeveloperInput} from "../../../Tools/ask-developer.ts";
 import {logger} from "../../../logger.ts";
@@ -55,7 +55,6 @@ export class PlanAgent extends BaseAgent {
 
         //TODO 用agent name向数据库获取真实的agent id
         const agentId = 1;
-
 
         super(
             ModelType.DeepSeekV4Flash,
