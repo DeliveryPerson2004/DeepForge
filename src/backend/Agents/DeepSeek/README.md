@@ -3,7 +3,7 @@
 本目录封装了与 DeepSeek 模型 provider 交互的核心能力，包含两个文件：
 
 - `ModelClient.ts` — 模型访问入口，负责与 `/responses` API 的 HTTP 通信
-- `BaseAgent.ts` — Agent 基类，实现基于 ModelClient 的多轮对话循环
+- `Agents/BaseAgent.ts` — Agent 基类，实现基于 ModelClient 的多轮对话循环
 
 ## ModelClient.ts
 
