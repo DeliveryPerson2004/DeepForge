@@ -45,6 +45,6 @@ export const selectIdFromAgentTableStmt: Statement = db.prepare(`
 
 export const selectMaxTurnFromAgentTableStmt: Statement = db.prepare(`
     SELECT max_turn FROM agent WHERE id = ?;
-`);
+`).pluck();
 
-insertIntoAgentTableStmt.run("gexep", 0, "agent");
+insertIntoAgentTableStmt.run("Lexey", 0, "language agent");
