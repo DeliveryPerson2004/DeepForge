@@ -6,10 +6,10 @@ import {
     ModelType,
     type ResponseSchema,
     type ToolsType
-} from "./API/responses.ts";
-import {ModelClient} from "./ModelClient.ts";
-import {logger} from "../../logger.ts";
-import {insertIntoMessageTableStmt} from "../../database.ts";
+} from "../API/responses.ts";
+import {ModelClient} from "../ModelClient.ts";
+import {logger} from "../../../logger.ts";
+import {insertIntoMessageTableStmt} from "../../../database.ts";
 
 
 
