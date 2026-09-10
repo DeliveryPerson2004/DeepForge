@@ -5,7 +5,6 @@ export const createAgentTable = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     max_turn INTEGER NOT NULL,
-    description TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 `;
@@ -25,4 +24,4 @@ export const createMessageTable = `
 db.exec(createAgentTable);
 db.exec(createMessageTable);
 
-db.exec("INSERT INTO agent (name, max_turn, description) VALUES ('Lexey', 0, 'language agent')");
+db.exec("INSERT INTO agent (name, max_turn) VALUES ('Lexey', 0)");

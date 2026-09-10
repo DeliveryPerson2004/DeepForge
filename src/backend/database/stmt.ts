@@ -3,7 +3,7 @@ import { type Statement } from "better-sqlite3";
 import { db } from "./db.ts";
 
 export const insertIntoAgentTableStmt: Statement<[name: string, maxTurn: number, description: string]> = db.prepare(`
-    INSERT INTO agent (name, max_turn, description) VALUES (?, ?, ?)
+    INSERT INTO agent (name, max_turn) VALUES (?, ?)
 `);
 
 export const selectIdFromAgentTableStmt: Statement = db.prepare(`
