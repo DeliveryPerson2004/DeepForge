@@ -4,3 +4,4 @@ node_modules
 user-workspace
 generated
 *.db
+src/backend/test.ts
