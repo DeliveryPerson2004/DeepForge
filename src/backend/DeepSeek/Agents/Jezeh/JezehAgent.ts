@@ -7,7 +7,6 @@ import {
 import path from "node:path";
 
 const dirPath = import.meta.dirname;
-const workspacePath = "";
 
 export class JezehAgent extends BaseAgent{
     constructor() {
