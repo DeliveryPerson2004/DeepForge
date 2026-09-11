@@ -13,7 +13,7 @@
 | Agent | 职责 | 联想词 | 状态 |
 | ----- | ---- | ------ | ---- |
 | **Lexey** | 语言 Agent（Lexicon）：多语言学习辅导与文本处理（翻译、润色、校对、摘要、术语规范化） | `lex`（lexicon 词汇 / 词典） | 已实现 |
-| **Gexep** | 执行与工程 Agent（Executor）：调用 shell、读写工作区、运行构建与测试，直接改动工作副本 | `exe`（execute 执行）、`ex`（former） | 规划中 |
+| **Gexep** | 入口与协调 Agent（Gateway）：理解用户需求、协调专属 Agent，并统一验收和交付结果 | `exe`（execute 执行）、`ex`（former） | 部分实现（A2A 待接入） |
 | **Jeyeh** | 视觉与多模态 Agent（Vision）：图像 / 视频 / 截图的画面理解、OCR、图表解析与界面元素识别 | `eye`（眼睛） | 规划中 |
 | **Jezeh** | 日常与轻量任务 Agent（Easy）：备忘、查询、格式转换等低复杂度高频请求，最短路径快速响应 | `ez`（easy / EZ）、`Zen`（禅 / 专注） | 规划中 |
 | **Weseh** | 规划与决策 Agent（Wise）：任务拆解、规划与策略判断，为执行类 Agent 输出计划与优先级 | `wise`（智慧）、`web` / `search`（备选） | 规划中 |
@@ -25,6 +25,6 @@
 
 ## 协作设想
 
-- 计划以一个 Agent 作为面向用户的**入口**，其余 Agent 均实现 A2A（Agent-to-Agent）协议，可被入口 Agent 调用；入口 Agent 的具体归属暂不指定。
+- **Gexep** 是面向用户的统一入口；其余 Agent 计划实现 A2A（Agent-to-Agent）协议，由 Gexep 根据用户需求调用。当前 A2A 尚未实现。
 - 隔离交给路由而非用户手动"新开会话"：由入口处的通用路由 Agent 判断"这次请求该交给哪个专属 Agent"，每个专属 Agent 只持有与自身职责相关的工具、数据与历史。详见 [../THINKING.md](../../THINKING.md)。
 - 工具按最小权限切分：执行类 Agent 只拥有产出修改所需的最小工具，git 等"checkpoint 型"工具留给审核 Agent。详见 [../THINKING.md](../../THINKING.md) 与 [../README.md](../../README.md) 路线图。
