@@ -30,7 +30,7 @@ export abstract class BaseAgent{
         agentId: number,
         agentName: string,
         functionTools: ToolsType,
-        turn: number,
+        maxTurn: number,
         input: InputItemType[],
     ) {
         this.functionTools = functionTools;
@@ -39,7 +39,7 @@ export abstract class BaseAgent{
         this.modelClient = new ModelClient();
         this.agentId = agentId;
         this.agentName = agentName;
-        this.turn = turn;
+        this.turn = maxTurn;
         this.input = input;
 
         logger.info("new class BaseAgent()");
