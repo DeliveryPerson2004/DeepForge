@@ -25,3 +25,4 @@ db.exec(createAgentTable);
 db.exec(createMessageTable);
 
 db.exec("INSERT INTO agent (name, max_turn) VALUES ('Lexey', 0)");
+db.exec("INSERT INTO agent (name, max_turn) VALUES ('Zebeh', 0)");
