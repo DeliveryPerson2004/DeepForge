@@ -8,10 +8,8 @@
 | `loadInstructions.ts` | —（启动时调用） | 读取 `instructions.md` 并追加 skills 元数据 | 构造时调用 |
 | `askDeveloper.ts` | `ask_developer` | 将 Agent 的问题以 warn 日志形式转达给开发者 | 已实现，未注册 |
 | `sendEmail.ts` | `send_email` | 通过 QQ SMTP 向工具中配置的固定邮箱发送邮件 | 已注册到 `GexepAgent` |
+| `executeE2BShell.ts` | `e2b_shell_execute` | 在网络禁用的 E2B Sandbox `/memos` 目录中执行 Shell 命令 | 已注册到 `JezehAgent` |
 | `downloadMemo.ts` | `download_memo` | 从 Jezeh 的 E2B Sandbox 下载 Markdown 备忘录到固定宿主机目录 | 已注册到 `JezehAgent` |
-| `shellCommand/` | `execute_shell_command` / `ls` / `pwd` | 在指定工作目录执行 shell 命令（bash，禁用 sudo） | 已实现，未注册 |
-
-shell 命令相关工具的技术细节见 [shellCommand/README.md](shellCommand/README.md)。
 
 ## 工具调用链路
 
@@ -73,8 +71,14 @@ E2B 配置从环境变量读取：
 - `E2B_API_KEY`：E2B API 密钥。
 - `E2B_MEMO_SANDBOX_ID`：可选的 Sandbox ID，可用于连接仍在运行或已暂停的 Sandbox；未设置时会创建一个禁用网络的新 Sandbox。
 
-当前 Jezeh 不再注册本地 `shell_execute`。后续的创建、读取、更新、整理与删除能力也应实现为限定在该 Sandbox 的结构化工具，而不是恢复通用 Shell。
+当前 Jezeh 不注册或调用宿主机 `shell_execute`；创建、读取、更新、整理与删除均通过 E2B Shell 在云端完成。
+
+## executeE2BShell.ts
+
+`executeE2BShell()` 通过 E2B SDK 在 Jezeh 当前 Sandbox 中运行命令，默认工作目录固定为 `/memos`，单次命令超时为 30 秒，返回退出码、标准输出和标准错误，单项输出超过 100,000 个字符时会被截断。
+
+这不是原来的本地 Shell：命令在 E2B 隔离环境中执行，创建 Sandbox 时禁用网络，宿主机也不会向 Sandbox 挂载目录或传递 Shell 权限。Jezeh 使用该工具创建和编辑云端备忘录，再按需调用 `download_memo` 导出文件。
 
 ## 与沙箱运行环境的关系
 
-旧的 shell 命令工具仍保留供其他开发用途，但不会注册给 Jezeh。Jezeh 在 E2B Sandbox 中隔离处理备忘录，仅由职责单一的结构化工具访问；`download_memo` 是受限的导出通道，只能在固定宿主机根目录内新建 Markdown 文件。Sandbox 默认是临时工作区，不能冒充持久化存储。
+Jezeh 不使用宿主机本地 Shell。它通过 `e2b_shell_execute` 在 E2B Sandbox 中处理备忘录，并通过 `download_memo` 这一受限导出通道在固定宿主机根目录内新建 Markdown 文件。Sandbox 默认是临时工作区，不能冒充持久化存储。
