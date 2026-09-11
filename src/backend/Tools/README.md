@@ -7,6 +7,7 @@
 | `loadSkill.ts` | `load_skill` | 按 frontmatter 的 `name` 加载 `SKILL.md` 正文 | 已注册到 `LexeyAgent` |
 | `loadInstructions.ts` | —（启动时调用） | 读取 `instructions.md` 并追加 skills 元数据 | 构造时调用 |
 | `askDeveloper.ts` | `ask_developer` | 将 Agent 的问题以 warn 日志形式转达给开发者 | 已实现，未注册 |
+| `sendEmail.ts` | `send_email` | 通过 QQ SMTP 向工具中配置的固定邮箱发送邮件 | 已实现，未注册 |
 | `shellCommand/` | `execute_shell_command` / `ls` / `pwd` | 在指定工作目录执行 shell 命令（bash，禁用 sudo） | 已实现，未注册 |
 
 shell 命令相关工具的技术细节见 [shellCommand/README.md](shellCommand/README.md)。
@@ -47,6 +48,18 @@ function_call_output 输入项并追加进消息上下文
 
 - `loadInstructions(dirPath)`：读取 Agent 的 `instructions.md`，扫描同级 `skills/` 下每个 `SKILL.md` 的 frontmatter，把 `name` / `description` 追加为指令末尾的能力清单
 - `loadSkill(skillsDirPath, skillName)`：按 frontmatter 的 `name` 命中文件，剥离 frontmatter 后返回正文；未找到或目录不可读时返回提示信息而非抛异常
+
+## sendEmail.ts
+
+`sendEmail()` 使用 QQ SMTP 发送纯文本邮件，并可附带 HTML 正文。模型调用参数包含发件人显示名称 `senderName`、主题 `subject`、纯文本正文 `text` 与可选的 HTML 正文 `html`。SMTP 主机、实际发件邮箱与收件人固定写在 `sendEmail.ts` 顶部的 `EMAIL_CONFIG` 中，Agent 无法在调用时把邮件改发到任意地址。
+
+`senderName` 只控制收件箱中显示的发件人名称，例如 `Gexep`；实际发件地址仍是通过 QQ SMTP 认证的固定邮箱。
+
+授权码不写入源码，而是从项目根目录 `.env` 的以下变量读取：
+
+- `SMTP_PASS`：QQ 邮箱生成的 SMTP 授权码
+
+工具只返回发送结果或错误信息，不会记录邮件正文和授权码。`.env` 已被 Git 忽略，不应将真实授权码复制到 `.env.example` 或其他受版本控制的文件中。当前尚未注册到具体 Agent。
 
 ## 与沙箱运行环境的关系
 
