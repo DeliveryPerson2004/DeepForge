@@ -31,7 +31,7 @@ const insertAgentIfMissing = db.prepare(`
 `);
 
 export function initDefaultAgents(): void {
-    for (const agentName of ["Gexep", "Lexey", "Zebeh"]) {
+    for (const agentName of ["Gexep", "Jezeh", "Lexey", "Zebeh"]) {
         insertAgentIfMissing.run(agentName, agentName);
     }
 }
