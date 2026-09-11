@@ -12,7 +12,7 @@ const skillsDirPath = path.join(dirPath, "skills");
 
 export class LexeyAgent extends BaseAgent{
     constructor() {
-        const instructions = loadInstructions(dirPath);
+        const instructions = loadInstructions(dirPath, true);
         const agentName = path.basename(dirPath);
         const agentId = selectIdFromAgentTableStmt.get(agentName) as number;
 
