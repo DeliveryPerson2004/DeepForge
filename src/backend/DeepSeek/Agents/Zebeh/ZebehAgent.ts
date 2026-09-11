@@ -12,7 +12,7 @@ import path from "node:path";
 
 const dirPath = import.meta.dirname;
 
-export class LexeyAgent extends BaseAgent{
+export class ZebehAgent extends BaseAgent{
     constructor() {
         const instructions = loadInstructions(dirPath);
         const agentName = path.basename(dirPath);
