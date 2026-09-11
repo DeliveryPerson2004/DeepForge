@@ -24,5 +24,16 @@ export const createMessageTable = `
 db.exec(createAgentTable);
 db.exec(createMessageTable);
 
-db.exec("INSERT INTO agent (name, max_turn) VALUES ('Lexey', 0)");
-db.exec("INSERT INTO agent (name, max_turn) VALUES ('Zebeh', 0)");
+const insertAgentIfMissing = db.prepare(`
+    INSERT INTO agent (name, max_turn)
+    SELECT ?, 0
+    WHERE NOT EXISTS (SELECT 1 FROM agent WHERE name = ?)
+`);
+
+export function initDefaultAgents(): void {
+    for (const agentName of ["Gexep", "Lexey", "Zebeh"]) {
+        insertAgentIfMissing.run(agentName, agentName);
+    }
+}
+
+initDefaultAgents();
