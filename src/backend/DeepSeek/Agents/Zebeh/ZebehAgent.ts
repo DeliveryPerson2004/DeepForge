@@ -1,4 +1,4 @@
-import {BaseAgent} from "../BaseAgent.ts";
+import {BaseAgent} from "#base-agent";
 import {type InputFunctionCallItem, ModelType, type ToolsType} from "../../API/responses.ts";
 import {loadInstructions} from "../../../Tools/loadInstructions.ts";
 import {

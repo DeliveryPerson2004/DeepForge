@@ -20,6 +20,9 @@
     }
   },
   "type": "module",
+  "imports": {
+    "#base-agent": "./src/backend/DeepSeek/Agents/BaseAgent.ts"
+  },
   "dependencies": {
     "better-sqlite3": "^13.0.3",
     "dotenv": "^17.4.2",
