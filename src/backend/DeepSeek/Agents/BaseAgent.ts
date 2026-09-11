@@ -21,7 +21,7 @@ export abstract class BaseAgent{
 
     protected readonly agentId: number;
     protected readonly agentName: string;
-    protected turn: number;
+    protected maxTurn: number;
     protected input: InputItemType[];
 
     protected constructor(
@@ -39,7 +39,7 @@ export abstract class BaseAgent{
         this.modelClient = new ModelClient();
         this.agentId = agentId;
         this.agentName = agentName;
-        this.turn = maxTurn;
+        this.maxTurn = maxTurn;
         this.input = input;
 
         logger.info("new class BaseAgent()");
@@ -114,7 +114,7 @@ export abstract class BaseAgent{
 
         const inputDeltaAfterLoop = this.input.slice(inputLengthBeforeLoop);
 
-        insertIntoMessageTableStmt.run(this.agentId, this.turn, JSON.stringify(inputDeltaAfterLoop), 1);
+        insertIntoMessageTableStmt.run(this.agentId, this.maxTurn, JSON.stringify(inputDeltaAfterLoop), 1);
 
         logger.info("class BaseAgent public loop() end");
     }
