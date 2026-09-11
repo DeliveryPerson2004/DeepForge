@@ -8,6 +8,7 @@
 | `loadInstructions.ts` | —（启动时调用） | 读取 `instructions.md` 并追加 skills 元数据 | 构造时调用 |
 | `askDeveloper.ts` | `ask_developer` | 将 Agent 的问题以 warn 日志形式转达给开发者 | 已实现，未注册 |
 | `sendEmail.ts` | `send_email` | 通过 QQ SMTP 向工具中配置的固定邮箱发送邮件 | 已注册到 `GexepAgent` |
+| `downloadMemo.ts` | `download_memo` | 从 Jezeh 的 E2B Sandbox 下载 Markdown 备忘录到固定宿主机目录 | 已注册到 `JezehAgent` |
 | `shellCommand/` | `execute_shell_command` / `ls` / `pwd` | 在指定工作目录执行 shell 命令（bash，禁用 sudo） | 已实现，未注册 |
 
 shell 命令相关工具的技术细节见 [shellCommand/README.md](shellCommand/README.md)。
@@ -61,6 +62,19 @@ function_call_output 输入项并追加进消息上下文
 
 工具只返回发送结果或错误信息，不会记录邮件正文和授权码。`.env` 已被 Git 忽略，不应将真实授权码复制到 `.env.example` 或其他受版本控制的文件中。当前已注册到 `GexepAgent`。
 
+## downloadMemo.ts
+
+`downloadMemo()` 从 Jezeh 当前使用的 E2B Sandbox 读取 `memos/` 下的 Markdown 文件，并把它写入工具中固定的宿主机目录 `/home/gxp/Projects/MyMemo`。模型参数只有 `memoPath`，不能指定或更改宿主机路径。工具会保留备忘录相对于 `memos/` 的路径层级。
+
+工具只创建新文件，不覆盖已有文件；它只会在固定根目录内部创建缺失的子目录，并拒绝非 Markdown 文件、离开 `memos/` 的云端路径及经过符号链接的宿主路径。宿主文件默认以 `0600` 权限创建，单个备忘录最大为 5 MiB。
+
+E2B 配置从环境变量读取：
+
+- `E2B_API_KEY`：E2B API 密钥。
+- `E2B_MEMO_SANDBOX_ID`：可选的 Sandbox ID，可用于连接仍在运行或已暂停的 Sandbox；未设置时会创建一个禁用网络的新 Sandbox。
+
+当前 Jezeh 不再注册本地 `shell_execute`。后续的创建、读取、更新、整理与删除能力也应实现为限定在该 Sandbox 的结构化工具，而不是恢复通用 Shell。
+
 ## 与沙箱运行环境的关系
 
-shell 命令工具的**目标**运行环境是 Docker Sandbox（`sbx`）提供的隔离沙箱：宿主机只负责 Agent 开发，项目同步进沙箱后命令在沙箱内执行，防止注入影响宿主机。当前 `shellExecute()` 以本地 `exec` 实现，并先行通过 sudo 正则拦截（`\bsudo\b`，大小写不敏感）做第一道防护；沙箱接入见 [../README.md](../README.md) 路线图。
+旧的 shell 命令工具仍保留供其他开发用途，但不会注册给 Jezeh。Jezeh 在 E2B Sandbox 中隔离处理备忘录，仅由职责单一的结构化工具访问；`download_memo` 是受限的导出通道，只能在固定宿主机根目录内新建 Markdown 文件。Sandbox 默认是临时工作区，不能冒充持久化存储。
