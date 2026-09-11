@@ -16,7 +16,7 @@ const skillsDirPath = path.join(dirPath, "skills");
 export class LexeyAgent extends BaseAgent{
     constructor() {
         const instructions = loadInstructions(dirPath);
-        const agentName = "Lexey";
+        const agentName = path.basename(dirPath);
         const agentId = selectIdFromAgentTableStmt.get(agentName) as number;
 
         const funcTools: ToolsType = [
