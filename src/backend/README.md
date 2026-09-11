@@ -14,7 +14,7 @@
 | 模块体系 | ESM（`module: nodenext`） | `type: "module"`，代码中显式携带 `.ts` 扩展名导入 |
 | 运行方式 | tsx | 直接执行 TypeScript 源码；`tsc --noEmit` 负责类型检查 |
 | 包管理器 | pnpm | 通过 `devEngines` 锁定版本 |
-| 数据契约 | TypeScript 类型（编译期） | 请求 / 响应类型定义于 `Agents/DeepSeek/API`，无运行时校验 |
+| 数据契约 | TypeScript 类型（编译期） | 请求 / 响应类型定义于 `DeepSeek`，无运行时校验 |
 | HTTP 客户端 | Node.js 原生 fetch | 无第三方 HTTP 依赖 |
 | 参数校验 | zod | 工具入参（如 `load_skill`）的运行时校验 |
 | 持久化 | better-sqlite3 | 单文件 `./database.db`，prepared statement，无 ORM / 迁移 |
@@ -145,10 +145,10 @@ Agent 的职责与行为准则写在 `instructions.md`，具体能力沉淀为 `
 本项目（`ModelClient`、`BaseAgent`、API schemas、Agents）与 DeepSeek 这一特定 model provider 强绑定，原因如下：
 
 1. **model 与 model-provider 天然强绑定**。不同 provider 的 API 格式截然不同，无法抽象出统一接口。国内大部分 provider 目前兼容 OpenAI 或 Anthropic 的 API 格式，但未来模型训练范式可能变化，API 格式也存在变数，因此围绕单一 provider 开发是合理选择。
-2. **API 文档即最佳公开资料**。`Agents/DeepSeek/API` 直接翻译 DeepSeek API 文档的 request / response 部分，`BaseAgent` 的字段与 API 请求字段一一对应，开发者只需对照文档即可开发。
+2. **API 文档即最佳公开资料**。`DeepSeek` 直接翻译 DeepSeek API 文档的 request / response 部分，`BaseAgent` 的字段与 API 请求字段一一对应，开发者只需对照文档即可开发。
 3. **耦合换取实现简洁**。`BaseAgent` 直接以 provider 的请求字段形态组织代码，省去了中间抽象层。
 
-代价是：如需更换模型 provider，可能需要对类型契约、client 与 agent 字段做重构。更完整的论证见 [THINKING.md](THINKING.md) 与 [Agents/DeepSeek/README.md](Agents/DeepSeek/README.md)。
+代价是：如需更换模型 provider，可能需要对类型契约、client 与 agent 字段做重构。更完整的论证见 [THINKING.md](THINKING.md) 与 [Agents/DeepSeek/README.md](DeepSeek/README.md)。
 
 ## 7. 快速开始
 
@@ -225,8 +225,8 @@ pnpm test   # 等价于 node --import tsx --test test/**/*.ts
 | ---- | ---- |
 | [根目录 README.md](../../README.md) | 项目入口 / 命名故事 |
 | [THINKING.md](THINKING.md) | 8 条设计取舍与方向设想（部分尚未实现） |
-| [Agents/README.md](Agents/README.md) | Agent 名册与命名约定 |
-| [Agents/DeepSeek/README.md](Agents/DeepSeek/README.md) | ModelClient、BaseAgent 与 LexeyAgent |
+| [Agents/README.md](DeepSeek/Agents/README.md) | Agent 名册与命名约定 |
+| [Agents/DeepSeek/README.md](DeepSeek/README.md) | ModelClient、BaseAgent 与 LexeyAgent |
 | [Tools/README.md](Tools/README.md) | 工具调用链路与各工具实现 |
 | [Tools/shellCommand/README.md](Tools/shellCommand/README.md) | shell 工具实现细节 |
 | [../../test/](../../test) | 测试套件 |

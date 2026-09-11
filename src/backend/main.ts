@@ -1,4 +1,4 @@
-import {LexeyAgent} from "./Agents/DeepSeek/Agents/Lexey/LexeyAgent.ts";
+import {LexeyAgent} from "./DeepSeek/Agents/Lexey/LexeyAgent.ts";
 
 const lexeyAgent = new LexeyAgent();
 
