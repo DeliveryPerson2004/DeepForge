@@ -8,8 +8,8 @@ import {
     type ToolsType
 } from "../API/responses.ts";
 import {ModelClient} from "../ModelClient.ts";
-import {logger} from "../../../logger.ts";
-import {insertIntoMessageTableStmt} from "../../../database/stmt.ts";
+import {logger} from "../../logger.ts";
+import {insertIntoMessageTableStmt} from "../../database/stmt.ts";
 
 
 

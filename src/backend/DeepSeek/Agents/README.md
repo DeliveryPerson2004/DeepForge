@@ -19,12 +19,12 @@
 | **Weseh** | 规划与决策 Agent（Wise）：任务拆解、规划与策略判断，为执行类 Agent 输出计划与优先级 | `wise`（智慧）、`web` / `search`（备选） | 规划中 |
 | **Xedec** | 待定 | — | TODO |
 | **Celey** | 待定 | — | TODO |
-| **Zebeh** | 待定 | — | TODO |
+| **Zebeh** | 测试与验证 Agent（Behavior）：编写 / 运行测试、断言行为、回归验证 | `beh`（behavior 行为） | 规划中 |
 
 > `Gexep` 去掉两个 `e` 得到 `gxp`，既是好友中文名的首字母，也曾是本项目的旧代号（`GexepAgent`）。
 
 ## 协作设想
 
 - 计划以一个 Agent 作为面向用户的**入口**，其余 Agent 均实现 A2A（Agent-to-Agent）协议，可被入口 Agent 调用；入口 Agent 的具体归属暂不指定。
-- 隔离交给路由而非用户手动"新开会话"：由入口处的通用路由 Agent 判断"这次请求该交给哪个专属 Agent"，每个专属 Agent 只持有与自身职责相关的工具、数据与历史。详见 [../THINKING.md](../THINKING.md)。
-- 工具按最小权限切分：执行类 Agent 只拥有产出修改所需的最小工具，git 等"checkpoint 型"工具留给审核 Agent。详见 [../THINKING.md](../THINKING.md) 与 [../README.md](../README.md) 路线图。
+- 隔离交给路由而非用户手动"新开会话"：由入口处的通用路由 Agent 判断"这次请求该交给哪个专属 Agent"，每个专属 Agent 只持有与自身职责相关的工具、数据与历史。详见 [../THINKING.md](../../THINKING.md)。
+- 工具按最小权限切分：执行类 Agent 只拥有产出修改所需的最小工具，git 等"checkpoint 型"工具留给审核 Agent。详见 [../THINKING.md](../../THINKING.md) 与 [../README.md](../../README.md) 路线图。

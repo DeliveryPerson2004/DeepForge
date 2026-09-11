@@ -5,7 +5,7 @@
 - `ModelClient.ts` — 模型访问入口，负责与 `/responses` API 的 HTTP 通信
 - `API/responses.ts` — 请求体 / 响应体 TypeScript 类型契约（编译期强类型）
 - `Agents/BaseAgent.ts` — Agent 基类，实现基于 ModelClient 的多轮对话循环
-- `Agents/Lexey/` — 具体 Agent：语言 Agent（Lexicon）
+- `Agents/Lexey` — 具体 Agent：语言 Agent（Lexicon）
 
 ## ModelClient.ts
 
@@ -13,7 +13,7 @@
 
 ModelClient 是"使用模型的一个入口"，是整个项目中唯一接触网络细节的类：
 
-- 持有 provider 的 `baseURL`（`https://api.deepseek.com`）与 `DEEPSEEK_API_KEY`（读取自 `../../../../.env`）
+- 持有 provider 的 `baseURL`（`https://api.deepseek.com`）与 `DEEPSEEK_API_KEY`（读取自 `../../../.env`）
 - 对外暴露 `requestResponsesAPI(model, input, instructions, tools, user)`，封装 `/responses` endpoint 的完整调用流程
 - 上层（BaseAgent）只依赖该方法，无需关心 URL、鉴权头、序列化等实现细节
 
@@ -34,7 +34,7 @@ JSON.stringify 序列化    ← 类型契约保证字段形态（编译期）
 
 请求与响应两侧均受 `API/responses.ts` 类型契约约束，编译期强类型；运行时不做校验。
 
-请求 URL / 请求头 / 请求体结构与响应解析由 `test/model-client.test.ts` 覆盖：该测试通过 `mock.method(globalThis, "fetch", ...)` 模拟网络层，断言请求构造正确且不发起真实网络请求。
+请求 URL / 请求头 / 请求体结构与响应解析由 `../../../test/model-client.test.ts` 覆盖：该测试通过 `mock.method(globalThis, "fetch", ...)` 模拟网络层，断言请求构造正确且不发起真实网络请求。
 
 ## BaseAgent.ts
 
@@ -76,7 +76,7 @@ BaseAgent 是通用 Agent 基类，为具体 Agent（如 `LexeyAgent`）提供�
 - 通过 `ToolsType` 注册 `web_search` 与 `load_skill`
 - 实现 `requestFunctionCall()`：`load_skill` 的 `arguments` 反序列化后用 zod `safeParse` 校验，命中则 `loadSkill()` 返回正文并回填；解析或校验失败则回填错误信息
 
-分发与回填行为由 `test/lexey-agent.test.ts` 覆盖：测试以 `TestableLexeyAgent` 子类暴露受保护的 `requestFunctionCall()`，验证 `load_skill` 的正常 / 解析失败 / 校验失败 / 未知工具名场景，以及 `ask()` 全链路。
+分发与回填行为由 `../../../test/lexey-agent.test.ts` 覆盖：测试以 `TestableLexeyAgent` 子类暴露受保护的 `requestFunctionCall()`，验证 `load_skill` 的正常 / 解析失败 / 校验失败 / 未知工具名场景，以及 `ask()` 全链路。
 
 ## 与 model provider 的耦合
 
@@ -85,4 +85,4 @@ BaseAgent 是通用 Agent 基类，为具体 Agent（如 `LexeyAgent`）提供�
 - **为什么这样设计**：API 文档是最好的公开资料，围绕这份资料开发无需参考其他文件或代码。BaseAgent 的代码与 provider 的 API 文档字段强绑，便于调用 ModelClient 的相关方法，实现相对简单。
 - **代价**：耦合了 provider，如需更换模型，可能需要对类型契约、client 与 agent 字段做重构。
 
-"model" 与 "model-provider" 显然是强绑定的，例如 OpenAI 的 model-client 与 Anthropic 的截然不同，根本原因是 API 格式完全不同。国内大部分 provider 兼容 OpenAI 或 Anthropic 的 API 格式，但后续模型训练范式可能变化，API 格式也可能改变。因此围绕单一 provider 开发是可以理解的。更完整的论证见 [../../README.md](../../README.md) 与 [../../THINKING.md](../../THINKING.md)。
+"model" 与 "model-provider" 显然是强绑定的，例如 OpenAI 的 model-client 与 Anthropic 的截然不同，根本原因是 API 格式完全不同。国内大部分 provider 兼容 OpenAI 或 Anthropic 的 API 格式，但后续模型训练范式可能变化，API 格式也可能改变。因此围绕单一 provider 开发是可以理解的。更完整的论证见 [../../README.md](../README.md) 与 [../../THINKING.md](../THINKING.md)。
