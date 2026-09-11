@@ -9,6 +9,7 @@ import type {
     InputItemType,
 } from "../src/backend/DeepSeek/API/responses.ts";
 import type {DownloadMemoInputType} from "../src/backend/Tools/downloadMemo.ts";
+import type {ExecuteE2BShellInputType} from "../src/backend/Tools/executeE2BShell.ts";
 
 
 const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "deep-forge-jezeh-test-"));
@@ -97,6 +98,25 @@ describe("JezehAgent.requestFunctionCall()", () => {
         assert.equal(getLastOutputItem(agent.getInput()).output, "已下载");
     });
 
+    it("e2b_shell_execute 正常调用后回填结果", async () => {
+        let receivedInput: ExecuteE2BShellInputType | undefined;
+        const agent = new TestableJezehAgent(
+            async () => "不应调用下载",
+            async (input) => {
+                receivedInput = input;
+                return "exitCode: 0";
+            },
+        );
+
+        await agent.testRequestFunctionCall(createFunctionCallItem(
+            "e2b_shell_execute",
+            JSON.stringify({command: "printf '# memo' > memo.md"}),
+        ));
+
+        assert.deepEqual(receivedInput, {command: "printf '# memo' > memo.md"});
+        assert.equal(getLastOutputItem(agent.getInput()).output, "exitCode: 0");
+    });
+
     it("拒绝非法 JSON 和缺失的备忘录路径", async () => {
         const agent = new TestableJezehAgent(async () => "不应调用");
 
@@ -110,7 +130,7 @@ describe("JezehAgent.requestFunctionCall()", () => {
 });
 
 describe("JezehAgent 工具注册", () => {
-    it("只注册 download_memo，不注册 shell_execute", async () => {
+    it("注册 E2B Shell 与下载工具，不注册宿主机 shell_execute", async () => {
         let capturedBody: Record<string, unknown> | undefined;
         mock.method(globalThis, "fetch", async (
             _input: string | URL | Request,
@@ -137,6 +157,7 @@ describe("JezehAgent 工具注册", () => {
         const tools = capturedBody?.tools as Array<Record<string, unknown>>;
         const downloadMemoTool = tools.find((tool) => tool.name === "download_memo");
         assert.ok(downloadMemoTool !== undefined);
+        assert.ok(tools.some((tool) => tool.name === "e2b_shell_execute"));
         assert.deepEqual(
             (downloadMemoTool.parameters as {required: string[]}).required,
             ["memoPath"],
