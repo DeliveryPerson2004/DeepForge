@@ -15,7 +15,7 @@
 | **Lexey** | 语言 Agent（Lexicon）：多语言学习辅导与文本处理（翻译、润色、校对、摘要、术语规范化） | `lex`（lexicon 词汇 / 词典） | 已实现 |
 | **Gexep** | 入口与协调 Agent（Gateway）：理解用户需求、协调专属 Agent，并统一验收和交付结果 | `exe`（execute 执行）、`ex`（former） | 部分实现（A2A 待接入） |
 | **Jeyeh** | 视觉与多模态 Agent（Vision）：图像 / 视频 / 截图的画面理解、OCR、图表解析与界面元素识别 | `eye`（眼睛） | 规划中 |
-| **Jezeh** | 日常与轻量任务 Agent（Easy）：备忘、查询、格式转换等低复杂度高频请求，最短路径快速响应 | `ez`（easy / EZ）、`Zen`（禅 / 专注） | 规划中 |
+| **Jezeh** | 备忘录 Agent（Easy）：在 E2B Sandbox 中安全处理备忘录，并导出到固定的用户可见目录 | `ez`（easy / EZ）、`Zen`（禅 / 专注） | 部分实现（下载工具已接入） |
 | **Weseh** | 规划与决策 Agent（Wise）：任务拆解、规划与策略判断，为执行类 Agent 输出计划与优先级 | `wise`（智慧）、`web` / `search`（备选） | 规划中 |
 | **Xedec** | 待定 | — | TODO |
 | **Celey** | 待定 | — | TODO |
