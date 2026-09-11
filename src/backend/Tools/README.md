@@ -7,7 +7,7 @@
 | `loadSkill.ts` | `load_skill` | 按 frontmatter 的 `name` 加载 `SKILL.md` 正文 | 已注册到 `LexeyAgent` |
 | `loadInstructions.ts` | —（启动时调用） | 读取 `instructions.md` 并追加 skills 元数据 | 构造时调用 |
 | `askDeveloper.ts` | `ask_developer` | 将 Agent 的问题以 warn 日志形式转达给开发者 | 已实现，未注册 |
-| `sendEmail.ts` | `send_email` | 通过 QQ SMTP 向工具中配置的固定邮箱发送邮件 | 已实现，未注册 |
+| `sendEmail.ts` | `send_email` | 通过 QQ SMTP 向工具中配置的固定邮箱发送邮件 | 已注册到 `GexepAgent` |
 | `shellCommand/` | `execute_shell_command` / `ls` / `pwd` | 在指定工作目录执行 shell 命令（bash，禁用 sudo） | 已实现，未注册 |
 
 shell 命令相关工具的技术细节见 [shellCommand/README.md](shellCommand/README.md)。
@@ -59,7 +59,7 @@ function_call_output 输入项并追加进消息上下文
 
 - `SMTP_PASS`：QQ 邮箱生成的 SMTP 授权码
 
-工具只返回发送结果或错误信息，不会记录邮件正文和授权码。`.env` 已被 Git 忽略，不应将真实授权码复制到 `.env.example` 或其他受版本控制的文件中。当前尚未注册到具体 Agent。
+工具只返回发送结果或错误信息，不会记录邮件正文和授权码。`.env` 已被 Git 忽略，不应将真实授权码复制到 `.env.example` 或其他受版本控制的文件中。当前已注册到 `GexepAgent`。
 
 ## 与沙箱运行环境的关系
 
