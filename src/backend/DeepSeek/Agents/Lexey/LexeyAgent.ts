@@ -40,26 +40,13 @@ export class LexeyAgent extends BaseAgent{
             },
         ];
 
-        const max_turn = selectMaxTurnFromAgentTableStmt.get(agentId) as number;
 
-        const messageRows = selectMessageFromMessageTableStmt.all(agentId);
-        const input: InputItemType[] = [];
-        for (const row of messageRows) {
-            try {
-                input.push(...(JSON.parse(row.content) as InputItemType[]));
-            } catch {
-                logger.warn(`跳过无法解析的 message 行: ${row.content}`);
-            }
-        }
 
         super(
             ModelType.DeepSeekFlash,
             instructions,
             agentId,
-            agentName,
             funcTools,
-            max_turn,
-            input,
         );
     }
 
