@@ -3,7 +3,7 @@
 **A multi-agent runtime where every agent is a confidant.**
 **多智能体运行时 —— 每一个 Agent，都是一位挚友。**
 
-基于 DeepSeek `/responses` API、为个人开发者打造的最小多智能体运行时。核心是**多轮对话循环 + 工具调用闭环**：Agent 可内建 web 搜索、按需加载 skill，工具结果回填上下文供模型继续推理；会话历史落在本地 SQLite。整体用 TypeScript 编写，请求 / 响应契约从 API 文档直接翻译而来，全程编译期强类型。
+这个项目旨在“粘合”我学习和构建 Agent 过程中产生的想法，以及接触到的各类协议与技术，并借此记录和表达自己的观点，包括但不限于 MCP、A2A、Sandbox 和 GraphRAG。
 
 ## 名字从哪来
 
