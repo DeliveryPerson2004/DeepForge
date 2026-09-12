@@ -49,13 +49,15 @@ src/backend/
 test/                      # 隔离的自动化测试
 ```
 
-## 文档导航
+## 给面试官的阅读导航
 
-| 文档 | 内容 |
-| ---- | ---- |
-| [后端架构](src/backend/README.md) | 技术栈、目录结构、运行方式、持久化、测试和当前边界 |
-| [设计思考](src/backend/THINKING.md) | 关于模型耦合、MCP、A2A、Sandbox 与 GraphRAG 的取舍 |
-| [DeepSeek 模块](src/backend/DeepSeek/README.md) | 模型请求链路、Agent Loop 和具体 Agent |
-| [Agents 名册](src/backend/DeepSeek/Agents/README.md) | 命名规则、职责、实现状态与协作方向 |
-| [Tools 模块](src/backend/Tools/README.md) | 工具注册方式、配置项和安全边界 |
-| [自动化测试](test) | Agent、工具、数据库和模型客户端的回归测试 |
+如果时间有限，建议先用 5 分钟阅读本页的“已实现的能力”，再依次查看“设计思考”和“DeepSeek 模块”：前者集中说明关键技术取舍，后者展示这些判断如何落实为 Agent Loop。若希望进一步考察工程完整性，可继续阅读后端架构、工具边界和自动化测试。
+
+| 顺序 | 文档 | 建议关注 |
+| ---- | ---- | -------- |
+| 1 | [设计思考](src/backend/THINKING.md) | Workflow 与 Agentic 的关系，以及模型耦合、MCP、A2A、Sandbox 和 GraphRAG 等方向上的判断与取舍 |
+| 2 | [DeepSeek 模块](src/backend/DeepSeek/README.md) | 强类型模型协议、Agent Loop、工具结果回填和循环终止条件 |
+| 3 | [后端架构](src/backend/README.md) | 技术栈、模块边界、持久化方案、运行方式，以及已实现能力与路线图的区分 |
+| 4 | [Tools 模块](src/backend/Tools/README.md) | 工具注册、参数校验、按角色授权，以及 E2B Sandbox 与宿主机之间的安全边界 |
+| 5 | [Agents 名册](src/backend/DeepSeek/Agents/README.md) | 各 Agent 的职责划分、命名来源、当前实现状态与未来协作方式 |
+| 6 | [自动化测试](test) | Agent、工具、数据库和模型客户端的回归测试，用于验证核心行为而非只描述设计 |
