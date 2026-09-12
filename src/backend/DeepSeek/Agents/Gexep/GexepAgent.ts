@@ -8,12 +8,8 @@ import path from "node:path";
 
 const dirPath = import.meta.dirname;
 
-export type SendEmailFunction = (input: SendEmailInputType) => Promise<string>;
-
 export class GexepAgent extends BaseAgent {
-    private readonly sendEmailFunction: SendEmailFunction;
-
-    constructor(sendEmailFunction: SendEmailFunction = sendEmail) {
+    constructor() {
         const instructions = loadInstructions(dirPath);
         const agentName = path.basename(dirPath);
         const agentId = selectIdFromAgentTableStmt.get(agentName) as number;
@@ -54,8 +50,10 @@ export class GexepAgent extends BaseAgent {
             agentId,
             funcTools,
         );
+    }
 
-        this.sendEmailFunction = sendEmailFunction;
+    protected executeSendEmail(input: SendEmailInputType): Promise<string> {
+        return sendEmail(input);
     }
 
     protected async requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem): Promise<void> {
@@ -83,7 +81,7 @@ export class GexepAgent extends BaseAgent {
             return;
         }
 
-        const output = await this.sendEmailFunction(schemaParseResult.data);
+        const output = await this.executeSendEmail(schemaParseResult.data);
         this.createFunctionCallOutputItemAndPush(inputFunctionCallItem, output);
     }
 }
