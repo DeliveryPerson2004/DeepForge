@@ -1,30 +1,28 @@
-# Agents 名册与命名约定
+# Agents 名册与协作边界
 
-本项目是一个多智能体运行时——**Pantheon of Confidants**。每个 Agent 都是现实中一位好友的化身，各司其职、协同完成任务。本文件记录 Agent 名册、命名规则与协作设想。
+本文记录各 Agent 的职责、实现状态和协作方向。项目名称与完整命名故事见 [根目录 README](../../../../README.md)，具体运行机制见 [DeepSeek 模块说明](../README.md)。
 
 ## 命名规则
 
-- **名字来源**：取好友中文名的拼音首字母 `C1C2C3`，在字母之间插入两个 `e`，得到 `C1eC2eC3`。例如 `gxp → Gexep`、`lxy → Lexey`、`jyh → Jeyeh`。名字本身是一层只有懂的人才读得懂的暗号。
-- **职责联想**：再为每个名字联想一个英文单词，作为该 Agent 的职责主题。例如 `Jeyeh` 中的 `eye` → 视觉 / 多模态；`Lexey` 中的 `lex` → lexicon（语言）。
-- **项目名呼应**：`Pantheon`（万神殿）是众 Agent 的群像，`Confidant`（挚友）既是每个 Agent 的身份，也是 Persona 里"与挚友建立羁绊、以 Coop 等级累积协作"的系统。
+Agent 名称来自现实好友中文名的拼音首字母：在三个字母之间插入两个 `e`，得到 `C1eC2eC3`，例如 `gxp → Gexep`、`lxy → Lexey`。每个名称还会关联一个英文词根，用来提示职责主题，如 `lex` 对应语言、`beh` 对应行为。
 
-## 名册
+## 当前名册
 
-| Agent | 职责 | 联想词 | 状态 |
-| ----- | ---- | ------ | ---- |
-| **Lexey** | 语言 Agent（Lexicon）：多语言学习辅导与文本处理（翻译、润色、校对、摘要、术语规范化） | `lex`（lexicon 词汇 / 词典） | 已实现 |
-| **Gexep** | 入口与协调 Agent（Gateway）：理解用户需求、协调专属 Agent，并统一验收和交付结果 | `exe`（execute 执行）、`ex`（former） | 部分实现（A2A 待接入） |
-| **Jeyeh** | 视觉与多模态 Agent（Vision）：图像 / 视频 / 截图的画面理解、OCR、图表解析与界面元素识别 | `eye`（眼睛） | 规划中 |
-| **Jezeh** | 备忘录 Agent（Easy）：在 E2B Sandbox 中安全处理备忘录，并导出到固定的用户可见目录 | `ez`（easy / EZ）、`Zen`（禅 / 专注） | 部分实现（下载工具已接入） |
-| **Weseh** | 规划与决策 Agent（Wise）：任务拆解、规划与策略判断，为执行类 Agent 输出计划与优先级 | `wise`（智慧）、`web` / `search`（备选） | 规划中 |
-| **Xedec** | 待定 | — | TODO |
-| **Celey** | 待定 | — | TODO |
-| **Zebeh** | 测试与验证 Agent（Behavior）：编写 / 运行测试、断言行为、回归验证 | `beh`（behavior 行为） | 规划中 |
+| Agent | 职责 | 当前状态 |
+| ----- | ---- | -------- |
+| **Gexep** | 面向用户的入口与协调者；当前可向固定邮箱发送邮件 | 基础 Agent 与邮件工具已实现，A2A 协调待接入 |
+| **Jezeh** | 在 E2B Sandbox 中创建、查询、整理和导出 Markdown 备忘录 | 沙箱执行与受限下载工具已实现，A2A 待接入 |
+| **Lexey** | 多语言学习辅导与翻译、润色、校对、摘要等文本处理 | 已实现网页搜索和 Skill 按需加载 |
+| **Zebeh** | 开发阶段的 Agent 行为验证与调试 | 基础角色已实现，专用验证工具待补充 |
+| **Jeyeh** | 图像、视频、OCR、图表和界面元素理解 | 规划中 |
+| **Weseh** | 任务拆解、规划与决策 | 规划中 |
+| **Xedec** | 待定 | 规划中 |
+| **Celey** | 待定 | 规划中 |
 
-> `Gexep` 去掉两个 `e` 得到 `gxp`，既是好友中文名的首字母，也曾是本项目的旧代号（`GexepAgent`）。
+## 协作边界
 
-## 协作设想
+设计目标是由 Gexep 接收用户请求，再通过 A2A 将边界清晰的子任务交给合适的专属 Agent。每个 Agent 只拥有职责所需的工具、数据和历史，从角色分工中获得上下文隔离与最小权限。
 
-- **Gexep** 是面向用户的统一入口；其余 Agent 计划实现 A2A（Agent-to-Agent）协议，由 Gexep 根据用户需求调用。当前 A2A 尚未实现。
-- 隔离交给路由而非用户手动"新开会话"：由入口处的通用路由 Agent 判断"这次请求该交给哪个专属 Agent"，每个专属 Agent 只持有与自身职责相关的工具、数据与历史。详见 [../THINKING.md](../../THINKING.md)。
-- 工具按最小权限切分：执行类 Agent 只拥有产出修改所需的最小工具，git 等"checkpoint 型"工具留给审核 Agent。详见 [../THINKING.md](../../THINKING.md) 与 [../README.md](../../README.md) 路线图。
+当前代码尚未实现 A2A，因此这些 Agent 彼此独立运行，Gexep 也不能实际发现、调用或汇总其他 Agent。文档和角色指令中出现的“协调”描述代表目标形态，不代表当前已经具备跨 Agent 通信能力。
+
+关于路由、Sandbox、工具归属和审核 Agent 的设计理由，见 [THINKING.md](../../THINKING.md)。

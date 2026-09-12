@@ -1,88 +1,53 @@
-# DeepSeek 目录说明文档
+# DeepSeek 模块
 
-本目录封装与 DeepSeek 模型 provider 交互的核心能力：
+本目录封装与 DeepSeek `/responses` API 直接相关的类型、网络请求和 Agent 运行时。整体架构与运行方式见 [后端架构说明](../README.md)；这里聚焦模型链路的实现细节。
 
-- `ModelClient.ts` — 模型访问入口，负责与 `/responses` API 的 HTTP 通信
-- `API/responses.ts` — 请求体 / 响应体 TypeScript 类型契约（编译期强类型）
-- `Agents/BaseAgent.ts` — Agent 基类，实现基于 ModelClient 的多轮对话循环
-- `Agents/Lexey` — 具体 Agent：语言 Agent（Lexicon）
+## 目录职责
 
-## ModelClient.ts
+| 路径 | 职责 |
+| ---- | ---- |
+| `API/responses.ts` | 定义请求体、输入项、输出项、模型和工具的 TypeScript 类型 |
+| `ModelClient.ts` | 使用原生 `fetch` 发送 `/responses` 请求，并注入鉴权信息 |
+| `Agents/BaseAgent.ts` | 实现多轮循环、function tool 回填和消息历史持久化 |
+| `Agents/<name>/` | 保存具体 Agent 的角色指令、工具声明与调用分发逻辑 |
 
-### 职责
+## 请求与循环
 
-ModelClient 是"使用模型的一个入口"，是整个项目中唯一接触网络细节的类：
+`ModelClient.requestResponsesAPI()` 接收 `model`、`input`、`instructions`、`tools` 和 `user`，组装请求体后向 `https://api.deepseek.com/responses` 发起请求。`DEEPSEEK_API_KEY` 通过环境变量读取；上层不处理 URL、请求头或序列化细节。
 
-- 持有 provider 的 `baseURL`（`https://api.deepseek.com`）与 `DEEPSEEK_API_KEY`（读取自 `../../../.env`）
-- 对外暴露 `requestResponsesAPI(model, input, instructions, tools, user)`，封装 `/responses` endpoint 的完整调用流程
-- 上层（BaseAgent）只依赖该方法，无需关心 URL、鉴权头、序列化等实现细节
+`BaseAgent.ask()` 驱动完整循环：
 
-### 调用流程
+1. 将用户输入转换成 `message` 并追加到当前上下文。
+2. 调用 `ModelClient` 获取模型输出。
+3. 将每个输出项追加到上下文，并按类型处理：
+   - `message`：记录模型回复；
+   - `reasoning`：记录推理文本；
+   - `web_search_call`：由模型服务完成，本地只记录；
+   - `function_call`：交给具体 Agent 校验参数并执行工具。
+4. 将工具结果包装成 `function_call_output`，回填后再次请求模型。
+5. 当一轮不再出现 `function_call` 时结束，并将本轮新增上下文写入 SQLite。
 
-```
-组装 payload（model / input / instructions / tools / user）
-        │
-        ▼
-JSON.stringify 序列化    ← 类型契约保证字段形态（编译期）
-        │
-        ▼
-原生 fetch POST /responses   ← 携带 Bearer Token
-        │
-        ▼
-返回 JSON（上层按 ResponseSchema 消费）
-```
+`BaseAgent` 在构造时还会根据 `agentId` 恢复所有 `is_activated = 1` 的历史记录。无法解析的旧记录会被跳过并写入警告日志。
 
-请求与响应两侧均受 `API/responses.ts` 类型契约约束，编译期强类型；运行时不做校验。
+## 具体 Agent
 
-请求 URL / 请求头 / 请求体结构与响应解析由 `../../../test/model-client.test.ts` 覆盖：该测试通过 `mock.method(globalThis, "fetch", ...)` 模拟网络层，断言请求构造正确且不发起真实网络请求。
+| Agent | 模型可见工具 | 说明 |
+| ----- | ------------ | ---- |
+| `GexepAgent` | `send_email` | 使用固定 SMTP 发件人与收件人发送邮件；公开构造函数无参数 |
+| `JezehAgent` | `e2b_shell_execute`、`download_memo` | 在 `/memos` 沙箱工作区处理备忘录，并通过受限通道导出 |
+| `LexeyAgent` | `web_search`、`load_skill` | 处理语言任务；启动时注入 Skill 元数据，模型按需加载正文 |
+| `ZebehAgent` | `web_search` | 用于开发阶段的行为验证，目前没有自定义 function tool |
 
-## BaseAgent.ts
+具体 Agent 只负责定制四件事：加载 `instructions.md`、从数据库取得自身 ID、声明模型可见工具，以及实现 `requestFunctionCall()`。对话循环、历史恢复和持久化统一由 `BaseAgent` 完成。
 
-### 职责
+## 类型与 provider 边界
 
-BaseAgent 是通用 Agent 基类，为具体 Agent（如 `LexeyAgent`）提供对话能力：
+请求和响应契约直接依据 DeepSeek API 建模，运行时不会再次校验模型响应。这种实现保留了 `reasoning`、`web_search_call` 和结构化文本格式等 provider 特性，也意味着更换 provider 时需要同时调整 `responses.ts`、`ModelClient` 与 `BaseAgent` 消费输出项的逻辑。
 
-- 通过构造函数接收 `model`、`instructions`、`agentId`、`agentName`、`functionTools`、`turn`、`input` 完成定制
-- 内部持有一个 `ModelClient` 实例和消息上下文 `input`（数组，累积全部历史消息）
-- 实现 `ask()` 多轮对话循环，并把每轮增量持久化进 `message` 表
+为何选择直接调用 API、以及为何不预先抽象统一模型层，见 [THINKING.md](../THINKING.md)。工具的参数校验、配置和安全边界见 [Tools 说明](../Tools/README.md)。
 
-### 多轮循环机制
+## 测试
 
-1. `createInputMessageItemAndPush()` 将用户输入构造为 `message` 消息项（`InputMessageItem`），追加进上下文
-2. 调用 `requestResponsesAPI()` 获取模型响应
-3. 逐条处理输出项：
-   - `message`：记录文本回复，追加进上下文
-   - `reasoning`：记录推理过程，追加进上下文
-   - `function_call`：记录调用信息，追加进上下文，置 `hasFunctionCall = true`，并调用抽象方法 `requestFunctionCall()` 交由子类执行对应工具
-   - `web_search_call`：记录 web 搜索日志
-4. 当一轮响应中不再包含 `function_call` 时循环终止
-5. 通过 `insertIntoMessageTableStmt` 把本轮新增上下文（`input.slice(inputLengthBeforeLoop)`）序列化为 JSON 写入 `message` 表
-
-### 工具调用的抽象契约
-
-`requestFunctionCall(inputFunctionCallItem: InputFunctionCallItem)` 是抽象方法，工具的具体执行由子类实现：
-
-- 子类按 `inputFunctionCallItem.name` 分发到 `Tools/` 目录下的对应工具实现
-- 工具执行完成后，调用受保护的 `createFunctionCallOutputItemAndPush()`，将结果构造为 `function_call_output` 输入项（`InputFunctionCallOutputItem`）追加进上下文
-- 下一轮请求时，模型即可看到工具执行结果，继续推理直至不再发出 `function_call`
-
-## Agents/Lexey/LexeyAgent.ts
-
-具体 Agent 示例，负责"定制"而非"驱动"：
-
-- 用 `loadInstructions(dirPath)` 加载 `instructions.md` 并注入同级 `skills/` 的元数据
-- 从 `agent` 表按 `name = "Lexey"` 读取 `agentId` 与 `max_turn`
-- 用 `selectMessageFromMessageTableStmt` 取出 `is_activated = 1` 的历史 `message` 行，`JSON.parse` 后恢复 `input`
-- 通过 `ToolsType` 注册 `web_search` 与 `load_skill`
-- 实现 `requestFunctionCall()`：`load_skill` 的 `arguments` 反序列化后用 zod `safeParse` 校验，命中则 `loadSkill()` 返回正文并回填；解析或校验失败则回填错误信息
-
-分发与回填行为由 `../../../test/lexey-agent.test.ts` 覆盖：测试以 `TestableLexeyAgent` 子类暴露受保护的 `requestFunctionCall()`，验证 `load_skill` 的正常 / 解析失败 / 校验失败 / 未知工具名场景，以及 `ask()` 全链路。
-
-## 与 model provider 的耦合
-
-该目录中的字段与某一 model provider 的 API 请求字段强绑（`user`、`funcTools`、`model`、`instructions` 与请求字段一一对应）。
-
-- **为什么这样设计**：API 文档是最好的公开资料，围绕这份资料开发无需参考其他文件或代码。BaseAgent 的代码与 provider 的 API 文档字段强绑，便于调用 ModelClient 的相关方法，实现相对简单。
-- **代价**：耦合了 provider，如需更换模型，可能需要对类型契约、client 与 agent 字段做重构。
-
-"model" 与 "model-provider" 显然是强绑定的，例如 OpenAI 的 model-client 与 Anthropic 的截然不同，根本原因是 API 格式完全不同。国内大部分 provider 兼容 OpenAI 或 Anthropic 的 API 格式，但后续模型训练范式可能变化，API 格式也可能改变。因此围绕单一 provider 开发是可以理解的。更完整的论证见 [../../README.md](../README.md) 与 [../../THINKING.md](../THINKING.md)。
+- `test/model-client.test.ts` 验证请求 URL、请求头、请求体和响应解析，测试中不会发起真实网络请求。
+- `test/gexep-agent.test.ts`、`test/jezeh-agent.test.ts` 和 `test/lexey-agent.test.ts` 覆盖构造、工具分发、错误回填及 Agent Loop。
+- `test/database.test.ts` 覆盖默认 Agent、消息读写、激活过滤和外键约束。
