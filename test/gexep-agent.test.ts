@@ -25,6 +25,13 @@ const {GexepAgent} = await import("../src/backend/DeepSeek/Agents/Gexep/GexepAge
 const dbAgentId = selectIdFromAgentTableStmt.get("Gexep") as number;
 
 class TestableGexepAgent extends GexepAgent {
+    private readonly sendEmailFunction: (input: SendEmailInputType) => Promise<string>;
+
+    constructor(sendEmailFunction: (input: SendEmailInputType) => Promise<string> = async () => "邮件已发送") {
+        super();
+        this.sendEmailFunction = sendEmailFunction;
+    }
+
     public getInput(): InputItemType[] {
         return this.input;
     }
@@ -39,6 +46,10 @@ class TestableGexepAgent extends GexepAgent {
 
     public testRequestFunctionCall(item: InputFunctionCallItem): Promise<void> {
         return this.requestFunctionCall(item);
+    }
+
+    protected override executeSendEmail(input: SendEmailInputType): Promise<string> {
+        return this.sendEmailFunction(input);
     }
 }
 
@@ -69,8 +80,13 @@ after(() => {
 });
 
 describe("GexepAgent 构造函数", () => {
+    it("公开构造函数没有形参", () => {
+        assert.equal(GexepAgent.length, 0);
+        assert.doesNotThrow(() => new GexepAgent());
+    });
+
     it("从数据库读取 Gexep 的 agentId 与 agentName", () => {
-        const agent = new TestableGexepAgent(async () => "邮件已发送");
+        const agent = new TestableGexepAgent();
 
         assert.equal(agent.getAgentId(), dbAgentId);
         assert.equal(agent.getAgentName(), "Gexep");
@@ -155,7 +171,7 @@ describe("GexepAgent 工具注册", () => {
             });
         });
 
-        const agent = new TestableGexepAgent(async () => "邮件已发送");
+        const agent = new TestableGexepAgent();
         await agent.ask("发送一封邮件");
 
         const tools = capturedBody?.tools as Array<Record<string, unknown>>;
