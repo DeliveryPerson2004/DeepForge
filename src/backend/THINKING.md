@@ -2,7 +2,7 @@
 
 本文记录项目背后的判断，而不是功能清单。已经落地的能力以 [后端架构说明](README.md) 和代码为准；MCP、A2A、审核 Agent 与 GraphRAG 等内容仍是后续方向，不应被理解为现有功能。
 
-## 直接调用模型 API，保留 provider 的表达能力
+## 直接调用模型 API，保留 model provider 的表达能力
 
 本项目不是只消费一段文本的聊天客户端，而是由模型输出项驱动的 Agent 运行时。DeepSeek `/responses` 返回的 `message`、`reasoning`、`function_call` 和 `web_search_call` 具有不同语义：有些需要记录，有些需要在本地执行并回填，有些则由模型服务自行完成。若过早套用通用 SDK 或统一中间层，这些差异往往会被压缩成“文本 + 工具调用”的最小公约数。
 
