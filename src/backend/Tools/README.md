@@ -1,53 +1,50 @@
-# Tools 目录说明文档
+# Tools 模块
 
-本目录存放 Agent 可调用的具体工具（tool）实现。工具是模型通过 `function_call` 触发、由 Agent 在本地执行并回填结果的函数单元。
+本目录保存 Agent 可调用的具体能力。function tool 由具体 Agent 以 JSON Schema 声明给模型；模型返回 `function_call` 后，Agent 解析并校验参数、执行函数，再将结果作为 `function_call_output` 回填。模型协议与循环细节见 [DeepSeek 模块说明](../DeepSeek/README.md)。
 
-| 文件 / 目录 | 工具 | 说明 | 注册状态 |
-| ----------- | ---- | ---- | -------- |
-| `loadSkill.ts` | `load_skill` | 按 frontmatter 的 `name` 加载 `SKILL.md` 正文 | 已注册到 `LexeyAgent` |
-| `loadInstructions.ts` | —（启动时调用） | 读取 `instructions.md` 并追加 skills 元数据 | 构造时调用 |
-| `askDeveloper.ts` | `ask_developer` | 将 Agent 的问题以 warn 日志形式转达给开发者 | 已实现，未注册 |
-| `shellCommand/` | `execute_shell_command` / `ls` / `pwd` | 在指定工作目录执行 shell 命令（bash，禁用 sudo） | 已实现，未注册 |
+## 工具清单
 
-shell 命令相关工具的技术细节见 [shellCommand/README.md](shellCommand/README.md)。
+| 文件 | 工具或用途 | 使用方 |
+| ---- | ---------- | ------ |
+| `loadInstructions.ts` | 读取 `instructions.md`，并可选注入 Skill 元数据 | 所有 Agent；元数据注入目前仅用于 Lexey |
+| `loadSkill.ts` | `load_skill`：按 frontmatter 中的 `name` 加载 `SKILL.md` 正文 | Lexey |
+| `sendEmail.ts` | `send_email`：通过固定 QQ SMTP 配置发送邮件 | Gexep |
+| `executeE2BShell.ts` | `e2b_shell_execute`：在 E2B 的 `/memos` 中执行命令 | Jezeh |
+| `downloadMemo.ts` | `download_memo`：将沙箱中的 Markdown 备忘录导出到固定宿主机目录 | Jezeh |
+| `askDeveloper.ts` | 通过警告日志向开发者显示问题 | 已实现，尚未注册到 Agent |
 
-## 工具调用链路
+所有 function tool 都遵循同一条本地调用链：具体 Agent 显式注册工具，解析模型给出的 JSON 参数，使用 Zod `safeParse()` 校验，再调用实现函数并回填字符串结果。解析、校验或执行失败时，工具返回可供模型理解的失败信息，而不是伪造成功状态。
 
-工具并非被模型远程调用，而是走完整的本地执行 + 上下文回填流程：
+## Instructions 与 Skills
 
-```
-模型响应中的 function_call 输出项
-        │
-        ▼
-BaseAgent.ask() 识别 item.type === "function_call"
-        │
-        ▼
-调用抽象方法 requestFunctionCall()（由具体 Agent 实现，如 LexeyAgent）
-        │
-        ▼
-按 name 分发到对应工具（如 load_skill → loadSkill()）
-        │
-        ▼
-工具执行完毕，通过 createFunctionCallOutputItemAndPush() 构造
-function_call_output 输入项并追加进消息上下文
-        │
-        ▼
-下一轮请求时，模型可见工具执行结果，继续推理直至无 function_call
-```
+`loadInstructions(dirPath, isLoadSkills)` 始终读取 Agent 目录中的 `instructions.md`。当 `isLoadSkills` 为 `true` 时，它还会扫描同级 `skills/*/SKILL.md`，提取 frontmatter 中的 `name` 和 `description`，将能力清单追加到角色指令中。
 
-## 工具注册与分发
+模型需要详细步骤时可调用 `load_skill`。`loadSkill()` 会按 `name` 找到目标文件，移除 frontmatter 后返回正文。这样常驻上下文只包含简短元数据，完整 Skill 内容按需加载。
 
-- **注册**：具体 Agent（`LexeyAgent`）通过 `ToolsType` 声明工具列表；`function` 类工具在 `parameters` 中以 JSON Schema 声明参数形态，与 `API/responses.ts` 类型契约对应
-- **分发**：`requestFunctionCall()` 按 `inputFunctionCallItem.name` 分发；`arguments`（JSON 字符串）反序列化为工具入参，并经 zod 校验
-- **回填**：工具执行完成后由 `createFunctionCallOutputItemAndPush()` 构造 `function_call_output` 输入项，使模型在下一轮推理中可见执行结果
+## 邮件工具
 
-## loadSkill.ts 与 loadInstructions.ts
+`sendEmail()` 接受发件人显示名称、主题、纯文本正文和可选 HTML 正文。SMTP 主机、认证账号、实际发件地址和收件地址固定在工具内部，模型不能在调用时更改收件人；`SMTP_PASS` 则从环境变量读取，不写入源码。
 
-这两个文件共同支撑 skills 机制：
+发送行为通过 Nodemailer 完成。工具会校验输入与 SMTP 配置、关闭 transport，并返回服务端结果或错误信息。`messageId` 只表示发信服务已经接受邮件，不代表收件人已阅读。
 
-- `loadInstructions(dirPath)`：读取 Agent 的 `instructions.md`，扫描同级 `skills/` 下每个 `SKILL.md` 的 frontmatter，把 `name` / `description` 追加为指令末尾的能力清单
-- `loadSkill(skillsDirPath, skillName)`：按 frontmatter 的 `name` 命中文件，剥离 frontmatter 后返回正文；未找到或目录不可读时返回提示信息而非抛异常
+## Jezeh 的沙箱与导出
 
-## 与沙箱运行环境的关系
+`executeE2BShell()` 通过 E2B SDK 在网络隔离的 Sandbox 中运行命令：
 
-shell 命令工具的**目标**运行环境是 Docker Sandbox（`sbx`）提供的隔离沙箱：宿主机只负责 Agent 开发，项目同步进沙箱后命令在沙箱内执行，防止注入影响宿主机。当前 `shellExecute()` 以本地 `exec` 实现，并先行通过 sudo 正则拦截（`\bsudo\b`，大小写不敏感）做第一道防护；沙箱接入见 [../README.md](../README.md) 路线图。
+- 工作目录固定为 `/memos`，单次命令超时 30 秒；
+- 不挂载宿主机目录，也不在宿主机执行 Shell；
+- 标准输出和错误输出分别限制为 100,000 个字符；
+- `E2B_MEMO_SANDBOX_ID` 可用于复用 Sandbox，未配置时会创建新实例。
+
+`downloadMemo()` 是沙箱到宿主机的受限出口。它只接受 `/memos` 下的相对 Markdown 路径，将文件复制到预先配置的固定目录，并保留相对层级。工具拒绝路径穿越、非 Markdown 文件、超过 5 MiB 的文件、符号链接路径和覆盖已有文件；新文件权限为 `0600`。
+
+Jezeh 的日常创建、读取、搜索、修改和整理都在 Sandbox 中完成，只有明确调用 `download_memo` 且返回成功后，文件才算已经导出到用户可见的宿主机目录。Sandbox 本身是临时工作区，不能替代持久化存储。
+
+## 配置与测试
+
+| 能力 | 环境变量 |
+| ---- | ---------- |
+| Gexep 邮件 | `SMTP_PASS` |
+| Jezeh Sandbox | `E2B_API_KEY`；可选 `E2B_MEMO_SANDBOX_ID` |
+
+自动化测试会注入假的 SMTP transport、E2B Sandbox 和文件存储，因此不会发送真实邮件或调用真实 E2B 服务。真实链路脚本 `src/backend/test.ts` 不属于默认测试套件，运行前应确认服务凭据和宿主机写入行为。

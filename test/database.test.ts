@@ -11,7 +11,7 @@ process.chdir(tempDir);
 mock.method(console, "log", () => {});
 
 const {db} = await import("../src/backend/database/db.ts");
-await import("../src/backend/database/initDatabase.ts");
+const {initDefaultAgents} = await import("../src/backend/database/initDatabase.ts");
 const {
     selectIdFromAgentTableStmt,
     selectMaxTurnFromAgentTableStmt,
@@ -20,6 +20,8 @@ const {
 } = await import("../src/backend/database/stmt.ts");
 
 const agentId = selectIdFromAgentTableStmt.get("Lexey") as number;
+const gexepAgentId = selectIdFromAgentTableStmt.get("Gexep") as number;
+const jezehAgentId = selectIdFromAgentTableStmt.get("Jezeh") as number;
 
 after(() => {
     db.close();
@@ -27,9 +29,23 @@ after(() => {
 });
 
 describe("initDatabase()", () => {
-    it("创建 agent 表并插入 Lexey", () => {
+    it("创建 agent 表并插入 Lexey、Gexep 与 Jezeh", () => {
         assert.equal(typeof agentId, "number");
         assert.equal(selectMaxTurnFromAgentTableStmt.get(agentId), 0);
+        assert.equal(typeof gexepAgentId, "number");
+        assert.equal(selectMaxTurnFromAgentTableStmt.get(gexepAgentId), 0);
+        assert.equal(typeof jezehAgentId, "number");
+        assert.equal(selectMaxTurnFromAgentTableStmt.get(jezehAgentId), 0);
+    });
+
+    it("重复初始化不会插入同名 Agent", () => {
+        initDefaultAgents();
+
+        const rows = db.prepare("SELECT name, COUNT(*) AS count FROM agent GROUP BY name").all() as Array<{
+            name: string;
+            count: number;
+        }>;
+        assert.ok(rows.every((row) => row.count === 1));
     });
 
     it("创建 message 表", () => {

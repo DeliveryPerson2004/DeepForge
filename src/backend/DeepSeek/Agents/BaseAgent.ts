@@ -8,8 +8,12 @@ import {
     type ToolsType
 } from "../API/responses.ts";
 import {ModelClient} from "../ModelClient.ts";
-import {logger} from "../../../logger.ts";
-import {insertIntoMessageTableStmt} from "../../../database/stmt.ts";
+import {logger} from "../../logger.ts";
+import {
+    insertIntoMessageTableStmt,
+    selectMaxTurnFromAgentTableStmt,
+    selectMessageFromMessageTableStmt, selectNameFromAgentTableStmt
+} from "../../database/stmt.ts";
 
 
 
@@ -21,26 +25,38 @@ export abstract class BaseAgent{
 
     protected readonly agentId: number;
     protected readonly agentName: string;
-    protected turn: number;
+    protected maxTurn: number;
     protected input: InputItemType[];
 
     protected constructor(
         model: ModelType,
         instructions: string,
         agentId: number,
-        agentName: string,
         functionTools: ToolsType,
-        turn: number,
-        input: InputItemType[],
     ) {
         this.functionTools = functionTools;
         this.instructions = instructions;
         this.model = model;
         this.modelClient = new ModelClient();
         this.agentId = agentId;
-        this.agentName = agentName;
-        this.turn = turn;
+
+        const max_turn = selectMaxTurnFromAgentTableStmt.get(agentId) as number;
+
+        const messageRows = selectMessageFromMessageTableStmt.all(agentId);
+        const input: InputItemType[] = [];
+        for (const row of messageRows) {
+            try {
+                input.push(...(JSON.parse(row.content) as InputItemType[]));
+            } catch {
+                logger.warn(`跳过无法解析的 message 行: ${row.content}`);
+            }
+        }
+
+        const agentName = selectNameFromAgentTableStmt.get(agentId) as string;
+
+        this.maxTurn = max_turn;
         this.input = input;
+        this.agentName = agentName;
 
         logger.info("new class BaseAgent()");
     }
@@ -114,7 +130,7 @@ export abstract class BaseAgent{
 
         const inputDeltaAfterLoop = this.input.slice(inputLengthBeforeLoop);
 
-        insertIntoMessageTableStmt.run(this.agentId, this.turn, JSON.stringify(inputDeltaAfterLoop), 1);
+        insertIntoMessageTableStmt.run(this.agentId, this.maxTurn, JSON.stringify(inputDeltaAfterLoop), 1);
 
         logger.info("class BaseAgent public loop() end");
     }

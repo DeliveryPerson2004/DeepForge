@@ -8,7 +8,7 @@ import type {
     InputFunctionCallOutputItem,
     InputItemType,
     InputMessageItem,
-} from "../src/backend/Agents/DeepSeek/API/responses.ts";
+} from "../src/backend/DeepSeek/API/responses.ts";
 
 
 const SKILL_NAME = "从英语单词引申到外国名著片段";
@@ -27,7 +27,7 @@ const {
     insertIntoMessageTableStmt,
     selectMessageFromMessageTableStmt,
 } = await import("../src/backend/database/stmt.ts");
-const {LexeyAgent} = await import("../src/backend/Agents/DeepSeek/Agents/Lexey/LexeyAgent.ts");
+const {LexeyAgent} = await import("../src/backend/DeepSeek/Agents/Lexey/LexeyAgent.ts");
 
 const dbAgentId = selectIdFromAgentTableStmt.get("Lexey") as number;
 

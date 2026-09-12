@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, describe, it, mock} from "node:test";
 import assert from "node:assert/strict";
-import {ModelClient} from "../src/backend/Agents/DeepSeek/ModelClient.ts";
-import {ModelType, type ResponseSchema, type ToolsType} from "../src/backend/Agents/DeepSeek/API/responses.ts";
+import {ModelClient} from "../src/backend/DeepSeek/ModelClient.ts";
+import {ModelType, type ResponseSchema, type ToolsType} from "../src/backend/DeepSeek/API/responses.ts";
 
 
 const fakeResponse: ResponseSchema = {

@@ -50,9 +50,13 @@ function loadSkillsMetaData(skillsDirPath: string): string {
     return skillMetaDataList.join("\n");
 }
 
-export function loadInstructions(dirPath: string): string{
+export function loadInstructions(dirPath: string, isLoadSkills: boolean = false): string{
     const instructionsFilePath = path.join(dirPath, "instructions.md");
     const instructionsContent = fs.readFileSync(instructionsFilePath, "utf-8");
+
+    if (!isLoadSkills) {
+        return instructionsContent;
+    }
 
     const skillsDirPath = path.join(dirPath, "skills");
     const skillsMetaData = loadSkillsMetaData(skillsDirPath);

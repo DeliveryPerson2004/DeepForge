@@ -37,7 +37,7 @@ describe("loadInstructions()", () => {
         writeSkill(agentDir, "alpha", "---\nname: alpha\ndescription: first\n---\n\nbody\n");
 
         assert.equal(
-            await loadInstructions(agentDir),
+            await loadInstructions(agentDir, true),
             "# 指令\n- name: alpha\n  description: first",
         );
     });
@@ -48,7 +48,7 @@ describe("loadInstructions()", () => {
         writeSkill(agentDir, "alpha", "---\nname: alpha\ndescription: first line\n  second line\n---\n\nbody\n");
 
         assert.equal(
-            await loadInstructions(agentDir),
+            await loadInstructions(agentDir, true),
             "INSTR- name: alpha\n  description: first line second line",
         );
     });
@@ -60,7 +60,7 @@ describe("loadInstructions()", () => {
         writeSkill(agentDir, "beta", "---\nname: beta\ndescription: second\n---\n\nbody\n");
 
         assert.equal(
-            await loadInstructions(agentDir),
+            await loadInstructions(agentDir, true),
             "INSTR- name: alpha\n  description: first\n- name: beta\n  description: second",
         );
     });
@@ -71,7 +71,7 @@ describe("loadInstructions()", () => {
         writeSkill(agentDir, "no-name", "---\ndescription: only description\n---\n\nbody\n");
         writeSkill(agentDir, "no-description", "---\nname: only-name\n---\n\nbody\n");
 
-        assert.equal(await loadInstructions(agentDir), "INSTR");
+        assert.equal(await loadInstructions(agentDir, true), "INSTR");
     });
 
     it("跳过没有 SKILL.md 的目录", async () => {
@@ -79,13 +79,28 @@ describe("loadInstructions()", () => {
         writeInstructions(agentDir, "INSTR");
         fs.mkdirSync(path.join(agentDir, "skills", "empty"), {recursive: true});
 
-        assert.equal(await loadInstructions(agentDir), "INSTR");
+        assert.equal(await loadInstructions(agentDir, true), "INSTR");
     });
 
     it("skills 目录不存在时抛错", () => {
         const agentDir = createAgentDir();
         writeInstructions(agentDir, "INSTR");
 
-        assert.throws(() => loadInstructions(agentDir));
+        assert.throws(() => loadInstructions(agentDir, true));
+    });
+
+    it("isLoadSkills 为 false 时只返回 instructions 内容", async () => {
+        const agentDir = createAgentDir();
+        writeInstructions(agentDir, "INSTR");
+        writeSkill(agentDir, "alpha", "---\nname: alpha\ndescription: first\n---\n\nbody\n");
+
+        assert.equal(await loadInstructions(agentDir, false), "INSTR");
+    });
+
+    it("默认不加载 skills，且 skills 目录缺失也不抛错", async () => {
+        const agentDir = createAgentDir();
+        writeInstructions(agentDir, "INSTR");
+
+        assert.equal(await loadInstructions(agentDir), "INSTR");
     });
 });
