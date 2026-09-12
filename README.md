@@ -4,21 +4,21 @@
 >
 > **多智能体运行时——每一个 Agent，都是一位挚友。**
 
-这个项目旨在“粘合”我学习和构建 Agent 过程中产生的想法，以及接触到的各类协议与技术，并借此记录和表达自己的观点，包括但不限于 MCP、A2A、Sandbox 和 GraphRAG。
-
-## 已实现的能力
-
-- **强类型 Agent Loop**：通过 Node.js 原生 `fetch` 调用 DeepSeek `/responses` API，逐项处理 `message`、`reasoning`、`function_call` 和 `web_search_call`，并将工具结果回填给模型继续推理。
-- **按角色分配能力**：Gexep 可向固定邮箱发送邮件；Lexey 负责语言任务，并支持网页搜索和按需加载 Skill；Jezeh 在网络隔离的 E2B Sandbox 中管理 Markdown 备忘录；Zebeh 用于开发阶段的行为验证。
-- **受控工具边界**：工具由具体 Agent 显式注册，入参经 Zod 校验；Jezeh 的命令默认在 E2B 的 `/memos` 中运行，并通过受限下载工具将备忘录导出到固定宿主机目录。
-- **本地会话持久化**：使用 `better-sqlite3` 管理单文件 `database.db`，按 Agent 保存和恢复已激活的对话历史。
-- **轻量工程栈**：TypeScript、ESM、pnpm、tsx 和 Node.js 内置测试框架，不引入模型 SDK 或 ORM。
-
-MCP 客户端、基于 A2A 的 Agent 协作以及 GraphRAG 长期记忆仍处于设计阶段；文档会明确区分已经落地的能力与尚未实现的设想。
+这个项目旨在“粘合”我学习和构建 Agent 过程中产生的想法，以及接触到的各类协议与技术，并借此记录和表达自己的观点，包括但不限于 MCP、A2A、Sandbox 和 GraphRAG。其中，A2A、GraphRAG 等方向的具体实现仍需进一步调研与验证。
 
 ## 名字从哪来
 
 每个 Agent 都以现实中的一位好友为原型：取好友中文名的拼音首字母，在字母之间插入两个 `e`，例如 `gxp → Gexep`、`lxy → Lexey`、`jyh → Jeyeh`。`Pantheon` 是众 Agent 的群像，`Confidant` 则表达“挚友”这一共同身份。完整名册见 [Agents 说明](src/backend/DeepSeek/Agents/README.md)。
+
+## 已实现的能力
+
+- **强类型 Agent Loop**：通过 Node.js 原生 `fetch` 调用 DeepSeek `/responses` API，逐项处理 `message`、`reasoning`、`function_call` 和 `web_search_call`，并将工具结果回填给模型继续推理。
+- **按角色分配能力**：Gexep 可向固定邮箱发送邮件，以便主动与我联系，让我离开电脑时也能通过手机查看它想传达的消息；Lexey 负责语言任务，并支持网页搜索和按需加载 Skill；Jezeh 在网络隔离的 E2B Sandbox 中管理 Markdown 备忘录；Zebeh 用于开发阶段的行为验证。
+- **受控工具边界**：工具由具体 Agent 显式注册，入参经 Zod 校验；Jezeh 的命令默认在 E2B 的 `/memos` 中运行，并通过受限下载工具将备忘录导出到固定宿主机目录。
+- **本地会话持久化**：使用 `better-sqlite3` 管理单文件 `database.db`，按 Agent 保存对话历史，并通过激活态控制恢复范围。该状态也为后续长期记忆机制预留：届时可判断哪些短期记忆不应继续占用当前上下文，将其置为非激活态，从而实现上下文管理。
+- **轻量工程栈**：TypeScript、ESM、pnpm、tsx 和 Node.js 内置测试框架，不引入模型 SDK 或 ORM。
+
+MCP 客户端、基于 A2A 的 Agent 协作以及 GraphRAG 长期记忆仍处于设计阶段；文档会明确区分已经落地的能力与尚未实现的设想。
 
 ## 快速开始
 
